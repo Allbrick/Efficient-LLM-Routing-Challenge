@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prompt Terrain Router Viewer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <h1>Prompt Terrain Router Viewer</h1>
+          <p>학습된 artifact로 example_train.csv 프롬프트를 라우팅한 결과</p>
+        </div>
+        <div class="tier-tabs" role="tablist" aria-label="budget tier">
+          <button class="tier-tab active" data-tier="fast">Fast</button>
+          <button class="tier-tab" data-tier="balanced">Balanced</button>
+          <button class="tier-tab" data-tier="premium">Premium</button>
+        </div>
+      </header>
+
+      <section class="metrics" id="metrics"></section>
+
+      <section class="workspace">
+        <aside class="prompt-panel">
+          <div class="panel-head">
+            <h2>프롬프트</h2>
+            <input id="searchInput" type="search" placeholder="검색" />
+          </div>
+          <div class="prompt-list" id="promptList"></div>
+        </aside>
+
+        <section class="detail-panel">
+          <div class="detail-head">
+            <div>
+              <span class="tag" id="promptMeta"></span>
+              <h2 id="promptText"></h2>
+            </div>
+            <div class="selected-box">
+              <span>선택 모델</span>
+              <strong id="selectedModel"></strong>
+            </div>
+          </div>
+
+          <div class="score-strip" id="scoreStrip"></div>
+
+          <div class="comparison">
+            <h3>후보 모델 비교</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>모델</th>
+                    <th>실제 품질</th>
+                    <th>예측 품질</th>
+                    <th>보정 품질</th>
+                    <th>정책 품질</th>
+                    <th>비용</th>
+                    <th>Utility</th>
+                  </tr>
+                </thead>
+                <tbody id="candidateRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="output-preview">
+            <h3>선택 모델 출력</h3>
+            <pre id="selectedOutput"></pre>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./router_eval.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -12,6 +12,7 @@ from .quality_predictor import QualityPredictor
 from .calibrator import Calibrator
 from .utility_engine import CostNormalizer, UtilityEngine
 from .data_models import CostConfig, LambdaParams
+from .prompt_policy import apply_prompt_prior
 
 
 class PromptTerrainRouterV2:
@@ -102,7 +103,8 @@ class PromptTerrainRouterV2:
             dtype=np.int32,
         )
         q_cal = self.calibrator.transform(raw_q, model_id_encoded)
+        q_policy = apply_prompt_prior(q_cal, model_ids, prompt, tier)
 
         # 5. Utility-based selection
-        selected = self.utility_engine.select(q_cal, model_ids, tier)
+        selected = self.utility_engine.select(q_policy, model_ids, tier)
         return selected

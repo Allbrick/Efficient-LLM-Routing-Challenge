@@ -1,0 +1,3043 @@
+{
+  "summary": {
+    "data_path": "data/public/example_train.csv",
+    "artifacts_dir": "artifacts",
+    "n_rows": 108,
+    "n_prompts": 36,
+    "models": [
+      "cheap",
+      "mid",
+      "premium"
+    ],
+    "lambda_params": {
+      "fast": 1.0653900375939844,
+      "balanced": 0.05263157894736819,
+      "premium": 0.05263157894736819
+    },
+    "tier_summary": {
+      "fast": {
+        "selection_counts": {
+          "cheap": 21,
+          "mid": 13,
+          "premium": 2
+        },
+        "mean_selected_quality": 0.815278,
+        "mean_selected_cost": 0.035
+      },
+      "balanced": {
+        "selection_counts": {
+          "premium": 10,
+          "mid": 26
+        },
+        "mean_selected_quality": 0.897222,
+        "mean_selected_cost": 0.091667
+      },
+      "premium": {
+        "selection_counts": {
+          "premium": 36
+        },
+        "mean_selected_quality": 0.944167,
+        "mean_selected_cost": 0.2
+      }
+    },
+    "holdout_report": {
+      "holdout_mae": 0.08614262942711771,
+      "tier_scores": {
+        "fast": 0.8877777777777777,
+        "balanced": 0.9477777777777779,
+        "premium": 0.9477777777777779
+      },
+      "weighted_score": 0.9177777777777778
+    }
+  },
+  "prompts": [
+    {
+      "prompt_id": "p001",
+      "prompt": "API가 무엇인지 한 문장으로 설명해줘.",
+      "domain": "general",
+      "task_type": "qa",
+      "benchmark_id": "basic_qa",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.88,
+          "cost": 0.01,
+          "predicted_quality": 0.776426,
+          "calibrated_quality": 0.653968,
+          "model_output": "API는 프로그램끼리 서로 요청하고 응답할 수 있게 해주는 약속입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.91,
+          "cost": 0.05,
+          "predicted_quality": 0.954831,
+          "calibrated_quality": 0.988971,
+          "model_output": "API는 한 소프트웨어가 다른 소프트웨어의 기능이나 데이터를 정해진 방식으로 사용할 수 있게 해주는 인터페이스입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.9,
+          "cost": 0.2,
+          "predicted_quality": 1.005779,
+          "calibrated_quality": 1.099333,
+          "model_output": "API는 애플리케이션들이 정해진 규칙에 따라 요청과 응답을 주고받도록 만드는 계약이자 인터페이스입니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.88,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 1.013968,
+            "mid": 0.804679,
+            "premium": -0.046057
+          },
+          "policy_quality": {
+            "cheap": 1.013968,
+            "mid": 1.028971,
+            "premium": 1.019333
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.9,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 0.733968,
+            "mid": 1.017891,
+            "premium": 1.026702
+          },
+          "policy_quality": {
+            "cheap": 0.733968,
+            "mid": 1.028971,
+            "premium": 1.079333
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.9,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 0.653968,
+            "mid": 0.977891,
+            "premium": 1.046702
+          },
+          "policy_quality": {
+            "cheap": 0.653968,
+            "mid": 0.988971,
+            "premium": 1.099333
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p002",
+      "prompt": "n번째 피보나치 수를 반환하는 파이썬 함수를 작성해줘.",
+      "domain": "tech",
+      "task_type": "code_generation",
+      "benchmark_id": "coding_easy",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.62,
+          "cost": 0.01,
+          "predicted_quality": 0.697165,
+          "calibrated_quality": 0.574707,
+          "model_output": "def fib(n): return n if n < 2 else fib(n-1) + fib(n-2)"
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.92,
+          "cost": 0.05,
+          "predicted_quality": 0.878863,
+          "calibrated_quality": 0.913002,
+          "model_output": "def fib(n):\\n    a, b = 0, 1\\n    for _ in range(n):\\n        a, b = b, a + b\\n    return a"
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.95,
+          "cost": 0.2,
+          "predicted_quality": 0.928088,
+          "calibrated_quality": 1.021642,
+          "model_output": "def fibonacci(n):\\n    if n < 0:\\n        raise ValueError('n은 0 이상이어야 합니다')\\n    a, b = 0, 1\\n    for _ in range(n):\\n        a, b = b, a + b\\n    return a"
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.62,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.814707,
+            "mid": 0.78471,
+            "premium": -0.107748
+          },
+          "policy_quality": {
+            "cheap": 0.814707,
+            "mid": 1.009002,
+            "premium": 0.957642
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.626707,
+            "mid": 0.981922,
+            "premium": 0.953011
+          },
+          "policy_quality": {
+            "cheap": 0.626707,
+            "mid": 0.993002,
+            "premium": 1.005642
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.574707,
+            "mid": 0.901922,
+            "premium": 0.969011
+          },
+          "policy_quality": {
+            "cheap": 0.574707,
+            "mid": 0.913002,
+            "premium": 1.021642
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p003",
+      "prompt": "회의록을 요약해줘: 팀은 결제 버그를 고치고 온보딩을 개선하기 위해 출시를 2주 미루기로 했다.",
+      "domain": "business",
+      "task_type": "summarization",
+      "benchmark_id": "summarization_short",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.91,
+          "cost": 0.01,
+          "predicted_quality": 0.757936,
+          "calibrated_quality": 0.635478,
+          "model_output": "출시는 결제 버그 수정과 온보딩 개선 때문에 2주 연기됩니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.93,
+          "cost": 0.05,
+          "predicted_quality": 0.959841,
+          "calibrated_quality": 0.99398,
+          "model_output": "팀은 결제 문제를 해결하고 온보딩을 다듬기 위해 출시 일정을 2주 늦추기로 했습니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.92,
+          "cost": 0.2,
+          "predicted_quality": 1.016953,
+          "calibrated_quality": 1.110507,
+          "model_output": "출시는 2주 연기되며, 그 기간 동안 팀은 결제 버그를 수정하고 신규 사용자 온보딩 흐름을 개선할 예정입니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.91,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.887478,
+            "mid": 0.860088,
+            "premium": -0.020483
+          },
+          "policy_quality": {
+            "cheap": 0.887478,
+            "mid": 1.08438,
+            "premium": 1.044907
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.690278,
+            "mid": 1.0589,
+            "premium": 1.041476
+          },
+          "policy_quality": {
+            "cheap": 0.690278,
+            "mid": 1.06998,
+            "premium": 1.094107
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.635478,
+            "mid": 0.9829,
+            "premium": 1.057876
+          },
+          "policy_quality": {
+            "cheap": 0.635478,
+            "mid": 0.99398,
+            "premium": 1.110507
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p004",
+      "prompt": "작은 분석 대시보드에 SQLite와 PostgreSQL 중 무엇이 더 적합한지 비교해줘.",
+      "domain": "tech",
+      "task_type": "reasoning",
+      "benchmark_id": "comparison_medium",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.58,
+          "cost": 0.01,
+          "predicted_quality": 0.689983,
+          "calibrated_quality": 0.567525,
+          "model_output": "SQLite는 간단하고 PostgreSQL은 더 큰 서비스에 좋습니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.86,
+          "cost": 0.05,
+          "predicted_quality": 0.906182,
+          "calibrated_quality": 0.940321,
+          "model_output": "SQLite는 배포가 쉽고 단일 사용자나 가벼운 대시보드에 적합합니다. PostgreSQL은 동시 접속, 큰 데이터, 복잡한 쿼리가 필요한 경우 더 좋습니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.92,
+          "cost": 0.2,
+          "predicted_quality": 0.977272,
+          "calibrated_quality": 1.070827,
+          "model_output": "대시보드가 로컬 중심이고 데이터 규모가 작으며 동시 사용자가 거의 없다면 SQLite가 단순하고 효율적입니다. 여러 사용자가 접속하거나 권한 관리, 주기적 적재, 복잡한 분석 쿼리가 필요하다면 PostgreSQL이 더 적합합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.86,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.765525,
+            "mid": 0.831629,
+            "premium": -0.052963
+          },
+          "policy_quality": {
+            "cheap": 0.765525,
+            "mid": 1.055921,
+            "premium": 1.012427
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.86,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.609725,
+            "mid": 1.023241,
+            "premium": 1.003595
+          },
+          "policy_quality": {
+            "cheap": 0.609725,
+            "mid": 1.034321,
+            "premium": 1.056227
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.567525,
+            "mid": 0.929241,
+            "premium": 1.018195
+          },
+          "policy_quality": {
+            "cheap": 0.567525,
+            "mid": 0.940321,
+            "premium": 1.070827
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p005",
+      "prompt": "단계별로 풀어줘: 기차가 3시간 동안 180km를 이동했다면 평균 속도는 얼마야?",
+      "domain": "math",
+      "task_type": "math",
+      "benchmark_id": "math_easy",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.9,
+          "cost": 0.01,
+          "predicted_quality": 0.77682,
+          "calibrated_quality": 0.654363,
+          "model_output": "60km/h입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.96,
+          "cost": 0.05,
+          "predicted_quality": 0.985903,
+          "calibrated_quality": 1.020043,
+          "model_output": "평균 속도는 거리 나누기 시간입니다. 180km를 3시간으로 나누면 60km/h입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 1.038109,
+          "calibrated_quality": 1.131664,
+          "model_output": "평균 속도는 이동 거리 / 걸린 시간으로 계산합니다. 180km / 3시간 = 60km/h이므로 평균 속도는 60km/h입니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.9,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.11,
+          "utilities": {
+            "cheap": 0.948363,
+            "mid": 0.86655,
+            "premium": -0.004926
+          },
+          "policy_quality": {
+            "cheap": 0.948363,
+            "mid": 1.090843,
+            "premium": 1.060464
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.11,
+          "utilities": {
+            "cheap": 0.718963,
+            "mid": 1.070962,
+            "premium": 1.061232
+          },
+          "policy_quality": {
+            "cheap": 0.718963,
+            "mid": 1.082043,
+            "premium": 1.113864
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.11,
+          "utilities": {
+            "cheap": 0.654363,
+            "mid": 1.008962,
+            "premium": 1.079032
+          },
+          "policy_quality": {
+            "cheap": 0.654363,
+            "mid": 1.020043,
+            "premium": 1.131664
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p006",
+      "prompt": "피트니스 앱에 넣을 짧은 법적 고지 문구를 작성해줘.",
+      "domain": "legal",
+      "task_type": "generation",
+      "benchmark_id": "legal_generation",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.55,
+          "cost": 0.01,
+          "predicted_quality": 0.620906,
+          "calibrated_quality": 0.498448,
+          "model_output": "이 앱은 정보 제공용이며 의학적 조언이 아닙니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.79,
+          "cost": 0.05,
+          "predicted_quality": 0.802604,
+          "calibrated_quality": 0.836743,
+          "model_output": "이 앱은 일반적인 피트니스 정보를 제공하며 전문적인 의학적 조언을 대체하지 않습니다. 운동을 시작하기 전 전문가와 상담하세요."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.89,
+          "cost": 0.2,
+          "predicted_quality": 0.853551,
+          "calibrated_quality": 0.947106,
+          "model_output": "본 앱은 일반적인 건강 및 피트니스 정보를 제공하기 위한 것이며 의학적 진단, 치료 또는 전문적인 조언을 대체하지 않습니다. 운동 프로그램을 시작하거나 변경하기 전에는 자격을 갖춘 의료 전문가와 상담해야 합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.55,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.17,
+          "utilities": {
+            "cheap": 0.756448,
+            "mid": 0.700051,
+            "premium": -0.184684
+          },
+          "policy_quality": {
+            "cheap": 0.756448,
+            "mid": 0.924343,
+            "premium": 0.880706
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.79,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.17,
+          "utilities": {
+            "cheap": 0.554648,
+            "mid": 0.899663,
+            "premium": 0.877874
+          },
+          "policy_quality": {
+            "cheap": 0.554648,
+            "mid": 0.910743,
+            "premium": 0.930506
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.89,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.17,
+          "utilities": {
+            "cheap": 0.498448,
+            "mid": 0.825663,
+            "premium": 0.894474
+          },
+          "policy_quality": {
+            "cheap": 0.498448,
+            "mid": 0.836743,
+            "premium": 0.947106
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p007",
+      "prompt": "다음 문장을 영어로 번역해줘: 송장은 다음 주 금요일까지 결제해야 합니다.",
+      "domain": "general",
+      "task_type": "translation",
+      "benchmark_id": "translation_easy",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.88,
+          "cost": 0.01,
+          "predicted_quality": 0.743567,
+          "calibrated_quality": 0.621109,
+          "model_output": "The invoice must be paid by next Friday."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.94,
+          "cost": 0.05,
+          "predicted_quality": 0.95265,
+          "calibrated_quality": 0.986789,
+          "model_output": "The invoice is due next Friday."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.93,
+          "cost": 0.2,
+          "predicted_quality": 1.007518,
+          "calibrated_quality": 1.101073,
+          "model_output": "The invoice is due by next Friday."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.88,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.957109,
+            "mid": 0.813697,
+            "premium": -0.041117
+          },
+          "policy_quality": {
+            "cheap": 0.957109,
+            "mid": 1.037989,
+            "premium": 1.024273
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.695509,
+            "mid": 1.023709,
+            "premium": 1.029242
+          },
+          "policy_quality": {
+            "cheap": 0.695509,
+            "mid": 1.034789,
+            "premium": 1.081873
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.621109,
+            "mid": 0.975709,
+            "premium": 1.048442
+          },
+          "policy_quality": {
+            "cheap": 0.621109,
+            "mid": 0.986789,
+            "premium": 1.101073
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p008",
+      "prompt": "멀티테넌트 SaaS 결제 시스템의 상위 수준 아키텍처를 설계해줘.",
+      "domain": "tech",
+      "task_type": "complex_design",
+      "benchmark_id": "architecture_hard",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.35,
+          "cost": 0.01,
+          "predicted_quality": 0.536125,
+          "calibrated_quality": 0.413668,
+          "model_output": "백엔드, 데이터베이스, 결제 API를 사용하면 됩니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.72,
+          "cost": 0.05,
+          "predicted_quality": 0.745643,
+          "calibrated_quality": 0.779782,
+          "model_output": "API 서버, 테넌트별 데이터 모델, 결제 작업자, 웹훅 처리기, 결제 제공자 연동을 두는 구조가 적합합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.94,
+          "cost": 0.2,
+          "predicted_quality": 0.821639,
+          "calibrated_quality": 0.915193,
+          "model_output": "테넌트 인식 인증, API 계층, 구독 서비스, 청구서 서비스, 사용량 집계 파이프라인, 결제 웹훅 처리기, 비동기 결제 작업자, 감사 로그, 권한 분리된 리포팅 저장소로 구성하는 것이 좋습니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.72,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.59,
+          "utilities": {
+            "cheap": 0.419668,
+            "mid": 0.70309,
+            "premium": 0.025003
+          },
+          "policy_quality": {
+            "cheap": 0.419668,
+            "mid": 0.927382,
+            "premium": 1.090393
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.72,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.59,
+          "utilities": {
+            "cheap": 0.411068,
+            "mid": 0.883502,
+            "premium": 0.868362
+          },
+          "policy_quality": {
+            "cheap": 0.411068,
+            "mid": 0.894582,
+            "premium": 0.920993
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.59,
+          "utilities": {
+            "cheap": 0.413668,
+            "mid": 0.768702,
+            "premium": 0.862562
+          },
+          "policy_quality": {
+            "cheap": 0.413668,
+            "mid": 0.779782,
+            "premium": 0.915193
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p009",
+      "prompt": "프론트엔드 모노레포(Monorepo) 구성 시 Turborepo와 Lerna 중 무엇이 나은지 비교해줘.",
+      "domain": "tech",
+      "task_type": "reasoning",
+      "benchmark_id": "comparison_medium",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.62,
+          "cost": 0.01,
+          "predicted_quality": 0.747357,
+          "calibrated_quality": 0.624899,
+          "model_output": "Turborepo가 더 빠르고 최근에 나온 툴이라 편합니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.87,
+          "cost": 0.05,
+          "predicted_quality": 0.956439,
+          "calibrated_quality": 0.990579,
+          "model_output": "Turborepo는 빌드 캐싱 덕분에 빠르고 설정이 쉽습니다. Lerna는 오래된 대규모 프로젝트에 익숙하지만 속도가 느려 최근에는 Turborepo로 마이그레이션하는 추세입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.94,
+          "cost": 0.2,
+          "predicted_quality": 1.011308,
+          "calibrated_quality": 1.104863,
+          "model_output": "신규 프론트엔드 프로젝트라면 원격 빌드 캐싱과 의존성 그래프 최적화가 뛰어난 Turborepo가 유리합니다. 반면 다중 패키지 배포 및 버전 관리 프로세스가 이미 복잡하게 얽혀 있는 기존 대규모 레거시 모노레포라면 Lerna(Nx 통합 버전)가 안정적인 대안이 될 수 있습니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.87,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.822899,
+            "mid": 0.881886,
+            "premium": -0.018927
+          },
+          "policy_quality": {
+            "cheap": 0.822899,
+            "mid": 1.106179,
+            "premium": 1.046463
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.87,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.667099,
+            "mid": 1.073499,
+            "premium": 1.037631
+          },
+          "policy_quality": {
+            "cheap": 0.667099,
+            "mid": 1.084579,
+            "premium": 1.090263
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.624899,
+            "mid": 0.979499,
+            "premium": 1.052231
+          },
+          "policy_quality": {
+            "cheap": 0.624899,
+            "mid": 0.990579,
+            "premium": 1.104863
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p010",
+      "prompt": "주어진 배열에서 중복 요소를 제거하는 가장 효율적인 자바스크립트 함수를 작성해줘.",
+      "domain": "tech",
+      "task_type": "code_generation",
+      "benchmark_id": "coding_easy",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.91,
+          "cost": 0.01,
+          "predicted_quality": 0.788726,
+          "calibrated_quality": 0.666268,
+          "model_output": "function unique(arr) { return [...new Set(arr)]; }"
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.92,
+          "cost": 0.05,
+          "predicted_quality": 0.975248,
+          "calibrated_quality": 1.009387,
+          "model_output": "const removeDuplicates = (arr) => Array.from(new Set(arr)); 이 방식이 가독성이 높고 성능도 좋습니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 1.024473,
+          "calibrated_quality": 1.118027,
+          "model_output": "function removeDuplicates(arr) {\\n  if (!Array.isArray(arr)) throw new TypeError('배열을 입력해야 합니다');\\n  return [...new Set(arr)];\\n}"
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.91,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.906268,
+            "mid": 0.881095,
+            "premium": -0.011363
+          },
+          "policy_quality": {
+            "cheap": 0.906268,
+            "mid": 1.105387,
+            "premium": 1.054027
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.718268,
+            "mid": 1.078307,
+            "premium": 1.049396
+          },
+          "policy_quality": {
+            "cheap": 0.718268,
+            "mid": 1.089387,
+            "premium": 1.102027
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.666268,
+            "mid": 0.998307,
+            "premium": 1.065396
+          },
+          "policy_quality": {
+            "cheap": 0.666268,
+            "mid": 1.009387,
+            "premium": 1.118027
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p011",
+      "prompt": "고객 피드백 요약해줘: 결제 화면 로딩이 너무 느려서 도중에 이탈하는 사용자가 많음. 결제 자체는 성공함.",
+      "domain": "business",
+      "task_type": "summarization",
+      "benchmark_id": "summarization_short",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.89,
+          "cost": 0.01,
+          "predicted_quality": 0.754701,
+          "calibrated_quality": 0.632243,
+          "model_output": "결제 성공은 하지만 로딩이 느려서 이탈자가 많습니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.94,
+          "cost": 0.05,
+          "predicted_quality": 0.951853,
+          "calibrated_quality": 0.985993,
+          "model_output": "결제 기능은 정상 작동하지만, 화면 로딩 속도가 느려 결제 도중 사용자가 이탈하는 문제가 핵심입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.93,
+          "cost": 0.2,
+          "predicted_quality": 1.011627,
+          "calibrated_quality": 1.105182,
+          "model_output": "결제 트랜잭션 자체의 성공률은 유효하나, 결제 페이지의 심각한 로딩 지연으로 인해 사용자들의 중도 이탈률이 높으므로 UI/UX 성능 개선이 시급합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.89,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.884243,
+            "mid": 0.8521,
+            "premium": -0.025808
+          },
+          "policy_quality": {
+            "cheap": 0.884243,
+            "mid": 1.076393,
+            "premium": 1.039582
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.687043,
+            "mid": 1.050912,
+            "premium": 1.036151
+          },
+          "policy_quality": {
+            "cheap": 0.687043,
+            "mid": 1.061993,
+            "premium": 1.088782
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.632243,
+            "mid": 0.974912,
+            "premium": 1.052551
+          },
+          "policy_quality": {
+            "cheap": 0.632243,
+            "mid": 0.985993,
+            "premium": 1.105182
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p012",
+      "prompt": "스타트업을 위한 고용 계약서에 반드시 포함되어야 할 3가지 조항을 알려줘.",
+      "domain": "legal",
+      "task_type": "generation",
+      "benchmark_id": "legal_generation",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.52,
+          "cost": 0.01,
+          "predicted_quality": 0.583213,
+          "calibrated_quality": 0.460755,
+          "model_output": "급여, 근무 시간, 담당 업무입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.81,
+          "cost": 0.05,
+          "predicted_quality": 0.791267,
+          "calibrated_quality": 0.825406,
+          "model_output": "근무 조건(급여 및 시간), 비밀유지 서약(NDA), 그리고 지식재산권(IP) 귀속 조항이 필수적입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.93,
+          "cost": 0.2,
+          "predicted_quality": 0.879881,
+          "calibrated_quality": 0.973436,
+          "model_output": "임금 구성항목 및 소정근무시간을 명시한 근로조건 조항, 기업 자산을 보호하는 비밀유지(Confidentiality) 조항, 그리고 재직 중 개발한 성과물이 회사에 귀속됨을 명시하는 지식재산권 양도(IP Assignment) 조항이 필수입니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.52,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.700755,
+            "mid": 0.697114,
+            "premium": -0.155954
+          },
+          "policy_quality": {
+            "cheap": 0.700755,
+            "mid": 0.921406,
+            "premium": 0.909436
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.512755,
+            "mid": 0.894326,
+            "premium": 0.904805
+          },
+          "policy_quality": {
+            "cheap": 0.512755,
+            "mid": 0.905406,
+            "premium": 0.957436
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.460755,
+            "mid": 0.814326,
+            "premium": 0.920805
+          },
+          "policy_quality": {
+            "cheap": 0.460755,
+            "mid": 0.825406,
+            "premium": 0.973436
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p013",
+      "prompt": "3D 지도 렌더링 엔진을 위한 대용량 공간 데이터 파이프라인의 상위 아키텍처를 설계해줘.",
+      "domain": "tech",
+      "task_type": "complex_design",
+      "benchmark_id": "architecture_hard",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.41,
+          "cost": 0.01,
+          "predicted_quality": 0.539362,
+          "calibrated_quality": 0.416904,
+          "model_output": "클라우드 저장소에 데이터를 두고 API로 불러와 렌더링합니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.75,
+          "cost": 0.05,
+          "predicted_quality": 0.752665,
+          "calibrated_quality": 0.786804,
+          "model_output": "원천 데이터를 인하이드레이션하고, 공간 인덱싱(3D Tiles) 처리를 거친 후, CDN을 통해 클라이언트 프론트엔드 엔진으로 스트리밍하는 구조입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.95,
+          "cost": 0.2,
+          "predicted_quality": 0.843942,
+          "calibrated_quality": 0.937497,
+          "model_output": "원천 공간 데이터(GIS) 적재 계층, 배치를 통한 3D Tiles/정점 데이터 파싱 및 공간 인덱싱 변환 계층, 분산 오브젝트 스토리지 및 전역 CDN 캐싱 계층, 클라이언트 엔진의 시야(Frustum) 기반 비동기 스트리밍 및 Level of Detail(LOD) 관리 엔진으로 구성합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.72,
+          "utilities": {
+            "cheap": 0.344904,
+            "mid": 0.663312,
+            "premium": 0.733707
+          },
+          "policy_quality": {
+            "cheap": 0.344904,
+            "mid": 0.887604,
+            "premium": 1.799097
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.72,
+          "utilities": {
+            "cheap": 0.396104,
+            "mid": 0.854124,
+            "premium": 0.938765
+          },
+          "policy_quality": {
+            "cheap": 0.396104,
+            "mid": 0.865204,
+            "premium": 0.991397
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.72,
+          "utilities": {
+            "cheap": 0.416904,
+            "mid": 0.775724,
+            "premium": 0.884865
+          },
+          "policy_quality": {
+            "cheap": 0.416904,
+            "mid": 0.786804,
+            "premium": 0.937497
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p014",
+      "prompt": "환자가 갑자기 호흡 곤란을 호소할 때 응급 처치 단계를 순서대로 설명해줘.",
+      "domain": "medical",
+      "task_type": "reasoning",
+      "benchmark_id": "emergency_hard",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.31,
+          "cost": 0.01,
+          "predicted_quality": 0.528088,
+          "calibrated_quality": 0.405631,
+          "model_output": "119에 전화하고 편하게 눕히세요."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.82,
+          "cost": 0.05,
+          "predicted_quality": 0.744287,
+          "calibrated_quality": 0.778427,
+          "model_output": "1. 즉시 119에 신고합니다. 2. 환자의 단추나 벨트를 풀어 편하게 하고 상체를 올린 자세를 취하게 합니다. 3. 환자의 의식을 확인하며 구급대를 기다립니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 0.812715,
+          "calibrated_quality": 0.90627,
+          "model_output": "1. 즉시 119에 신고하고 정확한 위치를 알립니다. 2. 기도를 압박하는 넥타이나 옷을 느슨하게 합니다. 3. 눕는 것보다 상체를 45도쯤 세운 반좌위(Semi-Fowler) 자세가 호흡에 유리하므로 받쳐줍니다. 4. 환자가 의식을 잃고 호흡이 멈춘다면 즉시 CPR(심폐소생술)을 시행해야 합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.82,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.33,
+          "utilities": {
+            "cheap": 0.567631,
+            "mid": 0.686535,
+            "premium": -0.21272
+          },
+          "policy_quality": {
+            "cheap": 0.567631,
+            "mid": 0.910827,
+            "premium": 0.85267
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.82,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.33,
+          "utilities": {
+            "cheap": 0.439431,
+            "mid": 0.873347,
+            "premium": 0.840239
+          },
+          "policy_quality": {
+            "cheap": 0.439431,
+            "mid": 0.884427,
+            "premium": 0.89287
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.33,
+          "utilities": {
+            "cheap": 0.405631,
+            "mid": 0.767347,
+            "premium": 0.853639
+          },
+          "policy_quality": {
+            "cheap": 0.405631,
+            "mid": 0.778427,
+            "premium": 0.90627
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p015",
+      "prompt": "커피숍 개업을 알리는 짧고 감성적인 인스타그램 홍보 문구를 작성해줘.",
+      "domain": "creative",
+      "task_type": "generation",
+      "benchmark_id": "marketing_short",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.6,
+          "cost": 0.01,
+          "predicted_quality": 0.644836,
+          "calibrated_quality": 0.522378,
+          "model_output": "카페 오픈했습니다! 맛있는 커피 드시러 오세요."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.88,
+          "cost": 0.05,
+          "predicted_quality": 0.834143,
+          "calibrated_quality": 0.868283,
+          "model_output": "따스한 햇살과 은은한 원두 향이 가득한 공간, 드디어 문을 열었습니다. 일상 속 작은 쉼표가 필요할 때 들러주세요."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.91,
+          "cost": 0.2,
+          "predicted_quality": 0.89865,
+          "calibrated_quality": 0.992204,
+          "model_output": "매일 아침을 깨우는 로스팅 향, 서두르던 발걸음도 잠시 쉬어가는 곳. 우리의 이야기가 시작되는 작은 공간으로 당신을 초대합니다. 로컬 블렌드와 함께하는 아늑한 주말 되세요."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.6,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.762378,
+            "mid": 0.73999,
+            "premium": -0.137186
+          },
+          "policy_quality": {
+            "cheap": 0.762378,
+            "mid": 0.964283,
+            "premium": 0.928204
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.88,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.574378,
+            "mid": 0.937203,
+            "premium": 0.923573
+          },
+          "policy_quality": {
+            "cheap": 0.574378,
+            "mid": 0.948283,
+            "premium": 0.976204
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.91,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.522378,
+            "mid": 0.857203,
+            "premium": 0.939573
+          },
+          "policy_quality": {
+            "cheap": 0.522378,
+            "mid": 0.868283,
+            "premium": 0.992204
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p016",
+      "prompt": "데이터베이스 인덱스(Index)의 작동 원리를 한 문장으로 설명해줘.",
+      "domain": "tech",
+      "task_type": "qa",
+      "benchmark_id": "basic_qa",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.85,
+          "cost": 0.01,
+          "predicted_quality": 0.789242,
+          "calibrated_quality": 0.666784,
+          "model_output": "인덱스는 책의 색인처럼 데이터를 빨리 찾게 해주는 표입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.92,
+          "cost": 0.05,
+          "predicted_quality": 0.961966,
+          "calibrated_quality": 0.996106,
+          "model_output": "인덱스는 B-Tree 등의 자료구조를 파일에 색인화하여 특정 테이블의 검색 성능을 극대화하는 메커니즘입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.94,
+          "cost": 0.2,
+          "predicted_quality": 1.010251,
+          "calibrated_quality": 1.103805,
+          "model_output": "데이터베이스 인덱스는 지정된 컬럼의 데이터를 키-포인터 쌍의 포인터 파일 및 B-Tree 자료구조로 미리 정렬해두어 풀 스캔을 방지하고 검색 속도를 비약적으로 높이는 기술입니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.85,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 1.002784,
+            "mid": 0.823013,
+            "premium": -0.038385
+          },
+          "policy_quality": {
+            "cheap": 1.002784,
+            "mid": 1.047306,
+            "premium": 1.027005
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.741184,
+            "mid": 1.033025,
+            "premium": 1.031974
+          },
+          "policy_quality": {
+            "cheap": 0.741184,
+            "mid": 1.044106,
+            "premium": 1.084605
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.666784,
+            "mid": 0.985025,
+            "premium": 1.051174
+          },
+          "policy_quality": {
+            "cheap": 0.666784,
+            "mid": 0.996106,
+            "premium": 1.103805
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p017",
+      "prompt": "CSS Flexbox와 Grid 아키텍처의 레이아웃 결정 기준 차이를 비교해줘.",
+      "domain": "tech",
+      "task_type": "reasoning",
+      "benchmark_id": "comparison_medium",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.68,
+          "cost": 0.01,
+          "predicted_quality": 0.688555,
+          "calibrated_quality": 0.566097,
+          "model_output": "Flex는 가로세로 한 줄이고 Grid는 바둑판 배열입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.89,
+          "cost": 0.05,
+          "predicted_quality": 0.904754,
+          "calibrated_quality": 0.938894,
+          "model_output": "Flexbox는 행 또는 열 기준의 1차원 레이아웃에 적합하며, Grid는 행과 열을 동시에 제어하는 거시적인 2차원 대형 웹 레이아웃 시스템에 적합합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.95,
+          "cost": 0.2,
+          "predicted_quality": 0.975844,
+          "calibrated_quality": 1.069399,
+          "model_output": "Flexbox는 컴포넌트 내부 요소의 유연한 콘텐츠 흐름 및 1차원 정렬을 정의할 때 강력하며, Grid는 열(Column)과 행(Row)을 사전에 정의하여 전체 웹 서비스 페이지의 거시적인 2차원 틀을 다룰 때 아키텍처적 무결성을 제공합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.89,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.686097,
+            "mid": 0.866601,
+            "premium": -0.043991
+          },
+          "policy_quality": {
+            "cheap": 0.686097,
+            "mid": 1.090894,
+            "premium": 1.021399
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.89,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.590097,
+            "mid": 1.047813,
+            "premium": 1.004767
+          },
+          "policy_quality": {
+            "cheap": 0.590097,
+            "mid": 1.058894,
+            "premium": 1.057399
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.566097,
+            "mid": 0.927813,
+            "premium": 1.016767
+          },
+          "policy_quality": {
+            "cheap": 0.566097,
+            "mid": 0.938894,
+            "premium": 1.069399
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p018",
+      "prompt": "자바스크립트에서 클로저(Closure)가 발생하는 이유를 한 문장으로 설명해줘.",
+      "domain": "tech",
+      "task_type": "qa",
+      "benchmark_id": "basic_qa",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.89,
+          "cost": 0.01,
+          "predicted_quality": 0.794728,
+          "calibrated_quality": 0.67227,
+          "model_output": "함수가 끝난 뒤에도 내부 변수를 계속 기억해서 그렇습니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.95,
+          "cost": 0.05,
+          "predicted_quality": 0.967452,
+          "calibrated_quality": 1.001592,
+          "model_output": "자바스크립트 함수가 생성될 당시의 렉시컬 환경(Lexical Environment)을 기억하여 외부 함수 스코프 밖에서 호출되어도 해당 스코프에 접근할 수 있기 때문입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 1.018399,
+          "calibrated_quality": 1.111954,
+          "model_output": "외부 함수의 실행 텍스트가 종료되어 콜 스택에서 반환되더라도, 내부 함수가 여전히 상위 스코프의 변수를 참조하고 있다면 렉시컬 환경이 가비지 컬렉션(GC) 대상에서 제외되어 클로저 현상이 발생합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.89,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 1.00827,
+            "mid": 0.828499,
+            "premium": -0.030236
+          },
+          "policy_quality": {
+            "cheap": 1.00827,
+            "mid": 1.052792,
+            "premium": 1.035154
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.74667,
+            "mid": 1.038511,
+            "premium": 1.040122
+          },
+          "policy_quality": {
+            "cheap": 0.74667,
+            "mid": 1.049592,
+            "premium": 1.092754
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.67227,
+            "mid": 0.990511,
+            "premium": 1.059322
+          },
+          "policy_quality": {
+            "cheap": 0.67227,
+            "mid": 1.001592,
+            "premium": 1.111954
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p019",
+      "prompt": "주어진 문자열을 뒤집는 가장 간결한 자바스크립트 한 줄 코드를 작성해줘.",
+      "domain": "tech",
+      "task_type": "code_generation",
+      "benchmark_id": "coding_easy",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.93,
+          "cost": 0.01,
+          "predicted_quality": 0.775643,
+          "calibrated_quality": 0.653185,
+          "model_output": "str.split('').reverse().join('');"
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.94,
+          "cost": 0.05,
+          "predicted_quality": 0.964518,
+          "calibrated_quality": 0.998658,
+          "model_output": "const reverseStr = str => [...str].reverse().join(''); 이 방식이 이모지 처리 등에서도 안전합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.95,
+          "cost": 0.2,
+          "predicted_quality": 1.016405,
+          "calibrated_quality": 1.10996,
+          "model_output": "function reverseString(str) {\\n  if (typeof str !== 'string') return '';\\n  return [...str].reverse().join('');\\n}"
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.893185,
+            "mid": 0.870365,
+            "premium": -0.01943
+          },
+          "policy_quality": {
+            "cheap": 0.893185,
+            "mid": 1.094658,
+            "premium": 1.04596
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.705185,
+            "mid": 1.067577,
+            "premium": 1.041328
+          },
+          "policy_quality": {
+            "cheap": 0.705185,
+            "mid": 1.078658,
+            "premium": 1.09396
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.653185,
+            "mid": 0.987577,
+            "premium": 1.057328
+          },
+          "policy_quality": {
+            "cheap": 0.653185,
+            "mid": 0.998658,
+            "premium": 1.10996
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p020",
+      "prompt": "배달 앱 알림 문구 요약해줘: 주문하신 치킨이 조리 완료되어 라이더에게 전달되었습니다. 20분 내 도착 예정.",
+      "domain": "business",
+      "task_type": "summarization",
+      "benchmark_id": "summarization_short",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.9,
+          "cost": 0.01,
+          "predicted_quality": 0.779682,
+          "calibrated_quality": 0.657224,
+          "model_output": "치킨 조리 끝, 20분 안에 배달 완료됩니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.93,
+          "cost": 0.05,
+          "predicted_quality": 0.962247,
+          "calibrated_quality": 0.996387,
+          "model_output": "주문 상품의 조리가 완료되어 라이더가 배달을 시작했으며, 20분 이내에 수령 가능합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.92,
+          "cost": 0.2,
+          "predicted_quality": 0.997913,
+          "calibrated_quality": 1.091468,
+          "model_output": "주문 건의 조리 완료 후 배송 파트너 픽업이 완료되었으며, 고객님 계신 곳까지 향후 20분 이내 도착 예정으로 요약됩니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.9,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.909224,
+            "mid": 0.862494,
+            "premium": -0.039522
+          },
+          "policy_quality": {
+            "cheap": 0.909224,
+            "mid": 1.086787,
+            "premium": 1.025868
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.712024,
+            "mid": 1.061306,
+            "premium": 1.022436
+          },
+          "policy_quality": {
+            "cheap": 0.712024,
+            "mid": 1.072387,
+            "premium": 1.075068
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.18,
+          "utilities": {
+            "cheap": 0.657224,
+            "mid": 0.985306,
+            "premium": 1.038836
+          },
+          "policy_quality": {
+            "cheap": 0.657224,
+            "mid": 0.996387,
+            "premium": 1.091468
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p021",
+      "prompt": "스타트업 제품 출시 전 이용약관에 명시해야 할 핵심 고지 사항 2가지를 알려줘.",
+      "domain": "legal",
+      "task_type": "generation",
+      "benchmark_id": "legal_generation",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.55,
+          "cost": 0.01,
+          "predicted_quality": 0.634902,
+          "calibrated_quality": 0.512444,
+          "model_output": "환불 규정 및 서비스 이용 제한 조건입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.82,
+          "cost": 0.05,
+          "predicted_quality": 0.817638,
+          "calibrated_quality": 0.851778,
+          "model_output": "서비스 이용에 따른 회사와 이용자 간의 귀속 권리 책임 및 면책 조항, 그리고 결제 취소나 환불에 대한 명확한 환불 정책입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.94,
+          "cost": 0.2,
+          "predicted_quality": 0.904994,
+          "calibrated_quality": 0.998548,
+          "model_output": "부정사용자나 시스템 장애 발생 시 회사의 법적 분쟁을 방어하는 서비스 면책(Limitation of Liability) 조항과 소비자분쟁해결기준에 부합하도록 적법하게 짜인 계약해지 및 환불 규정이 가장 핵심적입니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.55,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.752444,
+            "mid": 0.723485,
+            "premium": -0.130842
+          },
+          "policy_quality": {
+            "cheap": 0.752444,
+            "mid": 0.947778,
+            "premium": 0.934548
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.564444,
+            "mid": 0.920697,
+            "premium": 0.929917
+          },
+          "policy_quality": {
+            "cheap": 0.564444,
+            "mid": 0.931778,
+            "premium": 0.982548
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.512444,
+            "mid": 0.840697,
+            "premium": 0.945917
+          },
+          "policy_quality": {
+            "cheap": 0.512444,
+            "mid": 0.851778,
+            "premium": 0.998548
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p022",
+      "prompt": "CesiumJS와 OpenLayers 라이브러리의 3D 공간 데이터 표현 능력 차이를 비교해줘.",
+      "domain": "tech",
+      "task_type": "reasoning",
+      "benchmark_id": "comparison_medium",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.64,
+          "cost": 0.01,
+          "predicted_quality": 0.582299,
+          "calibrated_quality": 0.459842,
+          "model_output": "Cesium은 대규모 3D에 좋고, OpenLayers는 2D 평면 지도 중심입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.88,
+          "cost": 0.05,
+          "predicted_quality": 0.795602,
+          "calibrated_quality": 0.829742,
+          "model_output": "CesiumJS는 지구 스케일의 가상 구체 렌더링 및 3D Tiles 스트리밍에 최적화되어 있고, OpenLayers는 강력한 2D/2.5D 데이터 관리 레이어를 기반으로 가벼운 뷰를 구성할 때 유리합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.95,
+          "cost": 0.2,
+          "predicted_quality": 0.884217,
+          "calibrated_quality": 0.977772,
+          "model_output": "CesiumJS는 WebGL 기반의 글로벌 디지털 트윈을 위해 고정밀 지형(Terrain) 데이터 및 대용량 3D Tiles 개체를 계층적(LOD)으로 파이프라이닝하는 데 강점이 있으며, OpenLayers는 OGC 표준 포맷을 지원하는 전통적인 2D 벡터 레이어 제어와 평면 웹 맵 구현에 효율적인 아키텍처적 차이를 가집니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.88,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.657842,
+            "mid": 0.721049,
+            "premium": -0.146018
+          },
+          "policy_quality": {
+            "cheap": 0.657842,
+            "mid": 0.945342,
+            "premium": 0.919372
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.88,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.502042,
+            "mid": 0.912662,
+            "premium": 0.91054
+          },
+          "policy_quality": {
+            "cheap": 0.502042,
+            "mid": 0.923742,
+            "premium": 0.963172
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.27,
+          "utilities": {
+            "cheap": 0.459842,
+            "mid": 0.818662,
+            "premium": 0.92514
+          },
+          "policy_quality": {
+            "cheap": 0.459842,
+            "mid": 0.829742,
+            "premium": 0.977772
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p023",
+      "prompt": "실시간 데이터 시각화 웹 대시보드를 위한 고성능 클라이언트 아키텍처를 설계해줘.",
+      "domain": "tech",
+      "task_type": "complex_design",
+      "benchmark_id": "architecture_hard",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.38,
+          "cost": 0.01,
+          "predicted_quality": 0.52981,
+          "calibrated_quality": 0.407352,
+          "model_output": "웹소켓으로 데이터를 받아서 리액트 상태로 변경하고 화면을 갱신합니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.76,
+          "cost": 0.05,
+          "predicted_quality": 0.746009,
+          "calibrated_quality": 0.780149,
+          "model_output": "Websocket 통신 전용 비동기 스레드(Worker)를 분리하고, 전역 상태 스토어에서 버퍼링을 처리하여 차트 렌더링 프레임을 최적화하는 구조가 적합합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 0.834624,
+          "calibrated_quality": 0.928179,
+          "model_output": "네트워크 메인 스레드를 방해하지 않는 Web Worker 기반의 바이너리 소켓 스트림 관리 파이프라인, 프론트엔드 메인 렌더러의 가비지 컬렉터 부하를 최소화하는 버퍼/링 버퍼 큐, React의 불필요한 리렌더링을 격리하는 Zustand 상태 구조, 가상 DOM을 우회하고 Canvas/WebGL로 다이렉트 푸시하는 시각화 컴포넌트 레이어로 구성합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.76,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.46,
+          "utilities": {
+            "cheap": 0.491352,
+            "mid": 0.724656,
+            "premium": -0.180412
+          },
+          "policy_quality": {
+            "cheap": 0.491352,
+            "mid": 0.948949,
+            "premium": 0.884979
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.76,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.46,
+          "utilities": {
+            "cheap": 0.422952,
+            "mid": 0.901068,
+            "premium": 0.864747
+          },
+          "policy_quality": {
+            "cheap": 0.422952,
+            "mid": 0.912149,
+            "premium": 0.917379
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.46,
+          "utilities": {
+            "cheap": 0.407352,
+            "mid": 0.769068,
+            "premium": 0.875547
+          },
+          "policy_quality": {
+            "cheap": 0.407352,
+            "mid": 0.780149,
+            "premium": 0.928179
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p024",
+      "prompt": "심정지 환자가 발생했을 때 목격자가 취해야 할 행동 단계를 순서대로 설명해줘.",
+      "domain": "medical",
+      "task_type": "reasoning",
+      "benchmark_id": "emergency_hard",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.35,
+          "cost": 0.01,
+          "predicted_quality": 0.569757,
+          "calibrated_quality": 0.447299,
+          "model_output": "의식을 확인하고 즉시 가슴을 압박하세요."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.85,
+          "cost": 0.05,
+          "predicted_quality": 0.785956,
+          "calibrated_quality": 0.820096,
+          "model_output": "1. 환자의 어깨를 두드리며 반응을 봅니다. 2. 주위 사람에게 119 신고와 AED 지참을 요청합니다. 3. 구급대가 올 때까지 분당 100~120회 속도로 가슴 압박 소생술을 실시합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.97,
+          "cost": 0.2,
+          "predicted_quality": 0.854384,
+          "calibrated_quality": 0.947939,
+          "model_output": "1. 환자의 의식 및 호흡 유무를 정확하게 판별합니다. 2. 특정인을 지목하여 119 신고 및 자동심장충격기(AED) 수거를 지시합니다. 3. 환자의 복장 해체 후 복장뼈 하단 2분의 1 지점을 5~6cm 깊이로 강하고 빠르게 가슴 압박합니다. 4. AED가 도착하면 기기 음성 안내에 따라 패드 부착 및 제동 사이클을 반복 적용합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.85,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.687299,
+            "mid": 0.691803,
+            "premium": -0.181451
+          },
+          "policy_quality": {
+            "cheap": 0.687299,
+            "mid": 0.916096,
+            "premium": 0.883939
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.85,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.499299,
+            "mid": 0.889015,
+            "premium": 0.879307
+          },
+          "policy_quality": {
+            "cheap": 0.499299,
+            "mid": 0.900096,
+            "premium": 0.931939
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.97,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.447299,
+            "mid": 0.809015,
+            "premium": 0.895307
+          },
+          "policy_quality": {
+            "cheap": 0.447299,
+            "mid": 0.820096,
+            "premium": 0.947939
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p025",
+      "prompt": "로컬 베이커리의 건강한 쌀 식빵 출시를 알리는 감성적인 카피라이팅을 작성해줘.",
+      "domain": "creative",
+      "task_type": "generation",
+      "benchmark_id": "marketing_short",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.58,
+          "cost": 0.01,
+          "predicted_quality": 0.627154,
+          "calibrated_quality": 0.504696,
+          "model_output": "밀가루 없는 건강한 쌀 식빵 구워냈습니다. 사러 오세요."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.86,
+          "cost": 0.05,
+          "predicted_quality": 0.8193,
+          "calibrated_quality": 0.853439,
+          "model_output": "속 편한 아침을 위해 밀가루 대신 국내산 쌀로 꾹꾹 눌러 담았습니다. 갓 구워낸 쫄깃하고 담백한 식감을 만나보세요."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.92,
+          "cost": 0.2,
+          "predicted_quality": 0.906655,
+          "calibrated_quality": 1.00021,
+          "model_output": "부스스 눈을 뜬 아침, 나를 위해 준비하는 가장 무해한 식사. 밀가루를 비우고 정직한 우리 쌀의 포근함만 채워 넣은 담백한 속 편한 쌀 식빵이 노릇하게 구워졌습니다. 오늘부터 매일 아침 테이블에서 기다릴게요."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.58,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.744696,
+            "mid": 0.725147,
+            "premium": -0.12918
+          },
+          "policy_quality": {
+            "cheap": 0.744696,
+            "mid": 0.949439,
+            "premium": 0.93621
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.556696,
+            "mid": 0.922359,
+            "premium": 0.931578
+          },
+          "policy_quality": {
+            "cheap": 0.556696,
+            "mid": 0.933439,
+            "premium": 0.98421
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.504696,
+            "mid": 0.842359,
+            "premium": 0.947578
+          },
+          "policy_quality": {
+            "cheap": 0.504696,
+            "mid": 0.853439,
+            "premium": 1.00021
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p026",
+      "prompt": "화학 반응 속도론에서 활성화 에너지($E_a$)의 개념을 한 문장으로 정의해줘.",
+      "domain": "math",
+      "task_type": "qa",
+      "benchmark_id": "basic_qa",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.86,
+          "cost": 0.01,
+          "predicted_quality": 0.801183,
+          "calibrated_quality": 0.678726,
+          "model_output": "화학 반응이 일어나기 위해 필요한 최소한의 에너지 고개입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.94,
+          "cost": 0.05,
+          "predicted_quality": 0.976803,
+          "calibrated_quality": 1.010943,
+          "model_output": "활성화 에너지는 반응물들이 화학 반응을 일으켜 생성물로 변환되기 위해 반드시 넘어야 하는 최소한의 문턱 에너지 장벽입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.95,
+          "cost": 0.2,
+          "predicted_quality": 1.009807,
+          "calibrated_quality": 1.103362,
+          "model_output": "활성화 에너지($E_a$)는 출발 물질이 전이 상태(Transition State)의 활성화 착물을 형성하여 자발적 내지 비자발적 화학 반응으로 진행되기 위해 공급되어야 하는 통계역학적 최저 에너지 장벽을 의미합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.86,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 1.038726,
+            "mid": 0.82665,
+            "premium": -0.042028
+          },
+          "policy_quality": {
+            "cheap": 1.038726,
+            "mid": 1.050943,
+            "premium": 1.023362
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 0.758726,
+            "mid": 1.039863,
+            "premium": 1.03073
+          },
+          "policy_quality": {
+            "cheap": 0.758726,
+            "mid": 1.050943,
+            "premium": 1.083362
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 0.678726,
+            "mid": 0.999863,
+            "premium": 1.05073
+          },
+          "policy_quality": {
+            "cheap": 0.678726,
+            "mid": 1.010943,
+            "premium": 1.103362
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p027",
+      "prompt": "피타고라스 정리의 수학적 정의를 한 문장으로 기술해줘.",
+      "domain": "math",
+      "task_type": "qa",
+      "benchmark_id": "basic_qa",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.92,
+          "cost": 0.01,
+          "predicted_quality": 0.796359,
+          "calibrated_quality": 0.673902,
+          "model_output": "직각삼각형에서 밑변 제곱 더하기 높이 제곱은 빗변 제곱과 같습니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.95,
+          "cost": 0.05,
+          "predicted_quality": 0.979096,
+          "calibrated_quality": 1.013236,
+          "model_output": "직각삼각형에서 두 직각변의 길이를 각각 제곱하여 더한 값은 빗변의 길이를 제곱한 값과 항상 일치한다는 정리입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 1.030983,
+          "calibrated_quality": 1.124538,
+          "model_output": "직각삼각형의 직각을 낀 두 변의 길이를 $a, b$라 하고 대변인 빗변의 길이를 $c$라 할 때, Euclidean 평면 구조 하에서 $a^2 + b^2 = c^2$이 성립한다는 기하학적 정리입니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 1.033902,
+            "mid": 0.828943,
+            "premium": -0.020852
+          },
+          "policy_quality": {
+            "cheap": 1.033902,
+            "mid": 1.053236,
+            "premium": 1.044538
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 0.753902,
+            "mid": 1.042155,
+            "premium": 1.051906
+          },
+          "policy_quality": {
+            "cheap": 0.753902,
+            "mid": 1.053236,
+            "premium": 1.104538
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 0.673902,
+            "mid": 1.002155,
+            "premium": 1.071906
+          },
+          "policy_quality": {
+            "cheap": 0.673902,
+            "mid": 1.013236,
+            "premium": 1.124538
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p028",
+      "prompt": "거스름돈 반환 알고리즘용 탐욕 알고리즘(Greedy)의 한계점을 예시와 함께 설명해줘.",
+      "domain": "math",
+      "task_type": "reasoning",
+      "benchmark_id": "comparison_medium",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.62,
+          "cost": 0.01,
+          "predicted_quality": 0.630227,
+          "calibrated_quality": 0.50777,
+          "model_output": "가장 큰 동전부터 주면 가끔 동전 개수가 더 많아집니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.9,
+          "cost": 0.05,
+          "predicted_quality": 0.837382,
+          "calibrated_quality": 0.871521,
+          "model_output": "탐욕 알고리즘은 매순간 가장 단위가 큰 동전을 고르기 때문에, 동전 단위가 배수 관계가 아닐 때(예: 10원, 40원, 50원 화폐 구조에서 80원 반환 시) 최적해를 구하지 못합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 0.89225,
+          "calibrated_quality": 0.985805,
+          "model_output": "그리디 기법은 국소적인 최적 선택이 전역적 최적해(Global Optimum)를 보장한다는 전제로 동작하므로, 동전 액면가가 서로의 배수 형태(권종 설계)를 이루지 않는 배타적 집합일 경우, DP(동적 계획법)와 달리 탐욕적 선택 조건이 무너져 최소 동전 개수 산출에 실패하게 됩니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.9,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.33,
+          "utilities": {
+            "cheap": 0.66977,
+            "mid": 0.779629,
+            "premium": -0.133185
+          },
+          "policy_quality": {
+            "cheap": 0.66977,
+            "mid": 1.003921,
+            "premium": 0.932205
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.9,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.33,
+          "utilities": {
+            "cheap": 0.54157,
+            "mid": 0.966441,
+            "premium": 0.919774
+          },
+          "policy_quality": {
+            "cheap": 0.54157,
+            "mid": 0.977521,
+            "premium": 0.972405
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.33,
+          "utilities": {
+            "cheap": 0.50777,
+            "mid": 0.860441,
+            "premium": 0.933174
+          },
+          "policy_quality": {
+            "cheap": 0.50777,
+            "mid": 0.871521,
+            "premium": 0.985805
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p029",
+      "prompt": "대용량 점구름(Point Cloud) 데이터를 웹 브라우저에 최적화하여 렌더링하기 위한 포맷 체계를 비교해줘.",
+      "domain": "tech",
+      "task_type": "reasoning",
+      "benchmark_id": "comparison_medium",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.61,
+          "cost": 0.01,
+          "predicted_quality": 0.592335,
+          "calibrated_quality": 0.469878,
+          "model_output": "Potree나 3D Tiles 포맷을 쓰면 웹 환경에서 점 데이터를 빠르게 볼 수 있습니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.89,
+          "cost": 0.05,
+          "predicted_quality": 0.798522,
+          "calibrated_quality": 0.832662,
+          "model_output": "옥트리(Octree) 기반의 Potree 형식은 정밀한 점구름 뷰에 강하며, OGC 표준인 3D Tiles(PNTS)는 타일링 스트리밍을 통해 다른 3D 빌딩 개체들과 함께 GIS 레이어에 올리기 유리합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 0.870915,
+          "calibrated_quality": 0.96447,
+          "model_output": "정밀 포인트 인덱싱 중심인 Potree의 Octree 구조는 로컬 피처 밀도가 높은 스캔 분석에 적합한 반면, OGC 3D Tiles의 pnts 레이어는 계층적 LoD 아키텍처를 따라 대규모 거시 공간 웹 스트리밍 및 타 공간 데이터(BIM, Terrain)와의 파이프라인 통합 측면에서 압도적인 호환성을 가집니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.89,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.589878,
+            "mid": 0.760369,
+            "premium": -0.14892
+          },
+          "policy_quality": {
+            "cheap": 0.589878,
+            "mid": 0.984662,
+            "premium": 0.91647
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.89,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.493878,
+            "mid": 0.941581,
+            "premium": 0.899839
+          },
+          "policy_quality": {
+            "cheap": 0.493878,
+            "mid": 0.952662,
+            "premium": 0.95247
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.469878,
+            "mid": 0.821581,
+            "premium": 0.911839
+          },
+          "policy_quality": {
+            "cheap": 0.469878,
+            "mid": 0.832662,
+            "premium": 0.96447
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p030",
+      "prompt": "웹 브라우저 환경에서 투명도가 있는 3D 오브젝트들을 올바르게 정렬하여 렌더링(OIT)하는 알고리즘을 비교해줘.",
+      "domain": "tech",
+      "task_type": "reasoning",
+      "benchmark_id": "comparison_medium",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.45,
+          "cost": 0.01,
+          "predicted_quality": 0.660629,
+          "calibrated_quality": 0.538171,
+          "model_output": "앞뒤 순서대로 깊이 정렬을 해서 렌더링하거나 알파 블렌딩을 하면 됩니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.84,
+          "cost": 0.05,
+          "predicted_quality": 0.847516,
+          "calibrated_quality": 0.881655,
+          "model_output": "매 프레임 카메라 거리에 따라 CPU에서 정렬하는 뎁스 정렬(Depth Sorting) 방식과, 가비지 컬렉터 부하를 피하기 위해 셰이더 레벨에서 처리하는 순서 무관 투명도(OIT) 알고리즘 방식이 있으며 후자가 고성능 대형 씬에 적합합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.95,
+          "cost": 0.2,
+          "predicted_quality": 0.915987,
+          "calibrated_quality": 1.009542,
+          "model_output": "매 프레임 프리미티브를 CPU에서 정렬하는 전통적인 방식은 동적 데이터에서 드로우콜 병목을 유발하므로, WebGL 환경에서는 Fragment Shader 레벨에서 가중치 평균을 내는 WBOIT(Weighted Blended OIT)나 복잡한 링크드 리스트를 구성하는 페어와이즈 스크린 공간 가상 버퍼 트리를 구성하는 것이 대형 디지털 트윈 엔진 설계의 핵심입니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.84,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.658171,
+            "mid": 0.809363,
+            "premium": -0.103848
+          },
+          "policy_quality": {
+            "cheap": 0.658171,
+            "mid": 1.033655,
+            "premium": 0.961542
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.84,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.562171,
+            "mid": 0.990575,
+            "premium": 0.94491
+          },
+          "policy_quality": {
+            "cheap": 0.562171,
+            "mid": 1.001655,
+            "premium": 0.997542
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.4,
+          "utilities": {
+            "cheap": 0.538171,
+            "mid": 0.870575,
+            "premium": 0.95691
+          },
+          "policy_quality": {
+            "cheap": 0.538171,
+            "mid": 0.881655,
+            "premium": 1.009542
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p031",
+      "prompt": "CesiumJS 엔지니어링 관점에서 3D Tiles의 지형 고도(Terrain) 고정 방식을 한 문장으로 설명해줘.",
+      "domain": "tech",
+      "task_type": "qa",
+      "benchmark_id": "basic_qa",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.81,
+          "cost": 0.01,
+          "predicted_quality": 0.725242,
+          "calibrated_quality": 0.602784,
+          "model_output": "지형 높이에 3D 모델을 붙이려면 height 조절이나 clamp To Ground 옵션을 씁니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.91,
+          "cost": 0.05,
+          "predicted_quality": 0.908039,
+          "calibrated_quality": 0.942179,
+          "model_output": "CesiumJS에서는 타일셋 데이터가 가상 지구 고도에 묻히지 않도록 `HeightReference.CLAMP_TO_GROUND` 속성을 사용해 타일셋을 타겟 지형 메시에 동적으로 정렬합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 0.976511,
+          "calibrated_quality": 1.070066,
+          "model_output": "Cesium 공간 연산 엔진 내에서 3D Tileset 레이어의 물리 고도는 Quantized-Mesh 지형 파일의 레이캐스팅 고도 벡터 정보와 동기화되며, `sampleTerrainMostDetailed` 비동기 API 또는 엔티티의 래핑 클램핑 프로퍼티를 통해 정밀 유효 고도가 정렬됩니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.81,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.938784,
+            "mid": 0.769087,
+            "premium": -0.072124
+          },
+          "policy_quality": {
+            "cheap": 0.938784,
+            "mid": 0.993379,
+            "premium": 0.993266
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.677184,
+            "mid": 0.979099,
+            "premium": 0.998234
+          },
+          "policy_quality": {
+            "cheap": 0.677184,
+            "mid": 0.990179,
+            "premium": 1.050866
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.04,
+          "utilities": {
+            "cheap": 0.602784,
+            "mid": 0.931099,
+            "premium": 1.017434
+          },
+          "policy_quality": {
+            "cheap": 0.602784,
+            "mid": 0.942179,
+            "premium": 1.070066
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p032",
+      "prompt": "웹소켓(WebSocket) 연결이 빈번히 끊기는 환경에서 유실 없는 데이터 재전송 보장 메커니즘을 설계해줘.",
+      "domain": "tech",
+      "task_type": "complex_design",
+      "benchmark_id": "architecture_hard",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.39,
+          "cost": 0.01,
+          "predicted_quality": 0.583313,
+          "calibrated_quality": 0.460855,
+          "model_output": "끊기면 다시 커넥션을 맺고 메시지를 보내는 코드를 만듭니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.78,
+          "cost": 0.05,
+          "predicted_quality": 0.782393,
+          "calibrated_quality": 0.816533,
+          "model_output": "클라이언트 단에 지수 백오프(Exponential Backoff) 기반 재연결 로직을 구현하고, 인메모리 큐를 두어 미전송된 메시지를 담았다가 웹소켓이 재오픈되는 시점에 한 번에 발행(Flush)합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.95,
+          "cost": 0.2,
+          "predicted_quality": 0.857449,
+          "calibrated_quality": 0.951004,
+          "model_output": "시퀀스 넘버(Sequence Number) 기반의 클라이언트-서버 간 ACK 응답 프로토콜을 구현하고, 재연결 세션 시 인메모리 링버퍼(Ring Buffer)에서 미확인된 메시지를 추적하여 지수 백오프 전략에 따라 재전송하며, 클라이언트 로컬 스토리지에 오프라인 이벤트 로그 스토어를 두어 네트워크 단절 장기화 시 브라우저 크래시와 데이터 유실을 방어하는 복합 아키텍처를 설계합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.78,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.46,
+          "utilities": {
+            "cheap": 0.544855,
+            "mid": 0.76104,
+            "premium": -0.157586
+          },
+          "policy_quality": {
+            "cheap": 0.544855,
+            "mid": 0.985333,
+            "premium": 0.907804
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.78,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.46,
+          "utilities": {
+            "cheap": 0.476455,
+            "mid": 0.937453,
+            "premium": 0.887572
+          },
+          "policy_quality": {
+            "cheap": 0.476455,
+            "mid": 0.948533,
+            "premium": 0.940204
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.46,
+          "utilities": {
+            "cheap": 0.460855,
+            "mid": 0.805453,
+            "premium": 0.898372
+          },
+          "policy_quality": {
+            "cheap": 0.460855,
+            "mid": 0.816533,
+            "premium": 0.951004
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p033",
+      "prompt": "리액트 19(React 19)에 도입된 Server Actions의 핵심 개념과 이점을 한 문장으로 요약해줘.",
+      "domain": "tech",
+      "task_type": "qa",
+      "benchmark_id": "basic_qa",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.88,
+          "cost": 0.01,
+          "predicted_quality": 0.776868,
+          "calibrated_quality": 0.65441,
+          "model_output": "클라이언트 컴포넌트에서 서버 함수를 직접 불러와 실행하는 새로운 데이터 통신 방식입니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.94,
+          "cost": 0.05,
+          "predicted_quality": 0.958626,
+          "calibrated_quality": 0.992766,
+          "model_output": "Server Actions는 별도의 백엔드 API 엔드포인트를 개설하지 않고도 비동기 RPC 함수를 정의해 폼 제출 및 클라이언트 상태 업데이트를 서버 측에서 직접 실행하도록 돕는 기능입니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 0.99163,
+          "calibrated_quality": 1.085185,
+          "model_output": "React 19의 Server Actions는 클라이언트-서버 경계를 제거한 네트워크 단일화 RPC 아키텍처로, 폼 바인딩과 유효성 검사, 낙관적 업데이트(useOptimistic)와의 원활한 결합을 통해 네트워크 오버헤드와 보일러플레이트 코드를 근본적으로 줄여줍니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.88,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 1.01441,
+            "mid": 0.808473,
+            "premium": -0.060205
+          },
+          "policy_quality": {
+            "cheap": 1.01441,
+            "mid": 1.032766,
+            "premium": 1.005185
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 0.73441,
+            "mid": 1.021686,
+            "premium": 1.012553
+          },
+          "policy_quality": {
+            "cheap": 0.73441,
+            "mid": 1.032766,
+            "premium": 1.065185
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.0,
+          "utilities": {
+            "cheap": 0.65441,
+            "mid": 0.981686,
+            "premium": 1.032553
+          },
+          "policy_quality": {
+            "cheap": 0.65441,
+            "mid": 0.992766,
+            "premium": 1.085185
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p034",
+      "prompt": "이진 검색 트리(Binary Search Tree)가 한쪽으로 편향되었을 때의 문제점과 해결책을 설명해줘.",
+      "domain": "math",
+      "task_type": "reasoning",
+      "benchmark_id": "comparison_medium",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.65,
+          "cost": 0.01,
+          "predicted_quality": 0.738677,
+          "calibrated_quality": 0.61622,
+          "model_output": "노드가 한 줄로 늘어서면 탐색 속도가 느려지므로 균형 잡힌 트리로 바꿔야 합니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.92,
+          "cost": 0.05,
+          "predicted_quality": 0.945296,
+          "calibrated_quality": 0.979436,
+          "model_output": "트리가 한쪽으로 쏠리면 최악의 경우 검색 시간 복잡도가 $O(\\log N)$에서 $O(N)$으로 악화되어 연결 리스트와 다름없어집니다. 이를 방지하기 위해 AVL 트리나 레드-블랙 트리(Red-Black Tree) 같은 자가 균형 트리 알고리즘을 사용합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.97,
+          "cost": 0.2,
+          "predicted_quality": 1.000165,
+          "calibrated_quality": 1.09372,
+          "model_output": "데이터가 정렬된 순서대로 삽입될 때 BST는 편향 트리(Skewed Tree)로 퇴화하여 최악의 조회 연산 성능인 $O(N)$을 유발합니다. 이를 아키텍처적으로 개선하기 위해 삽입 및 삭제 연산 시 노드의 balance factor를 검사하고 트리 회전(Rotation) 연산을 수행하여 서브트리의 높이 균형을 $O(\\log N)$으로 강제 조율하는 자가 균형 이진 탐색 알고리즘(AVL, RB-Tree)을 도입해야 합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.65,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.85622,
+            "mid": 0.851143,
+            "premium": -0.03567
+          },
+          "policy_quality": {
+            "cheap": 0.85622,
+            "mid": 1.075436,
+            "premium": 1.02972
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.66822,
+            "mid": 1.048356,
+            "premium": 1.025088
+          },
+          "policy_quality": {
+            "cheap": 0.66822,
+            "mid": 1.059436,
+            "premium": 1.07772
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.97,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2,
+          "utilities": {
+            "cheap": 0.61622,
+            "mid": 0.968356,
+            "premium": 1.041088
+          },
+          "policy_quality": {
+            "cheap": 0.61622,
+            "mid": 0.979436,
+            "premium": 1.09372
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p035",
+      "prompt": "산림 디지털 트윈 환경에서 개별 나무(단목)의 수고(높이) 및 흉고직경 데이터를 추출하는 알고리즘 프로세스를 작성해줘.",
+      "domain": "tech",
+      "task_type": "complex_design",
+      "benchmark_id": "architecture_hard",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.32,
+          "cost": 0.01,
+          "predicted_quality": 0.540395,
+          "calibrated_quality": 0.417937,
+          "model_output": "드론으로 찍은 포인트 클라우드에서 나무 꼭대기와 아래를 재서 높이를 구합니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.74,
+          "cost": 0.05,
+          "predicted_quality": 0.747549,
+          "calibrated_quality": 0.781689,
+          "model_output": "LiDAR 점구름 데이터에서 지면(DTM)과 산림 표고(DSM)를 분리하여 수관고안내도(CHM)를 생성하고, 국지 최댓값 필터를 이용해 나무 꼭대기를 찾아 수고를 정한 뒤 1.2m 높이 단면에서 점들을 피팅하여 흉고직경을 산출합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 0.819942,
+          "calibrated_quality": 0.913497,
+          "model_output": "항공/지상형 LiDAR 로우 데이터를 기하 보정 후 CSF(Cloth Simulation Filter) 알고리즘을 적용해 지면 포인트와 식생 포인트를 분리합니다. 지면 제거 후 CHM(Canopy Height Model) 상에서 임목 영역 분할 알고리즘(Watershed 또는 Region Growing)으로 단목을 개별 세그멘테이션하고, 각 세그먼트의 최상단 z값 차이로 수고를 추출하며, 지면으로부터 대략 1.2~1.3m 높이 레이어의 포인트 클라우드 단면 분포를 RANSAC 알고리즘 원형 피팅으로 추정하여 흉고직경(DBH)을 수학적으로 산출하는 아키텍처 파이프라인을 구축합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.73,
+          "utilities": {
+            "cheap": 0.339937,
+            "mid": 0.654596,
+            "premium": 0.762507
+          },
+          "policy_quality": {
+            "cheap": 0.339937,
+            "mid": 0.878889,
+            "premium": 1.827897
+          }
+        },
+        "balanced": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.73,
+          "utilities": {
+            "cheap": 0.395737,
+            "mid": 0.846208,
+            "premium": 0.918465
+          },
+          "policy_quality": {
+            "cheap": 0.395737,
+            "mid": 0.857289,
+            "premium": 0.971097
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.73,
+          "utilities": {
+            "cheap": 0.417937,
+            "mid": 0.770608,
+            "premium": 0.860865
+          },
+          "policy_quality": {
+            "cheap": 0.417937,
+            "mid": 0.781689,
+            "premium": 0.913497
+          }
+        }
+      }
+    },
+    {
+      "prompt_id": "p036",
+      "prompt": "회사의 오픈소스 컴포넌트를 사내 사설 npm 저장소에 배포하기 위해 필요한 CI/CD 파이프라인 단계를 작성해줘.",
+      "domain": "tech",
+      "task_type": "code_generation",
+      "benchmark_id": "coding_easy",
+      "candidates": [
+        {
+          "model_id": "cheap",
+          "actual_quality": 0.75,
+          "cost": 0.01,
+          "predicted_quality": 0.707882,
+          "calibrated_quality": 0.585424,
+          "model_output": "코드 빌드하고 npm publish 명령어로 패키지를 저장소에 올립니다."
+        },
+        {
+          "model_id": "mid",
+          "actual_quality": 0.9,
+          "cost": 0.05,
+          "predicted_quality": 0.920295,
+          "calibrated_quality": 0.954435,
+          "model_output": "Git에 태그나 푸시가 감지되면 1) 린트 및 테스트 실행, 2) 빌드 도구로 컴포넌트 번들링, 3) `.npmrc` 파일에 사설 레지스트리 토큰 바인딩 후 `npm publish`를 자동 실행하는 파이프라인을 구성합니다."
+        },
+        {
+          "model_id": "premium",
+          "actual_quality": 0.96,
+          "cost": 0.2,
+          "predicted_quality": 0.976105,
+          "calibrated_quality": 1.069659,
+          "model_output": "GitHub Actions 또는 GitLab CI에서 checkout, dependency install, lint, test, build, version validation, .npmrc registry token injection, npm publish, release note generation 순서로 구성하고, 배포 토큰은 CI secret으로 관리하며 태그 또는 main 브랜치 머지 조건에서만 publish되도록 제한합니다."
+        }
+      ],
+      "routing": {
+        "fast": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.9,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.47,
+          "utilities": {
+            "cheap": 0.663424,
+            "mid": 0.901743,
+            "premium": -0.038131
+          },
+          "policy_quality": {
+            "cheap": 0.663424,
+            "mid": 1.126035,
+            "premium": 1.027259
+          }
+        },
+        "balanced": {
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.9,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.47,
+          "utilities": {
+            "cheap": 0.599624,
+            "mid": 1.077355,
+            "premium": 1.006428
+          },
+          "policy_quality": {
+            "cheap": 0.599624,
+            "mid": 1.088435,
+            "premium": 1.059059
+          }
+        },
+        "premium": {
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.47,
+          "utilities": {
+            "cheap": 0.585424,
+            "mid": 0.943355,
+            "premium": 1.017028
+          },
+          "policy_quality": {
+            "cheap": 0.585424,
+            "mid": 0.954435,
+            "premium": 1.069659
+          }
+        }
+      }
+    }
+  ]
+}

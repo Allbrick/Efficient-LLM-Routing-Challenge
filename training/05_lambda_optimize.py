@@ -1,13 +1,16 @@
-"""Step 5: Lambda 최적화.
+"""Step 5: Optimize tier-specific lambda values.
 
-사용법:
+Usage:
     python -m training.05_lambda_optimize \
         --oof_path artifacts/oof_predictions.csv \
         --oracle_path artifacts/oracle_analysis.json
 
-산출물:
+Outputs:
     - artifacts/lambda_params.json
+    - artifacts/cost_normalization.json
 """
+
+from __future__ import annotations
 
 import argparse
 import json
@@ -21,88 +24,132 @@ from src.data_models import CostConfig, LambdaParams
 from src.utility_engine import CostNormalizer, UtilityEngine
 
 
+DEFAULT_TIER_WEIGHTS = {"fast": 3.0, "balanced": 2.0, "premium": 1.0}
+
+# This is the optimization target's cost sensitivity, not the router lambda.
+# It teaches the lambda search what each tier values.
+DEFAULT_TIER_COST_WEIGHTS = {
+    "fast": 0.45,
+    "balanced": 0.14,
+    "premium": 0.02,
+}
+
+
 def compute_score(
     data: pd.DataFrame,
     q_cal_col: str,
-    model_id_mapping: dict,
     lambda_fast: float,
     lambda_balanced: float,
     lambda_premium: float,
     cost_normalizer: CostNormalizer,
-    tier_weights: dict | None = None,
+    tier_weights: dict[str, float] | None = None,
+    tier_cost_weights: dict[str, float] | None = None,
 ) -> float:
-    """주어진 lambda 조합으로 대회 메트릭을 시뮬레이션한다.
+    """Simulate routing score for one lambda combination.
 
-    각 (prompt_id)에 대해 3개 tier 각각에서 모델을 선택하고,
-    선택된 모델의 실제 quality_score의 가중 평균을 계산한다.
+    The router is valuable when it chooses cheaper models whenever their quality
+    is sufficient. Therefore the optimizer scores the selected model by:
+
+        actual_quality - tier_cost_weight * normalized_cost
+
+    The selected model is still chosen by the router's predicted utility:
+
+        calibrated_prediction - lambda(tier) * normalized_cost
     """
     if tier_weights is None:
-        tier_weights = {"fast": 3.0, "balanced": 2.0, "premium": 1.0}
+        tier_weights = DEFAULT_TIER_WEIGHTS
+    if tier_cost_weights is None:
+        tier_cost_weights = DEFAULT_TIER_COST_WEIGHTS
 
     try:
-        lp = LambdaParams(fast=lambda_fast, balanced=lambda_balanced, premium=lambda_premium)
+        lambda_params = LambdaParams(
+            fast=lambda_fast,
+            balanced=lambda_balanced,
+            premium=lambda_premium,
+        )
     except ValueError:
-        return -1e10  # 단조 조건 위반
+        return -1e10
 
-    engine = UtilityEngine(lp, cost_normalizer)
+    engine = UtilityEngine(lambda_params, cost_normalizer)
 
     tier_scores = {}
     for tier in ["fast", "balanced", "premium"]:
-        selected_qualities = []
-        for pid, group in data.groupby("prompt_id"):
+        selected_objectives = []
+        for _pid, group in data.groupby("prompt_id"):
             model_ids = group["model_id"].tolist()
             q_cal = group[q_cal_col].values
             selected = engine.select(q_cal, model_ids, tier)
-            actual_q = group.loc[group["model_id"] == selected, "quality_score"].values[0]
-            selected_qualities.append(actual_q)
-        tier_scores[tier] = np.mean(selected_qualities)
+            selected_row = group.loc[group["model_id"] == selected].iloc[0]
 
-    total = sum(tier_weights[t] * tier_scores[t] for t in tier_scores)
-    total /= sum(tier_weights.values())
-    return total
+            actual_q = float(selected_row["quality_score"])
+            selected_cost_norm = float(
+                cost_normalizer.normalize(
+                    [selected],
+                    np.array([selected_row["cost"]], dtype=np.float64),
+                )[0]
+            )
+            selected_objectives.append(
+                actual_q - tier_cost_weights[tier] * selected_cost_norm
+            )
+
+        tier_scores[tier] = float(np.mean(selected_objectives))
+
+    total = sum(tier_weights[tier] * tier_scores[tier] for tier in tier_scores)
+    return float(total / sum(tier_weights.values()))
 
 
 def grid_search(
     data: pd.DataFrame,
     q_cal_col: str,
-    model_id_mapping: dict,
     cost_normalizer: CostNormalizer,
     lambda_range: tuple[float, float],
     grid_size: int = 20,
 ) -> tuple[LambdaParams, float]:
-    """Grid Search로 최적 lambda 조합을 찾는다.
+    """Find lambda values with monotonic tier constraint.
 
-    단조 조건: lambda_fast >= lambda_balanced >= lambda_premium >= 0
+    Constraint:
+        lambda_fast >= lambda_balanced >= lambda_premium >= 0
     """
     candidates = np.linspace(lambda_range[0], lambda_range[1], grid_size)
 
     best_score = -1e10
-    best_params = None
+    best_params: tuple[float, float, float] | None = None
 
     total_evals = 0
-    for lf in candidates:
-        for lb in candidates:
-            if lb > lf:
+    for lambda_fast in candidates:
+        for lambda_balanced in candidates:
+            if lambda_balanced > lambda_fast:
                 continue
-            for lp_val in candidates:
-                if lp_val > lb:
+            for lambda_premium in candidates:
+                if lambda_premium > lambda_balanced:
                     continue
                 total_evals += 1
                 score = compute_score(
-                    data, q_cal_col, model_id_mapping,
-                    lf, lb, lp_val, cost_normalizer,
+                    data,
+                    q_cal_col,
+                    lambda_fast,
+                    lambda_balanced,
+                    lambda_premium,
+                    cost_normalizer,
                 )
                 if score > best_score:
                     best_score = score
-                    best_params = (lf, lb, lp_val)
+                    best_params = (lambda_fast, lambda_balanced, lambda_premium)
+
+    if best_params is None:
+        raise RuntimeError("No valid lambda combination was evaluated.")
 
     print(f"  Evaluated {total_evals} combinations")
-    lp = LambdaParams(fast=best_params[0], balanced=best_params[1], premium=best_params[2])
-    return lp, best_score
+    lambda_params = LambdaParams(
+        fast=best_params[0],
+        balanced=best_params[1],
+        premium=best_params[2],
+    )
+    return lambda_params, best_score
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Lambda 최적화")
+    parser = argparse.ArgumentParser(description="Optimize router lambda values")
     parser.add_argument("--oof_path", default="artifacts/oof_predictions.csv")
     parser.add_argument("--oracle_path", default="artifacts/oracle_analysis.json")
     parser.add_argument("--calibration_path", default="artifacts/calibration_params.json")
@@ -111,46 +158,45 @@ if __name__ == "__main__":
     parser.add_argument("--output", default="artifacts/lambda_params.json")
     args = parser.parse_args()
 
-    # Load data
     data = pd.read_csv(args.oof_path).dropna(subset=["oof_q_hat"])
-    with open(args.model_id_mapping) as f:
+    with open(args.model_id_mapping, encoding="utf-8") as f:
         mapping = json.load(f)
-    with open(args.oracle_path) as f:
+    with open(args.oracle_path, encoding="utf-8") as f:
         oracle = json.load(f)
 
-    # Apply calibration
-    cal = Calibrator.load(args.calibration_path)
+    calibrator = Calibrator.load(args.calibration_path)
     model_ids_encoded = data["model_id"].map(mapping).values.astype(np.int32)
-    q_cal = cal.transform(data["oof_q_hat"].values, model_ids_encoded)
-    data["q_calibrated"] = q_cal
+    data["q_calibrated"] = calibrator.transform(
+        data["oof_q_hat"].values,
+        model_ids_encoded,
+    )
 
-    # Cost normalization
     cost_map = data.groupby("model_id")["cost"].mean().to_dict()
     cost_config = CostConfig(mode="fixed", cost_map=cost_map)
     cost_normalizer = CostNormalizer(cost_config)
 
-    # Lambda range from Oracle
-    lam_range = oracle["transition_points"]["suggested_lambda_range"]
-    print(f"Lambda search range: {lam_range}")
+    lambda_range = tuple(oracle["transition_points"]["suggested_lambda_range"])
+    print(f"Lambda search range: {lambda_range}")
+    print(f"Tier objective cost weights: {DEFAULT_TIER_COST_WEIGHTS}")
 
-    # Grid search
     print(f"\nRunning grid search (size={args.grid_size})...")
     best_params, best_score = grid_search(
-        data, "q_calibrated", mapping, cost_normalizer,
-        lambda_range=tuple(lam_range),
+        data,
+        "q_calibrated",
+        cost_normalizer,
+        lambda_range=lambda_range,
         grid_size=args.grid_size,
     )
 
-    print(f"\n=== Best Lambda ===")
+    print("\n=== Best Lambda ===")
     print(f"  fast:     {best_params.fast:.4f}")
     print(f"  balanced: {best_params.balanced:.4f}")
     print(f"  premium:  {best_params.premium:.4f}")
     print(f"  Score:    {best_score:.6f}")
 
-    # Save
-    os.makedirs(os.path.dirname(args.output), exist_ok=True)
+    output_dir = os.path.dirname(args.output)
+    os.makedirs(output_dir, exist_ok=True)
     best_params.save(args.output)
+    cost_config.save(os.path.join(output_dir, "cost_normalization.json"))
 
-    # Cost normalization도 저장
-    cost_config.save(os.path.join(os.path.dirname(args.output), "cost_normalization.json"))
     print(f"\nSaved to {args.output}")
