@@ -17,20 +17,19 @@ window.ROUTER_EVAL = {
     "tier_summary": {
       "fast": {
         "selection_counts": {
-          "cheap": 21,
-          "mid": 13,
-          "premium": 2
+          "cheap": 24,
+          "mid": 12
         },
-        "mean_selected_quality": 0.815278,
-        "mean_selected_cost": 0.035
+        "mean_selected_quality": 0.733611,
+        "mean_selected_cost": 0.023333
       },
       "balanced": {
         "selection_counts": {
-          "premium": 10,
-          "mid": 26
+          "mid": 29,
+          "premium": 7
         },
-        "mean_selected_quality": 0.897222,
-        "mean_selected_cost": 0.091667
+        "mean_selected_quality": 0.903333,
+        "mean_selected_cost": 0.079167
       },
       "premium": {
         "selection_counts": {
@@ -88,39 +87,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.88,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.0,
+          "prompt_complexity": 0.1717,
           "utilities": {
-            "cheap": 1.013968,
-            "mid": 0.804679,
-            "premium": -0.046057
+            "cheap": 1.008017,
+            "mid": 0.834776,
+            "premium": -0.03232
           },
           "policy_quality": {
-            "cheap": 1.013968,
-            "mid": 1.028971,
-            "premium": 1.019333
+            "cheap": 1.008017,
+            "mid": 1.059069,
+            "premium": 1.03307
           }
         },
         "balanced": {
-          "selected_model_id": "premium",
-          "selected_actual_quality": 0.9,
-          "selected_cost": 0.2,
-          "prompt_complexity": 0.0,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.91,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.1717,
           "utilities": {
-            "cheap": 0.733968,
-            "mid": 1.017891,
-            "premium": 1.026702
+            "cheap": 0.69508,
+            "mid": 1.042535,
+            "premium": 1.030136
           },
           "policy_quality": {
-            "cheap": 0.733968,
-            "mid": 1.028971,
-            "premium": 1.079333
+            "cheap": 0.69508,
+            "mid": 1.053615,
+            "premium": 1.082768
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.9,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.0,
+          "prompt_complexity": 0.1717,
           "utilities": {
             "cheap": 0.653968,
             "mid": 0.977891,
@@ -171,39 +170,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.62,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.194,
           "utilities": {
-            "cheap": 0.814707,
-            "mid": 0.78471,
-            "premium": -0.107748
+            "cheap": 0.909787,
+            "mid": 0.766618,
+            "premium": -0.108226
           },
           "policy_quality": {
-            "cheap": 0.814707,
-            "mid": 1.009002,
-            "premium": 0.957642
+            "cheap": 0.909787,
+            "mid": 0.990911,
+            "premium": 0.957164
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.194,
           "utilities": {
-            "cheap": 0.626707,
-            "mid": 0.981922,
-            "premium": 0.953011
+            "cheap": 0.613365,
+            "mid": 0.972368,
+            "premium": 0.952891
           },
           "policy_quality": {
-            "cheap": 0.626707,
-            "mid": 0.993002,
-            "premium": 1.005642
+            "cheap": 0.613365,
+            "mid": 0.983448,
+            "premium": 1.005523
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.194,
           "utilities": {
             "cheap": 0.574707,
             "mid": 0.901922,
@@ -254,39 +253,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.91,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.18,
+          "prompt_complexity": 0.289,
           "utilities": {
-            "cheap": 0.887478,
-            "mid": 0.860088,
-            "premium": -0.020483
+            "cheap": 0.889857,
+            "mid": 0.880826,
+            "premium": -0.011765
           },
           "policy_quality": {
-            "cheap": 0.887478,
-            "mid": 1.08438,
-            "premium": 1.044907
+            "cheap": 0.889857,
+            "mid": 1.105119,
+            "premium": 1.053625
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.93,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.18,
+          "prompt_complexity": 0.289,
           "utilities": {
-            "cheap": 0.690278,
-            "mid": 1.0589,
-            "premium": 1.041476
+            "cheap": 0.663692,
+            "mid": 1.078031,
+            "premium": 1.043655
           },
           "policy_quality": {
-            "cheap": 0.690278,
-            "mid": 1.06998,
-            "premium": 1.094107
+            "cheap": 0.663692,
+            "mid": 1.089112,
+            "premium": 1.096287
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.18,
+          "prompt_complexity": 0.289,
           "utilities": {
             "cheap": 0.635478,
             "mid": 0.9829,
@@ -334,42 +333,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.86,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.27,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.58,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2491,
           "utilities": {
-            "cheap": 0.765525,
-            "mid": 0.831629,
-            "premium": -0.052963
+            "cheap": 0.855767,
+            "mid": 0.813223,
+            "premium": -0.054633
           },
           "policy_quality": {
-            "cheap": 0.765525,
-            "mid": 1.055921,
-            "premium": 1.012427
+            "cheap": 0.855767,
+            "mid": 1.037516,
+            "premium": 1.010757
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.86,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.27,
+          "prompt_complexity": 0.2491,
           "utilities": {
-            "cheap": 0.609725,
-            "mid": 1.023241,
-            "premium": 1.003595
+            "cheap": 0.600121,
+            "mid": 1.014014,
+            "premium": 1.003178
           },
           "policy_quality": {
-            "cheap": 0.609725,
-            "mid": 1.034321,
-            "premium": 1.056227
+            "cheap": 0.600121,
+            "mid": 1.025095,
+            "premium": 1.055809
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.27,
+          "prompt_complexity": 0.2491,
           "utilities": {
             "cheap": 0.567525,
             "mid": 0.929241,
@@ -420,39 +419,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.9,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.11,
+          "prompt_complexity": 0.2848,
           "utilities": {
-            "cheap": 0.948363,
-            "mid": 0.86655,
-            "premium": -0.004926
+            "cheap": 0.912305,
+            "mid": 0.905421,
+            "premium": 0.009056
           },
           "policy_quality": {
-            "cheap": 0.948363,
-            "mid": 1.090843,
-            "premium": 1.060464
+            "cheap": 0.912305,
+            "mid": 1.129713,
+            "premium": 1.074446
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.11,
+          "prompt_complexity": 0.2848,
           "utilities": {
-            "cheap": 0.718963,
-            "mid": 1.070962,
-            "premium": 1.061232
+            "cheap": 0.683037,
+            "mid": 1.103003,
+            "premium": 1.064728
           },
           "policy_quality": {
-            "cheap": 0.718963,
-            "mid": 1.082043,
-            "premium": 1.113864
+            "cheap": 0.683037,
+            "mid": 1.114084,
+            "premium": 1.11736
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.11,
+          "prompt_complexity": 0.2848,
           "utilities": {
             "cheap": 0.654363,
             "mid": 1.008962,
@@ -503,39 +502,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.55,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.17,
+          "prompt_complexity": 0.1965,
           "utilities": {
-            "cheap": 0.756448,
-            "mid": 0.700051,
-            "premium": -0.184684
+            "cheap": 0.831458,
+            "mid": 0.691211,
+            "premium": -0.182568
           },
           "policy_quality": {
-            "cheap": 0.756448,
-            "mid": 0.924343,
-            "premium": 0.880706
+            "cheap": 0.831458,
+            "mid": 0.915504,
+            "premium": 0.882822
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.79,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.17,
+          "prompt_complexity": 0.1965,
           "utilities": {
-            "cheap": 0.554648,
-            "mid": 0.899663,
-            "premium": 0.877874
+            "cheap": 0.536838,
+            "mid": 0.896742,
+            "premium": 0.878403
           },
           "policy_quality": {
-            "cheap": 0.554648,
-            "mid": 0.910743,
-            "premium": 0.930506
+            "cheap": 0.536838,
+            "mid": 0.907823,
+            "premium": 0.931035
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.89,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.17,
+          "prompt_complexity": 0.1965,
           "utilities": {
             "cheap": 0.498448,
             "mid": 0.825663,
@@ -586,39 +585,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.88,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.04,
+          "prompt_complexity": 0.2436,
           "utilities": {
-            "cheap": 0.957109,
-            "mid": 0.813697,
-            "premium": -0.041117
+            "cheap": 0.91402,
+            "mid": 0.857769,
+            "premium": -0.024826
           },
           "policy_quality": {
-            "cheap": 0.957109,
-            "mid": 1.037989,
-            "premium": 1.024273
+            "cheap": 0.91402,
+            "mid": 1.082061,
+            "premium": 1.040564
           }
         },
         "balanced": {
-          "selected_model_id": "premium",
-          "selected_actual_quality": 0.93,
-          "selected_cost": 0.2,
-          "prompt_complexity": 0.04,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2436,
           "utilities": {
-            "cheap": 0.695509,
-            "mid": 1.023709,
-            "premium": 1.029242
+            "cheap": 0.654309,
+            "mid": 1.059054,
+            "premium": 1.033314
           },
           "policy_quality": {
-            "cheap": 0.695509,
-            "mid": 1.034789,
-            "premium": 1.081873
+            "cheap": 0.654309,
+            "mid": 1.070134,
+            "premium": 1.085946
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.93,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.04,
+          "prompt_complexity": 0.2436,
           "utilities": {
             "cheap": 0.621109,
             "mid": 0.975709,
@@ -666,42 +665,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.72,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.59,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.35,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2109,
           "utilities": {
-            "cheap": 0.419668,
-            "mid": 0.70309,
-            "premium": 0.025003
+            "cheap": 0.734377,
+            "mid": 0.639315,
+            "premium": -0.213322
           },
           "policy_quality": {
-            "cheap": 0.419668,
-            "mid": 0.927382,
-            "premium": 1.090393
+            "cheap": 0.734377,
+            "mid": 0.863608,
+            "premium": 0.852068
           }
         },
         "balanced": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.72,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.59,
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2109,
           "utilities": {
-            "cheap": 0.411068,
-            "mid": 0.883502,
-            "premium": 0.868362
+            "cheap": 0.450465,
+            "mid": 0.843544,
+            "premium": 0.84678
           },
           "policy_quality": {
-            "cheap": 0.411068,
-            "mid": 0.894582,
-            "premium": 0.920993
+            "cheap": 0.450465,
+            "mid": 0.854624,
+            "premium": 0.899412
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.59,
+          "prompt_complexity": 0.2109,
           "utilities": {
             "cheap": 0.413668,
             "mid": 0.768702,
@@ -752,39 +751,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.87,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.27,
+          "prompt_complexity": 0.307,
           "utilities": {
-            "cheap": 0.822899,
-            "mid": 0.881886,
-            "premium": -0.018927
+            "cheap": 0.863918,
+            "mid": 0.883749,
+            "premium": -0.015964
           },
           "policy_quality": {
-            "cheap": 0.822899,
-            "mid": 1.106179,
-            "premium": 1.046463
+            "cheap": 0.863918,
+            "mid": 1.108042,
+            "premium": 1.049426
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.87,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.27,
+          "prompt_complexity": 0.307,
           "utilities": {
-            "cheap": 0.667099,
-            "mid": 1.073499,
-            "premium": 1.037631
+            "cheap": 0.651125,
+            "mid": 1.079328,
+            "premium": 1.038372
           },
           "policy_quality": {
-            "cheap": 0.667099,
-            "mid": 1.084579,
-            "premium": 1.090263
+            "cheap": 0.651125,
+            "mid": 1.090408,
+            "premium": 1.091004
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.27,
+          "prompt_complexity": 0.307,
           "utilities": {
             "cheap": 0.624899,
             "mid": 0.979499,
@@ -835,39 +834,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.91,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2403,
           "utilities": {
-            "cheap": 0.906268,
-            "mid": 0.881095,
-            "premium": -0.011363
+            "cheap": 0.961988,
+            "mid": 0.87921,
+            "premium": -0.008136
           },
           "policy_quality": {
-            "cheap": 0.906268,
-            "mid": 1.105387,
-            "premium": 1.054027
+            "cheap": 0.961988,
+            "mid": 1.103503,
+            "premium": 1.057254
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2403,
           "utilities": {
-            "cheap": 0.718268,
-            "mid": 1.078307,
-            "premium": 1.049396
+            "cheap": 0.699832,
+            "mid": 1.080793,
+            "premium": 1.050202
           },
           "policy_quality": {
-            "cheap": 0.718268,
-            "mid": 1.089387,
-            "premium": 1.102027
+            "cheap": 0.699832,
+            "mid": 1.091873,
+            "premium": 1.102834
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2403,
           "utilities": {
             "cheap": 0.666268,
             "mid": 0.998307,
@@ -915,42 +914,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "cheap",
-          "selected_actual_quality": 0.89,
-          "selected_cost": 0.01,
-          "prompt_complexity": 0.18,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.3153,
           "utilities": {
-            "cheap": 0.884243,
-            "mid": 0.8521,
-            "premium": -0.025808
+            "cheap": 0.864214,
+            "mid": 0.882065,
+            "premium": -0.014982
           },
           "policy_quality": {
-            "cheap": 0.884243,
-            "mid": 1.076393,
-            "premium": 1.039582
+            "cheap": 0.864214,
+            "mid": 1.106358,
+            "premium": 1.050408
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.18,
+          "prompt_complexity": 0.3153,
           "utilities": {
-            "cheap": 0.687043,
-            "mid": 1.050912,
-            "premium": 1.036151
+            "cheap": 0.657557,
+            "mid": 1.076898,
+            "premium": 1.038857
           },
           "policy_quality": {
-            "cheap": 0.687043,
-            "mid": 1.061993,
-            "premium": 1.088782
+            "cheap": 0.657557,
+            "mid": 1.087978,
+            "premium": 1.091489
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.93,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.18,
+          "prompt_complexity": 0.3153,
           "utilities": {
             "cheap": 0.632243,
             "mid": 0.974912,
@@ -1001,39 +1000,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.52,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2391,
           "utilities": {
-            "cheap": 0.700755,
-            "mid": 0.697114,
-            "premium": -0.155954
+            "cheap": 0.757536,
+            "mid": 0.694792,
+            "premium": -0.152827
           },
           "policy_quality": {
-            "cheap": 0.700755,
-            "mid": 0.921406,
-            "premium": 0.909436
+            "cheap": 0.757536,
+            "mid": 0.919085,
+            "premium": 0.912563
           }
         },
         "balanced": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.93,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2391,
           "utilities": {
-            "cheap": 0.512755,
-            "mid": 0.894326,
-            "premium": 0.904805
+            "cheap": 0.494456,
+            "mid": 0.896487,
+            "premium": 0.905586
           },
           "policy_quality": {
-            "cheap": 0.512755,
-            "mid": 0.905406,
-            "premium": 0.957436
+            "cheap": 0.494456,
+            "mid": 0.907567,
+            "premium": 0.958218
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.93,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2391,
           "utilities": {
             "cheap": 0.460755,
             "mid": 0.814326,
@@ -1081,42 +1080,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "premium",
-          "selected_actual_quality": 0.95,
-          "selected_cost": 0.2,
-          "prompt_complexity": 0.72,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.41,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2655,
           "utilities": {
-            "cheap": 0.344904,
-            "mid": 0.663312,
-            "premium": 0.733707
+            "cheap": 0.691232,
+            "mid": 0.665435,
+            "premium": -0.186654
           },
           "policy_quality": {
-            "cheap": 0.344904,
-            "mid": 0.887604,
-            "premium": 1.799097
+            "cheap": 0.691232,
+            "mid": 0.889728,
+            "premium": 0.878736
           }
         },
         "balanced": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.72,
+          "prompt_complexity": 0.2655,
           "utilities": {
-            "cheap": 0.396104,
-            "mid": 0.854124,
-            "premium": 0.938765
+            "cheap": 0.447699,
+            "mid": 0.864753,
+            "premium": 0.870175
           },
           "policy_quality": {
-            "cheap": 0.396104,
-            "mid": 0.865204,
-            "premium": 0.991397
+            "cheap": 0.447699,
+            "mid": 0.875833,
+            "premium": 0.922806
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.72,
+          "prompt_complexity": 0.2655,
           "utilities": {
             "cheap": 0.416904,
             "mid": 0.775724,
@@ -1164,42 +1163,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.82,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.33,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.31,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2344,
           "utilities": {
-            "cheap": 0.567631,
-            "mid": 0.686535,
-            "premium": -0.21272
+            "cheap": 0.706433,
+            "mid": 0.646157,
+            "premium": -0.220372
           },
           "policy_quality": {
-            "cheap": 0.567631,
-            "mid": 0.910827,
-            "premium": 0.85267
+            "cheap": 0.706433,
+            "mid": 0.87045,
+            "premium": 0.845018
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.82,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.33,
+          "prompt_complexity": 0.2344,
           "utilities": {
-            "cheap": 0.439431,
-            "mid": 0.873347,
-            "premium": 0.840239
+            "cheap": 0.439852,
+            "mid": 0.848278,
+            "premium": 0.838326
           },
           "policy_quality": {
-            "cheap": 0.439431,
-            "mid": 0.884427,
-            "premium": 0.89287
+            "cheap": 0.439852,
+            "mid": 0.859358,
+            "premium": 0.890957
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.33,
+          "prompt_complexity": 0.2344,
           "utilities": {
             "cheap": 0.405631,
             "mid": 0.767347,
@@ -1250,39 +1249,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.6,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2197,
           "utilities": {
-            "cheap": 0.762378,
-            "mid": 0.73999,
-            "premium": -0.137186
+            "cheap": 0.835597,
+            "mid": 0.7309,
+            "premium": -0.135606
           },
           "policy_quality": {
-            "cheap": 0.762378,
-            "mid": 0.964283,
-            "premium": 0.928204
+            "cheap": 0.835597,
+            "mid": 0.955193,
+            "premium": 0.929784
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.88,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2197,
           "utilities": {
-            "cheap": 0.574378,
-            "mid": 0.937203,
-            "premium": 0.923573
+            "cheap": 0.558207,
+            "mid": 0.934336,
+            "premium": 0.923968
           },
           "policy_quality": {
-            "cheap": 0.574378,
-            "mid": 0.948283,
-            "premium": 0.976204
+            "cheap": 0.558207,
+            "mid": 0.945416,
+            "premium": 0.976599
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.91,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2197,
           "utilities": {
             "cheap": 0.522378,
             "mid": 0.857203,
@@ -1333,39 +1332,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.85,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.04,
+          "prompt_complexity": 0.2621,
           "utilities": {
-            "cheap": 1.002784,
-            "mid": 0.823013,
-            "premium": -0.038385
+            "cheap": 0.944016,
+            "mid": 0.873541,
+            "premium": -0.020618
           },
           "policy_quality": {
-            "cheap": 1.002784,
-            "mid": 1.047306,
-            "premium": 1.027005
+            "cheap": 0.944016,
+            "mid": 1.097834,
+            "premium": 1.044772
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.04,
+          "prompt_complexity": 0.2621,
           "utilities": {
-            "cheap": 0.741184,
-            "mid": 1.033025,
-            "premium": 1.031974
+            "cheap": 0.697955,
+            "mid": 1.073166,
+            "premium": 1.036415
           },
           "policy_quality": {
-            "cheap": 0.741184,
-            "mid": 1.044106,
-            "premium": 1.084605
+            "cheap": 0.697955,
+            "mid": 1.084246,
+            "premium": 1.089047
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.04,
+          "prompt_complexity": 0.2621,
           "utilities": {
             "cheap": 0.666784,
             "mid": 0.985025,
@@ -1413,42 +1412,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.89,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.4,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.68,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2336,
           "utilities": {
-            "cheap": 0.686097,
-            "mid": 0.866601,
-            "premium": -0.043991
+            "cheap": 0.86755,
+            "mid": 0.806356,
+            "premium": -0.057304
           },
           "policy_quality": {
-            "cheap": 0.686097,
-            "mid": 1.090894,
-            "premium": 1.021399
+            "cheap": 0.86755,
+            "mid": 1.030649,
+            "premium": 1.008086
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.89,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.4,
+          "prompt_complexity": 0.2336,
           "utilities": {
-            "cheap": 0.590097,
-            "mid": 1.047813,
-            "premium": 1.004767
+            "cheap": 0.600403,
+            "mid": 1.008545,
+            "premium": 1.001439
           },
           "policy_quality": {
-            "cheap": 0.590097,
-            "mid": 1.058894,
-            "premium": 1.057399
+            "cheap": 0.600403,
+            "mid": 1.019626,
+            "premium": 1.054071
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.4,
+          "prompt_complexity": 0.2336,
           "utilities": {
             "cheap": 0.566097,
             "mid": 0.927813,
@@ -1499,39 +1498,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.89,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.04,
+          "prompt_complexity": 0.2711,
           "utilities": {
-            "cheap": 1.00827,
-            "mid": 0.828499,
-            "premium": -0.030236
+            "cheap": 0.941803,
+            "mid": 0.882197,
+            "premium": -0.011745
           },
           "policy_quality": {
-            "cheap": 1.00827,
-            "mid": 1.052792,
-            "premium": 1.035154
+            "cheap": 0.941803,
+            "mid": 1.10649,
+            "premium": 1.053645
           }
         },
         "balanced": {
-          "selected_model_id": "premium",
-          "selected_actual_quality": 0.96,
-          "selected_cost": 0.2,
-          "prompt_complexity": 0.04,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.2711,
           "utilities": {
-            "cheap": 0.74667,
-            "mid": 1.038511,
-            "premium": 1.040122
+            "cheap": 0.702445,
+            "mid": 1.081007,
+            "premium": 1.044745
           },
           "policy_quality": {
-            "cheap": 0.74667,
-            "mid": 1.049592,
-            "premium": 1.092754
+            "cheap": 0.702445,
+            "mid": 1.092088,
+            "premium": 1.097377
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.04,
+          "prompt_complexity": 0.2711,
           "utilities": {
             "cheap": 0.67227,
             "mid": 0.990511,
@@ -1582,39 +1581,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.93,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2287,
           "utilities": {
-            "cheap": 0.893185,
-            "mid": 0.870365,
-            "premium": -0.01943
+            "cheap": 0.958831,
+            "mid": 0.864393,
+            "premium": -0.017138
           },
           "policy_quality": {
-            "cheap": 0.893185,
-            "mid": 1.094658,
-            "premium": 1.04596
+            "cheap": 0.958831,
+            "mid": 1.088686,
+            "premium": 1.048252
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2287,
           "utilities": {
-            "cheap": 0.705185,
-            "mid": 1.067577,
-            "premium": 1.041328
+            "cheap": 0.688033,
+            "mid": 1.067027,
+            "premium": 1.041901
           },
           "policy_quality": {
-            "cheap": 0.705185,
-            "mid": 1.078658,
-            "premium": 1.09396
+            "cheap": 0.688033,
+            "mid": 1.078107,
+            "premium": 1.094533
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2287,
           "utilities": {
             "cheap": 0.653185,
             "mid": 0.987577,
@@ -1662,42 +1661,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "cheap",
-          "selected_actual_quality": 0.9,
-          "selected_cost": 0.01,
-          "prompt_complexity": 0.18,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.93,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.332,
           "utilities": {
-            "cheap": 0.909224,
-            "mid": 0.862494,
-            "premium": -0.039522
+            "cheap": 0.875028,
+            "mid": 0.898292,
+            "premium": -0.027363
           },
           "policy_quality": {
-            "cheap": 0.909224,
-            "mid": 1.086787,
-            "premium": 1.025868
+            "cheap": 0.875028,
+            "mid": 1.122585,
+            "premium": 1.038027
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.93,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.18,
+          "prompt_complexity": 0.332,
           "utilities": {
-            "cheap": 0.712024,
-            "mid": 1.061306,
-            "premium": 1.022436
+            "cheap": 0.680704,
+            "mid": 1.091625,
+            "premium": 1.025476
           },
           "policy_quality": {
-            "cheap": 0.712024,
-            "mid": 1.072387,
-            "premium": 1.075068
+            "cheap": 0.680704,
+            "mid": 1.102706,
+            "premium": 1.078108
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.18,
+          "prompt_complexity": 0.332,
           "utilities": {
             "cheap": 0.657224,
             "mid": 0.985306,
@@ -1748,39 +1747,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.55,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2531,
           "utilities": {
-            "cheap": 0.752444,
-            "mid": 0.723485,
-            "premium": -0.130842
+            "cheap": 0.797331,
+            "mid": 0.726061,
+            "premium": -0.126596
           },
           "policy_quality": {
-            "cheap": 0.752444,
-            "mid": 0.947778,
-            "premium": 0.934548
+            "cheap": 0.797331,
+            "mid": 0.950354,
+            "premium": 0.938794
           }
         },
         "balanced": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2531,
           "utilities": {
-            "cheap": 0.564444,
-            "mid": 0.920697,
-            "premium": 0.929917
+            "cheap": 0.544606,
+            "mid": 0.926497,
+            "premium": 0.930978
           },
           "policy_quality": {
-            "cheap": 0.564444,
-            "mid": 0.931778,
-            "premium": 0.982548
+            "cheap": 0.544606,
+            "mid": 0.937577,
+            "premium": 0.98361
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2531,
           "utilities": {
             "cheap": 0.512444,
             "mid": 0.840697,
@@ -1828,42 +1827,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.88,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.27,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.64,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.266,
           "utilities": {
-            "cheap": 0.657842,
-            "mid": 0.721049,
-            "premium": -0.146018
+            "cheap": 0.733716,
+            "mid": 0.70856,
+            "premium": -0.146336
           },
           "policy_quality": {
-            "cheap": 0.657842,
-            "mid": 0.945342,
-            "premium": 0.919372
+            "cheap": 0.733716,
+            "mid": 0.932852,
+            "premium": 0.919054
           }
         },
         "balanced": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.88,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.27,
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.266,
           "utilities": {
-            "cheap": 0.502042,
-            "mid": 0.912662,
-            "premium": 0.91054
+            "cheap": 0.490578,
+            "mid": 0.907829,
+            "premium": 0.910461
           },
           "policy_quality": {
-            "cheap": 0.502042,
-            "mid": 0.923742,
-            "premium": 0.963172
+            "cheap": 0.490578,
+            "mid": 0.91891,
+            "premium": 0.963092
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.27,
+          "prompt_complexity": 0.266,
           "utilities": {
             "cheap": 0.459842,
             "mid": 0.818662,
@@ -1911,42 +1910,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.76,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.46,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.38,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2367,
           "utilities": {
-            "cheap": 0.491352,
-            "mid": 0.724656,
-            "premium": -0.180412
+            "cheap": 0.706116,
+            "mid": 0.648718,
+            "premium": -0.198272
           },
           "policy_quality": {
-            "cheap": 0.491352,
-            "mid": 0.948949,
-            "premium": 0.884979
+            "cheap": 0.706116,
+            "mid": 0.873011,
+            "premium": 0.867118
           }
         },
         "balanced": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.76,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.46,
+          "selected_model_id": "premium",
+          "selected_actual_quality": 0.96,
+          "selected_cost": 0.2,
+          "prompt_complexity": 0.2367,
           "utilities": {
-            "cheap": 0.422952,
-            "mid": 0.901068,
-            "premium": 0.864747
+            "cheap": 0.44131,
+            "mid": 0.850623,
+            "premium": 0.860282
           },
           "policy_quality": {
-            "cheap": 0.422952,
-            "mid": 0.912149,
-            "premium": 0.917379
+            "cheap": 0.44131,
+            "mid": 0.861703,
+            "premium": 0.912913
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.46,
+          "prompt_complexity": 0.2367,
           "utilities": {
             "cheap": 0.407352,
             "mid": 0.769068,
@@ -1994,42 +1993,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.85,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.2,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.35,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2384,
           "utilities": {
-            "cheap": 0.687299,
-            "mid": 0.691803,
-            "premium": -0.181451
+            "cheap": 0.744633,
+            "mid": 0.689254,
+            "premium": -0.178377
           },
           "policy_quality": {
-            "cheap": 0.687299,
-            "mid": 0.916096,
-            "premium": 0.883939
+            "cheap": 0.744633,
+            "mid": 0.913547,
+            "premium": 0.887013
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.85,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2384,
           "utilities": {
-            "cheap": 0.499299,
-            "mid": 0.889015,
-            "premium": 0.879307
+            "cheap": 0.481072,
+            "mid": 0.891008,
+            "premium": 0.880076
           },
           "policy_quality": {
-            "cheap": 0.499299,
-            "mid": 0.900096,
-            "premium": 0.931939
+            "cheap": 0.481072,
+            "mid": 0.902088,
+            "premium": 0.932707
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.97,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2384,
           "utilities": {
             "cheap": 0.447299,
             "mid": 0.809015,
@@ -2080,39 +2079,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.58,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2353,
           "utilities": {
-            "cheap": 0.744696,
-            "mid": 0.725147,
-            "premium": -0.12918
+            "cheap": 0.804694,
+            "mid": 0.7215,
+            "premium": -0.126356
           },
           "policy_quality": {
-            "cheap": 0.744696,
-            "mid": 0.949439,
-            "premium": 0.93621
+            "cheap": 0.804694,
+            "mid": 0.945793,
+            "premium": 0.939034
           }
         },
         "balanced": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2353,
           "utilities": {
-            "cheap": 0.556696,
-            "mid": 0.922359,
-            "premium": 0.931578
+            "cheap": 0.538814,
+            "mid": 0.923536,
+            "premium": 0.932284
           },
           "policy_quality": {
-            "cheap": 0.556696,
-            "mid": 0.933439,
-            "premium": 0.98421
+            "cheap": 0.538814,
+            "mid": 0.934616,
+            "premium": 0.984916
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.2353,
           "utilities": {
             "cheap": 0.504696,
             "mid": 0.842359,
@@ -2160,42 +2159,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "cheap",
-          "selected_actual_quality": 0.86,
-          "selected_cost": 0.01,
-          "prompt_complexity": 0.0,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.3253,
           "utilities": {
-            "cheap": 1.038726,
-            "mid": 0.82665,
-            "premium": -0.042028
+            "cheap": 0.902184,
+            "mid": 0.91052,
+            "premium": -0.016001
           },
           "policy_quality": {
-            "cheap": 1.038726,
-            "mid": 1.050943,
-            "premium": 1.023362
+            "cheap": 0.902184,
+            "mid": 1.134813,
+            "premium": 1.049389
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.0,
+          "prompt_complexity": 0.3253,
           "utilities": {
-            "cheap": 0.758726,
-            "mid": 1.039863,
-            "premium": 1.03073
+            "cheap": 0.702938,
+            "mid": 1.104452,
+            "premium": 1.037237
           },
           "policy_quality": {
-            "cheap": 0.758726,
-            "mid": 1.050943,
-            "premium": 1.083362
+            "cheap": 0.702938,
+            "mid": 1.115532,
+            "premium": 1.089868
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.0,
+          "prompt_complexity": 0.3253,
           "utilities": {
             "cheap": 0.678726,
             "mid": 0.999863,
@@ -2246,39 +2245,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "cheap",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.01,
-          "prompt_complexity": 0.0,
+          "prompt_complexity": 0.194,
           "utilities": {
-            "cheap": 1.033902,
-            "mid": 0.828943,
-            "premium": -0.020852
+            "cheap": 1.008982,
+            "mid": 0.866851,
+            "premium": -0.00533
           },
           "policy_quality": {
-            "cheap": 1.033902,
-            "mid": 1.053236,
-            "premium": 1.044538
+            "cheap": 1.008982,
+            "mid": 1.091144,
+            "premium": 1.06006
           }
         },
         "balanced": {
-          "selected_model_id": "premium",
-          "selected_actual_quality": 0.96,
-          "selected_cost": 0.2,
-          "prompt_complexity": 0.0,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.95,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.194,
           "utilities": {
-            "cheap": 0.753902,
-            "mid": 1.042155,
-            "premium": 1.051906
+            "cheap": 0.712559,
+            "mid": 1.072601,
+            "premium": 1.055787
           },
           "policy_quality": {
-            "cheap": 0.753902,
-            "mid": 1.053236,
-            "premium": 1.104538
+            "cheap": 0.712559,
+            "mid": 1.083682,
+            "premium": 1.108419
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.0,
+          "prompt_complexity": 0.194,
           "utilities": {
             "cheap": 0.673902,
             "mid": 1.002155,
@@ -2326,42 +2325,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "mid",
-          "selected_actual_quality": 0.9,
-          "selected_cost": 0.05,
-          "prompt_complexity": 0.33,
+          "selected_model_id": "cheap",
+          "selected_actual_quality": 0.62,
+          "selected_cost": 0.01,
+          "prompt_complexity": 0.2869,
           "utilities": {
-            "cheap": 0.66977,
-            "mid": 0.779629,
-            "premium": -0.133185
+            "cheap": 0.763884,
+            "mid": 0.757652,
+            "premium": -0.136631
           },
           "policy_quality": {
-            "cheap": 0.66977,
-            "mid": 1.003921,
-            "premium": 0.932205
+            "cheap": 0.763884,
+            "mid": 0.981945,
+            "premium": 0.928759
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.9,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.33,
+          "prompt_complexity": 0.2869,
           "utilities": {
-            "cheap": 0.54157,
-            "mid": 0.966441,
-            "premium": 0.919774
+            "cheap": 0.536208,
+            "mid": 0.955041,
+            "premium": 0.918912
           },
           "policy_quality": {
-            "cheap": 0.54157,
-            "mid": 0.977521,
-            "premium": 0.972405
+            "cheap": 0.536208,
+            "mid": 0.966122,
+            "premium": 0.971544
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.33,
+          "prompt_complexity": 0.2869,
           "utilities": {
             "cheap": 0.50777,
             "mid": 0.860441,
@@ -2412,39 +2411,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.89,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.4,
+          "prompt_complexity": 0.3263,
           "utilities": {
-            "cheap": 0.589878,
-            "mid": 0.760369,
-            "premium": -0.14892
+            "cheap": 0.692484,
+            "mid": 0.73259,
+            "premium": -0.154812
           },
           "policy_quality": {
-            "cheap": 0.589878,
-            "mid": 0.984662,
-            "premium": 0.91647
+            "cheap": 0.692484,
+            "mid": 0.956883,
+            "premium": 0.910578
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.89,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.4,
+          "prompt_complexity": 0.3263,
           "utilities": {
-            "cheap": 0.493878,
-            "mid": 0.941581,
-            "premium": 0.899839
+            "cheap": 0.49398,
+            "mid": 0.926431,
+            "premium": 0.898365
           },
           "policy_quality": {
-            "cheap": 0.493878,
-            "mid": 0.952662,
-            "premium": 0.95247
+            "cheap": 0.49398,
+            "mid": 0.937512,
+            "premium": 0.950997
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.4,
+          "prompt_complexity": 0.3263,
           "utilities": {
             "cheap": 0.469878,
             "mid": 0.821581,
@@ -2495,39 +2494,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.84,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.4,
+          "prompt_complexity": 0.3339,
           "utilities": {
-            "cheap": 0.658171,
-            "mid": 0.809363,
-            "premium": -0.103848
+            "cheap": 0.754357,
+            "mid": 0.784227,
+            "premium": -0.109136
           },
           "policy_quality": {
-            "cheap": 0.658171,
-            "mid": 1.033655,
-            "premium": 0.961542
+            "cheap": 0.754357,
+            "mid": 1.00852,
+            "premium": 0.956254
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.84,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.4,
+          "prompt_complexity": 0.3339,
           "utilities": {
-            "cheap": 0.562171,
-            "mid": 0.990575,
-            "premium": 0.94491
+            "cheap": 0.561443,
+            "mid": 0.977389,
+            "premium": 0.943588
           },
           "policy_quality": {
-            "cheap": 0.562171,
-            "mid": 1.001655,
-            "premium": 0.997542
+            "cheap": 0.561443,
+            "mid": 0.988469,
+            "premium": 0.99622
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.4,
+          "prompt_complexity": 0.3339,
           "utilities": {
             "cheap": 0.538171,
             "mid": 0.870575,
@@ -2575,42 +2574,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "cheap",
-          "selected_actual_quality": 0.81,
-          "selected_cost": 0.01,
-          "prompt_complexity": 0.04,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.91,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.3356,
           "utilities": {
-            "cheap": 0.938784,
-            "mid": 0.769087,
-            "premium": -0.072124
+            "cheap": 0.817495,
+            "mid": 0.845359,
+            "premium": -0.048473
           },
           "policy_quality": {
-            "cheap": 0.938784,
-            "mid": 0.993379,
-            "premium": 0.993266
+            "cheap": 0.817495,
+            "mid": 1.069651,
+            "premium": 1.016917
           }
         },
         "balanced": {
-          "selected_model_id": "premium",
-          "selected_actual_quality": 0.96,
-          "selected_cost": 0.2,
-          "prompt_complexity": 0.04,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.91,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.3356,
           "utilities": {
-            "cheap": 0.677184,
-            "mid": 0.979099,
-            "premium": 0.998234
+            "cheap": 0.625864,
+            "mid": 1.038364,
+            "premium": 1.004147
           },
           "policy_quality": {
-            "cheap": 0.677184,
-            "mid": 0.990179,
-            "premium": 1.050866
+            "cheap": 0.625864,
+            "mid": 1.049444,
+            "premium": 1.056779
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.04,
+          "prompt_complexity": 0.3356,
           "utilities": {
             "cheap": 0.602784,
             "mid": 0.931099,
@@ -2661,39 +2660,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.78,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.46,
+          "prompt_complexity": 0.3242,
           "utilities": {
-            "cheap": 0.544855,
-            "mid": 0.76104,
-            "premium": -0.157586
+            "cheap": 0.685297,
+            "mid": 0.715705,
+            "premium": -0.168452
           },
           "policy_quality": {
-            "cheap": 0.544855,
-            "mid": 0.985333,
-            "premium": 0.907804
+            "cheap": 0.685297,
+            "mid": 0.939998,
+            "premium": 0.896938
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.78,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.46,
+          "prompt_complexity": 0.3242,
           "utilities": {
-            "cheap": 0.476455,
-            "mid": 0.937453,
-            "premium": 0.887572
+            "cheap": 0.485195,
+            "mid": 0.909741,
+            "premium": 0.884856
           },
           "policy_quality": {
-            "cheap": 0.476455,
-            "mid": 0.948533,
-            "premium": 0.940204
+            "cheap": 0.485195,
+            "mid": 0.920821,
+            "premium": 0.937487
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.95,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.46,
+          "prompt_complexity": 0.3242,
           "utilities": {
             "cheap": 0.460855,
             "mid": 0.805453,
@@ -2741,42 +2740,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "cheap",
-          "selected_actual_quality": 0.88,
-          "selected_cost": 0.01,
-          "prompt_complexity": 0.0,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.94,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.3467,
           "utilities": {
-            "cheap": 1.01441,
-            "mid": 0.808473,
-            "premium": -0.060205
+            "cheap": 0.859737,
+            "mid": 0.899809,
+            "premium": -0.032471
           },
           "policy_quality": {
-            "cheap": 1.01441,
-            "mid": 1.032766,
-            "premium": 1.005185
+            "cheap": 0.859737,
+            "mid": 1.124102,
+            "premium": 1.032919
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.94,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.0,
+          "prompt_complexity": 0.3467,
           "utilities": {
-            "cheap": 0.73441,
-            "mid": 1.021686,
-            "premium": 1.012553
+            "cheap": 0.676276,
+            "mid": 1.091821,
+            "premium": 1.019487
           },
           "policy_quality": {
-            "cheap": 0.73441,
-            "mid": 1.032766,
-            "premium": 1.065185
+            "cheap": 0.676276,
+            "mid": 1.102901,
+            "premium": 1.072118
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.0,
+          "prompt_complexity": 0.3467,
           "utilities": {
             "cheap": 0.65441,
             "mid": 0.981686,
@@ -2824,42 +2823,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "cheap",
-          "selected_actual_quality": 0.65,
-          "selected_cost": 0.01,
-          "prompt_complexity": 0.2,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.92,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.3165,
           "utilities": {
-            "cheap": 0.85622,
-            "mid": 0.851143,
-            "premium": -0.03567
+            "cheap": 0.84716,
+            "mid": 0.875933,
+            "premium": -0.026347
           },
           "policy_quality": {
-            "cheap": 0.85622,
-            "mid": 1.075436,
-            "premium": 1.02972
+            "cheap": 0.84716,
+            "mid": 1.100225,
+            "premium": 1.039043
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.92,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.3165,
           "utilities": {
-            "cheap": 0.66822,
-            "mid": 1.048356,
-            "premium": 1.025088
+            "cheap": 0.6414,
+            "mid": 1.070656,
+            "premium": 1.027419
           },
           "policy_quality": {
-            "cheap": 0.66822,
-            "mid": 1.059436,
-            "premium": 1.07772
+            "cheap": 0.6414,
+            "mid": 1.081737,
+            "premium": 1.080051
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.97,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.2,
+          "prompt_complexity": 0.3165,
           "utilities": {
             "cheap": 0.61622,
             "mid": 0.968356,
@@ -2907,42 +2906,42 @@ window.ROUTER_EVAL = {
       ],
       "routing": {
         "fast": {
-          "selected_model_id": "premium",
-          "selected_actual_quality": 0.96,
-          "selected_cost": 0.2,
-          "prompt_complexity": 0.73,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.74,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.3803,
           "utilities": {
-            "cheap": 0.339937,
-            "mid": 0.654596,
-            "premium": 0.762507
+            "cheap": 0.594662,
+            "mid": 0.700509,
+            "premium": -0.201467
           },
           "policy_quality": {
-            "cheap": 0.339937,
-            "mid": 0.878889,
-            "premium": 1.827897
+            "cheap": 0.594662,
+            "mid": 0.924802,
+            "premium": 0.863923
           }
         },
         "balanced": {
-          "selected_model_id": "premium",
-          "selected_actual_quality": 0.96,
-          "selected_cost": 0.2,
-          "prompt_complexity": 0.73,
+          "selected_model_id": "mid",
+          "selected_actual_quality": 0.74,
+          "selected_cost": 0.05,
+          "prompt_complexity": 0.3803,
           "utilities": {
-            "cheap": 0.395737,
-            "mid": 0.846208,
-            "premium": 0.918465
+            "cheap": 0.436101,
+            "mid": 0.889492,
+            "premium": 0.848472
           },
           "policy_quality": {
-            "cheap": 0.395737,
-            "mid": 0.857289,
-            "premium": 0.971097
+            "cheap": 0.436101,
+            "mid": 0.900573,
+            "premium": 0.901104
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.73,
+          "prompt_complexity": 0.3803,
           "utilities": {
             "cheap": 0.417937,
             "mid": 0.770608,
@@ -2993,39 +2992,39 @@ window.ROUTER_EVAL = {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.9,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.47,
+          "prompt_complexity": 0.3101,
           "utilities": {
-            "cheap": 0.663424,
-            "mid": 0.901743,
-            "premium": -0.038131
+            "cheap": 0.821811,
+            "mid": 0.848689,
+            "premium": -0.05092
           },
           "policy_quality": {
-            "cheap": 0.663424,
-            "mid": 1.126035,
-            "premium": 1.027259
+            "cheap": 0.821811,
+            "mid": 1.072982,
+            "premium": 1.01447
           }
         },
         "balanced": {
           "selected_model_id": "mid",
           "selected_actual_quality": 0.9,
           "selected_cost": 0.05,
-          "prompt_complexity": 0.47,
+          "prompt_complexity": 0.3101,
           "utilities": {
-            "cheap": 0.599624,
-            "mid": 1.077355,
-            "premium": 1.006428
+            "cheap": 0.61131,
+            "mid": 1.043989,
+            "premium": 1.00323
           },
           "policy_quality": {
-            "cheap": 0.599624,
-            "mid": 1.088435,
-            "premium": 1.059059
+            "cheap": 0.61131,
+            "mid": 1.05507,
+            "premium": 1.055862
           }
         },
         "premium": {
           "selected_model_id": "premium",
           "selected_actual_quality": 0.96,
           "selected_cost": 0.2,
-          "prompt_complexity": 0.47,
+          "prompt_complexity": 0.3101,
           "utilities": {
             "cheap": 0.585424,
             "mid": 0.943355,

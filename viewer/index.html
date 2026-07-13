@@ -22,6 +22,26 @@
 
       <section class="metrics" id="metrics"></section>
 
+      <section class="try-panel">
+        <div class="try-input">
+          <h2>질문 직접 입력</h2>
+          <textarea id="customPrompt" rows="4" placeholder="예: React에서 useMemo를 언제 써야 하는지 간단히 설명해줘."></textarea>
+          <div class="try-actions">
+            <select id="customTier" aria-label="budget tier">
+              <option value="fast">Fast</option>
+              <option value="balanced">Balanced</option>
+              <option value="premium">Premium</option>
+            </select>
+            <button id="routeButton" type="button">모델 선택</button>
+          </div>
+        </div>
+        <div class="try-result" id="customResult">
+          <span>결과</span>
+          <strong>질문을 입력하세요</strong>
+          <p>실제 학습 artifact를 사용하려면 로컬 서버로 열어야 합니다.</p>
+        </div>
+      </section>
+
       <section class="workspace">
         <aside class="prompt-panel">
           <div class="panel-head">

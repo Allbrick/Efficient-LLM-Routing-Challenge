@@ -115,6 +115,94 @@ input {
   padding: 0 28px 28px;
 }
 
+.try-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 18px;
+  padding: 0 28px 18px;
+}
+
+.try-input,
+.try-result {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.try-input h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+#customPrompt {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 11px;
+  line-height: 1.5;
+}
+
+.try-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+#customTier,
+#routeButton {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+#routeButton {
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+#routeButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.try-result span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.try-result strong {
+  display: block;
+  color: var(--accent);
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.try-result p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.mini-table {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.mini-table table {
+  min-width: 520px;
+}
+
+tbody tr.custom-selected {
+  background: var(--accent-weak);
+}
+
 .prompt-panel,
 .detail-panel {
   background: var(--panel);
@@ -337,6 +425,10 @@ pre {
   }
 
   .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .try-panel {
     grid-template-columns: 1fr;
   }
 

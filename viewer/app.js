@@ -15,6 +15,10 @@ const els = {
   scoreStrip: document.getElementById("scoreStrip"),
   candidateRows: document.getElementById("candidateRows"),
   selectedOutput: document.getElementById("selectedOutput"),
+  customPrompt: document.getElementById("customPrompt"),
+  customTier: document.getElementById("customTier"),
+  routeButton: document.getElementById("routeButton"),
+  customResult: document.getElementById("customResult"),
 };
 
 function fmt(value, digits = 3) {
@@ -138,6 +142,74 @@ function render() {
   renderDetail();
 }
 
+function renderCustomResult(result) {
+  const rows = result.candidates
+    .map((candidate) => {
+      const active = candidate.model_id === result.selected_model_id ? " custom-selected" : "";
+      return `
+        <tr class="${active}">
+          <td><span class="model-pill">${candidate.model_id}</span></td>
+          <td>${fmt(candidate.calibrated_quality, 3)}</td>
+          <td>${fmt(candidate.policy_quality, 3)}</td>
+          <td>${fmt(candidate.cost, 3)}</td>
+          <td>${fmt(candidate.utility, 3)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  els.customResult.innerHTML = `
+    <span>${result.resolved_tier.toUpperCase()} · 복잡도 ${fmt(result.prompt_complexity, 3)} · lambda ${fmt(result.lambda, 3)}</span>
+    <strong>${result.selected_model_id}</strong>
+    <div class="mini-table">
+      <table>
+        <thead>
+          <tr>
+            <th>모델</th>
+            <th>보정 품질</th>
+            <th>정책 품질</th>
+            <th>비용</th>
+            <th>Utility</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function routeCustomPrompt() {
+  const prompt = els.customPrompt.value.trim();
+  const tier = els.customTier.value;
+  if (!prompt) {
+    els.customResult.innerHTML = `<span>결과</span><strong>질문을 입력하세요</strong>`;
+    return;
+  }
+
+  els.routeButton.disabled = true;
+  els.customResult.innerHTML = `<span>라우팅 중</span><strong>...</strong>`;
+  try {
+    const response = await fetch("/api/route", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, tier }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || result.error || "route failed");
+    }
+    renderCustomResult(result);
+  } catch (error) {
+    els.customResult.innerHTML = `
+      <span>서버 필요</span>
+      <strong>로컬 API가 실행 중이 아닙니다</strong>
+      <p><code>python scripts\\serve_router_viewer.py --port 4003</code> 실행 후 <code>http://127.0.0.1:4003/</code>에서 열어주세요.</p>
+    `;
+  } finally {
+    els.routeButton.disabled = false;
+  }
+}
+
 async function init() {
   if (window.ROUTER_EVAL) {
     payload = window.ROUTER_EVAL;
@@ -155,6 +227,7 @@ async function init() {
   });
 
   els.searchInput.addEventListener("input", render);
+  els.routeButton.addEventListener("click", routeCustomPrompt);
   render();
 }
 

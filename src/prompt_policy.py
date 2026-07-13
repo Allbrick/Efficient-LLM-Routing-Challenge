@@ -5,68 +5,59 @@ from typing import List
 import numpy as np
 
 
-SIMPLE_MARKERS = [
-    "한 문장",
-    "무엇인지",
-    "요약",
-    "번역",
-    "평균 속도",
-    "간단",
-    "짧은",
-    "쉬운",
-    "정의",
-    "one sentence",
-    "summarize",
-    "translate",
-]
-
-COMPLEX_MARKERS = [
-    "설계",
-    "아키텍처",
-    "프로세스",
-    "알고리즘",
-    "응급",
-    "법적",
-    "의학",
-    "의료",
-    "복합",
-    "파이프라인",
-    "보장",
-    "멀티테넌트",
-    "대용량",
-    "디지털 트윈",
-    "분산",
-    "동시성",
-    "architecture",
-    "algorithm",
-    "emergency",
-    "pipeline",
-]
-
-
 def estimate_prompt_complexity(prompt: str) -> float:
-    """Return a deterministic prompt complexity score in [0, 1]."""
-    text = prompt.lower()
-    length = len(prompt)
-    token_count = len(prompt.split())
+    """Return a deterministic structural complexity score in [0, 1].
 
-    score = 0.2
-    if length > 70 or token_count > 12:
-        score += 0.14
-    if length > 130 or token_count > 22:
-        score += 0.18
-    if length > 230 or token_count > 38:
-        score += 0.16
+    This intentionally avoids language/domain keyword hardcoding. It only uses
+    surface signals that are available for any prompt language:
 
-    score += 0.13 * sum(1 for marker in COMPLEX_MARKERS if marker.lower() in text)
-    score -= 0.16 * sum(1 for marker in SIMPLE_MARKERS if marker.lower() in text)
+    - character length
+    - whitespace token count
+    - line/paragraph structure
+    - punctuation and numeric density
+    - code-like delimiters
+    """
+    text = prompt.strip()
+    if not text:
+        return 0.0
 
-    if "```" in prompt or "def " in text or "function " in text:
-        score += 0.08
-    if "단계별" in prompt or "비교" in prompt:
-        score += 0.07
+    length = len(text)
+    token_count = len(text.split())
+    line_count = max(1, text.count("\n") + 1)
+    unique_chars = len(set(text))
+    char_diversity = unique_chars / max(length, 1)
 
-    return float(np.clip(score, 0.0, 1.0))
+    punctuation = sum(1 for char in text if not char.isalnum() and not char.isspace())
+    digits = sum(1 for char in text if char.isdigit())
+    punctuation_ratio = punctuation / max(length, 1)
+    digit_ratio = digits / max(length, 1)
+
+    code_delimiters = sum(text.count(token) for token in ("{", "}", "(", ")", "[", "]", "```", ";", "=>"))
+    structure_score = min(line_count / 8.0, 1.0)
+    code_score = min(code_delimiters / 10.0, 1.0)
+
+    length_score = min(length / 170.0, 1.0)
+    token_score = min(token_count / 32.0, 1.0)
+    punctuation_score = min(punctuation_ratio / 0.18, 1.0)
+    digit_score = min(digit_ratio / 0.12, 1.0)
+    diversity_score = min(char_diversity / 0.75, 1.0)
+
+    complexity = (
+        0.46 * length_score
+        + 0.14 * token_score
+        + 0.16 * structure_score
+        + 0.12 * punctuation_score
+        + 0.08 * code_score
+        + 0.04 * digit_score
+        + 0.04 * diversity_score
+    )
+
+    # Very short prompts are almost always cheap-tier candidates unless their
+    # surface form carries unusual structure.
+    if length <= 12 and token_count <= 3 and line_count == 1:
+        complexity *= 0.25
+
+    return float(np.clip(complexity, 0.0, 1.0))
 
 
 def apply_prompt_prior(
@@ -75,36 +66,47 @@ def apply_prompt_prior(
     prompt: str,
     tier: str,
 ) -> np.ndarray:
-    """Adjust calibrated quality with a prompt-level routing prior.
+    """Apply a language-agnostic structural prior before utility selection.
 
-    Fast tier should still be able to escalate to premium for hard prompts. The
-    prior therefore has three regions:
-
-    - simple: cheap gets a boost
-    - medium: mid gets a boost
-    - complex: premium gets enough boost to overcome fast-tier cost pressure
+    The prior is intentionally modest. It nudges obvious short/simple prompts
+    toward cheaper models and highly structured/long prompts toward stronger
+    models without matching specific words or domains.
     """
     adjusted = np.array(q_calibrated, dtype=np.float64, copy=True)
     complexity = estimate_prompt_complexity(prompt)
     simplicity = 1.0 - complexity
     medium = max(0.0, 1.0 - abs(complexity - 0.5) * 2.0)
-    hard = max(0.0, complexity - 0.55)
+    hard = max(0.0, complexity - 0.58)
+    stripped = prompt.strip()
+    ultra_simple = (
+        len(stripped) <= 12
+        and len(stripped.split()) <= 3
+        and "\n" not in stripped
+    )
     tier_lower = tier.lower()
 
     for idx, model_id in enumerate(model_ids):
+        if ultra_simple:
+            if model_id == "cheap":
+                adjusted[idx] += 0.62
+            elif model_id == "mid":
+                adjusted[idx] -= 0.05
+            elif model_id == "premium":
+                adjusted[idx] -= 0.28
+
         if tier_lower == "fast":
             if model_id == "cheap":
-                adjusted[idx] += 0.36 * simplicity - 0.24 * complexity
+                adjusted[idx] += 0.50 * simplicity - 0.35 * complexity
             elif model_id == "mid":
-                adjusted[idx] += 0.16 * medium + 0.04 * simplicity
+                adjusted[idx] += 0.18 * medium + 0.01 * simplicity
             elif model_id == "premium":
-                adjusted[idx] += 5.2 * hard - 0.08 * simplicity
+                adjusted[idx] += 5.5 * hard - 0.08 * simplicity
         elif tier_lower == "balanced":
             if model_id == "cheap":
-                adjusted[idx] += 0.08 * simplicity - 0.06 * complexity
+                adjusted[idx] += 0.06 * simplicity - 0.05 * complexity
             elif model_id == "mid":
-                adjusted[idx] += 0.12 * medium + 0.04 * simplicity
+                adjusted[idx] += 0.14 * medium + 0.02 * simplicity
             elif model_id == "premium":
-                adjusted[idx] += 0.35 * hard - 0.02 * simplicity
+                adjusted[idx] += 0.45 * hard - 0.02 * simplicity
 
     return adjusted
