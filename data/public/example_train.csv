@@ -1,0 +1,163 @@
+prompt_id,prompt,domain,task_type,benchmark_id,model_id,model_output,quality_score,cost
+p001,"API가 무엇인지 한 문장으로 설명해줘.",general,qa,basic_qa,cheap,"API는 프로그램끼리 서로 요청하고 응답할 수 있게 해주는 약속입니다.",0.88,0.01
+p001,"API가 무엇인지 한 문장으로 설명해줘.",general,qa,basic_qa,mid,"API는 한 소프트웨어가 다른 소프트웨어의 기능이나 데이터를 정해진 방식으로 사용할 수 있게 해주는 인터페이스입니다.",0.91,0.05
+p001,"API가 무엇인지 한 문장으로 설명해줘.",general,qa,basic_qa,premium,"API는 애플리케이션들이 정해진 규칙에 따라 요청과 응답을 주고받도록 만드는 계약이자 인터페이스입니다.",0.90,0.20
+p002,"n번째 피보나치 수를 반환하는 파이썬 함수를 작성해줘.",tech,code_generation,coding_easy,cheap,"def fib(n): return n if n < 2 else fib(n-1) + fib(n-2)",0.62,0.01
+p002,"n번째 피보나치 수를 반환하는 파이썬 함수를 작성해줘.",tech,code_generation,coding_easy,mid,"def fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a",0.92,0.05
+p002,"n번째 피보나치 수를 반환하는 파이썬 함수를 작성해줘.",tech,code_generation,coding_easy,premium,"def fibonacci(n):\n    if n < 0:\n        raise ValueError('n은 0 이상이어야 합니다')\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a",0.95,0.20
+p003,"회의록을 요약해줘: 팀은 결제 버그를 고치고 온보딩을 개선하기 위해 출시를 2주 미루기로 했다.",business,summarization,summarization_short,cheap,"출시는 결제 버그 수정과 온보딩 개선 때문에 2주 연기됩니다.",0.91,0.01
+p003,"회의록을 요약해줘: 팀은 결제 버그를 고치고 온보딩을 개선하기 위해 출시를 2주 미루기로 했다.",business,summarization,summarization_short,mid,"팀은 결제 문제를 해결하고 온보딩을 다듬기 위해 출시 일정을 2주 늦추기로 했습니다.",0.93,0.05
+p003,"회의록을 요약해줘: 팀은 결제 버그를 고치고 온보딩을 개선하기 위해 출시를 2주 미루기로 했다.",business,summarization,summarization_short,premium,"출시는 2주 연기되며, 그 기간 동안 팀은 결제 버그를 수정하고 신규 사용자 온보딩 흐름을 개선할 예정입니다.",0.92,0.20
+p004,"작은 분석 대시보드에 SQLite와 PostgreSQL 중 무엇이 더 적합한지 비교해줘.",tech,reasoning,comparison_medium,cheap,"SQLite는 간단하고 PostgreSQL은 더 큰 서비스에 좋습니다.",0.58,0.01
+p004,"작은 분석 대시보드에 SQLite와 PostgreSQL 중 무엇이 더 적합한지 비교해줘.",tech,reasoning,comparison_medium,mid,"SQLite는 배포가 쉽고 단일 사용자나 가벼운 대시보드에 적합합니다. PostgreSQL은 동시 접속, 큰 데이터, 복잡한 쿼리가 필요한 경우 더 좋습니다.",0.86,0.05
+p004,"작은 분석 대시보드에 SQLite와 PostgreSQL 중 무엇이 더 적합한지 비교해줘.",tech,reasoning,comparison_medium,premium,"대시보드가 로컬 중심이고 데이터 규모가 작으며 동시 사용자가 거의 없다면 SQLite가 단순하고 효율적입니다. 여러 사용자가 접속하거나 권한 관리, 주기적 적재, 복잡한 분석 쿼리가 필요하다면 PostgreSQL이 더 적합합니다.",0.92,0.20
+p005,"단계별로 풀어줘: 기차가 3시간 동안 180km를 이동했다면 평균 속도는 얼마야?",math,math,math_easy,cheap,"60km/h입니다.",0.90,0.01
+p005,"단계별로 풀어줘: 기차가 3시간 동안 180km를 이동했다면 평균 속도는 얼마야?",math,math,math_easy,mid,"평균 속도는 거리 나누기 시간입니다. 180km를 3시간으로 나누면 60km/h입니다.",0.96,0.05
+p005,"단계별로 풀어줘: 기차가 3시간 동안 180km를 이동했다면 평균 속도는 얼마야?",math,math,math_easy,premium,"평균 속도는 이동 거리 / 걸린 시간으로 계산합니다. 180km / 3시간 = 60km/h이므로 평균 속도는 60km/h입니다.",0.96,0.20
+p006,"피트니스 앱에 넣을 짧은 법적 고지 문구를 작성해줘.",legal,generation,legal_generation,cheap,"이 앱은 정보 제공용이며 의학적 조언이 아닙니다.",0.55,0.01
+p006,"피트니스 앱에 넣을 짧은 법적 고지 문구를 작성해줘.",legal,generation,legal_generation,mid,"이 앱은 일반적인 피트니스 정보를 제공하며 전문적인 의학적 조언을 대체하지 않습니다. 운동을 시작하기 전 전문가와 상담하세요.",0.79,0.05
+p006,"피트니스 앱에 넣을 짧은 법적 고지 문구를 작성해줘.",legal,generation,legal_generation,premium,"본 앱은 일반적인 건강 및 피트니스 정보를 제공하기 위한 것이며 의학적 진단, 치료 또는 전문적인 조언을 대체하지 않습니다. 운동 프로그램을 시작하거나 변경하기 전에는 자격을 갖춘 의료 전문가와 상담해야 합니다.",0.89,0.20
+p007,"다음 문장을 영어로 번역해줘: 송장은 다음 주 금요일까지 결제해야 합니다.",general,translation,translation_easy,cheap,"The invoice must be paid by next Friday.",0.88,0.01
+p007,"다음 문장을 영어로 번역해줘: 송장은 다음 주 금요일까지 결제해야 합니다.",general,translation,translation_easy,mid,"The invoice is due next Friday.",0.94,0.05
+p007,"다음 문장을 영어로 번역해줘: 송장은 다음 주 금요일까지 결제해야 합니다.",general,translation,translation_easy,premium,"The invoice is due by next Friday.",0.93,0.20
+p008,"멀티테넌트 SaaS 결제 시스템의 상위 수준 아키텍처를 설계해줘.",tech,complex_design,architecture_hard,cheap,"백엔드, 데이터베이스, 결제 API를 사용하면 됩니다.",0.35,0.01
+p008,"멀티테넌트 SaaS 결제 시스템의 상위 수준 아키텍처를 설계해줘.",tech,complex_design,architecture_hard,mid,"API 서버, 테넌트별 데이터 모델, 결제 작업자, 웹훅 처리기, 결제 제공자 연동을 두는 구조가 적합합니다.",0.72,0.05
+p008,"멀티테넌트 SaaS 결제 시스템의 상위 수준 아키텍처를 설계해줘.",tech,complex_design,architecture_hard,premium,"테넌트 인식 인증, API 계층, 구독 서비스, 청구서 서비스, 사용량 집계 파이프라인, 결제 웹훅 처리기, 비동기 결제 작업자, 감사 로그, 권한 분리된 리포팅 저장소로 구성하는 것이 좋습니다.",0.94,0.20
+p009,"프론트엔드 모노레포(Monorepo) 구성 시 Turborepo와 Lerna 중 무엇이 나은지 비교해줘.",tech,reasoning,comparison_medium,cheap,"Turborepo가 더 빠르고 최근에 나온 툴이라 편합니다.",0.62,0.01
+p009,"프론트엔드 모노레포(Monorepo) 구성 시 Turborepo와 Lerna 중 무엇이 나은지 비교해줘.",tech,reasoning,comparison_medium,mid,"Turborepo는 빌드 캐싱 덕분에 빠르고 설정이 쉽습니다. Lerna는 오래된 대규모 프로젝트에 익숙하지만 속도가 느려 최근에는 Turborepo로 마이그레이션하는 추세입니다.",0.87,0.05
+p009,"프론트엔드 모노레포(Monorepo) 구성 시 Turborepo와 Lerna 중 무엇이 나은지 비교해줘.",tech,reasoning,comparison_medium,premium,"신규 프론트엔드 프로젝트라면 원격 빌드 캐싱과 의존성 그래프 최적화가 뛰어난 Turborepo가 유리합니다. 반면 다중 패키지 배포 및 버전 관리 프로세스가 이미 복잡하게 얽혀 있는 기존 대규모 레거시 모노레포라면 Lerna(Nx 통합 버전)가 안정적인 대안이 될 수 있습니다.",0.94,0.20
+p010,"주어진 배열에서 중복 요소를 제거하는 가장 효율적인 자바스크립트 함수를 작성해줘.",tech,code_generation,coding_easy,cheap,"function unique(arr) { return [...new Set(arr)]; }",0.91,0.01
+p010,"주어진 배열에서 중복 요소를 제거하는 가장 효율적인 자바스크립트 함수를 작성해줘.",tech,code_generation,coding_easy,mid,"const removeDuplicates = (arr) => Array.from(new Set(arr)); 이 방식이 가독성이 높고 성능도 좋습니다.",0.92,0.05
+p010,"주어진 배열에서 중복 요소를 제거하는 가장 효율적인 자바스크립트 함수를 작성해줘.",tech,code_generation,coding_easy,premium,"function removeDuplicates(arr) {\n  if (!Array.isArray(arr)) throw new TypeError('배열을 입력해야 합니다');\n  return [...new Set(arr)];\n}",0.96,0.20
+p011,"고객 피드백 요약해줘: 결제 화면 로딩이 너무 느려서 도중에 이탈하는 사용자가 많음. 결제 자체는 성공함.",business,summarization,summarization_short,cheap,"결제 성공은 하지만 로딩이 느려서 이탈자가 많습니다.",0.89,0.01
+p011,"고객 피드백 요약해줘: 결제 화면 로딩이 너무 느려서 도중에 이탈하는 사용자가 많음. 결제 자체는 성공함.",business,summarization,summarization_short,mid,"결제 기능은 정상 작동하지만, 화면 로딩 속도가 느려 결제 도중 사용자가 이탈하는 문제가 핵심입니다.",0.94,0.05
+p011,"고객 피드백 요약해줘: 결제 화면 로딩이 너무 느려서 도중에 이탈하는 사용자가 많음. 결제 자체는 성공함.",business,summarization,summarization_short,premium,"결제 트랜잭션 자체의 성공률은 유효하나, 결제 페이지의 심각한 로딩 지연으로 인해 사용자들의 중도 이탈률이 높으므로 UI/UX 성능 개선이 시급합니다.",0.93,0.20
+p012,"스타트업을 위한 고용 계약서에 반드시 포함되어야 할 3가지 조항을 알려줘.",legal,generation,legal_generation,cheap,"급여, 근무 시간, 담당 업무입니다.",0.52,0.01
+p012,"스타트업을 위한 고용 계약서에 반드시 포함되어야 할 3가지 조항을 알려줘.",legal,generation,legal_generation,mid,"근무 조건(급여 및 시간), 비밀유지 서약(NDA), 그리고 지식재산권(IP) 귀속 조항이 필수적입니다.",0.81,0.05
+p012,"스타트업을 위한 고용 계약서에 반드시 포함되어야 할 3가지 조항을 알려줘.",legal,generation,legal_generation,premium,"임금 구성항목 및 소정근무시간을 명시한 근로조건 조항, 기업 자산을 보호하는 비밀유지(Confidentiality) 조항, 그리고 재직 중 개발한 성과물이 회사에 귀속됨을 명시하는 지식재산권 양도(IP Assignment) 조항이 필수입니다.",0.93,0.20
+p013,"3D 지도 렌더링 엔진을 위한 대용량 공간 데이터 파이프라인의 상위 아키텍처를 설계해줘.",tech,complex_design,architecture_hard,cheap,"클라우드 저장소에 데이터를 두고 API로 불러와 렌더링합니다.",0.41,0.01
+p013,"3D 지도 렌더링 엔진을 위한 대용량 공간 데이터 파이프라인의 상위 아키텍처를 설계해줘.",tech,complex_design,architecture_hard,mid,"원천 데이터를 인하이드레이션하고, 공간 인덱싱(3D Tiles) 처리를 거친 후, CDN을 통해 클라이언트 프론트엔드 엔진으로 스트리밍하는 구조입니다.",0.75,0.05
+p013,"3D 지도 렌더링 엔진을 위한 대용량 공간 데이터 파이프라인의 상위 아키텍처를 설계해줘.",tech,complex_design,architecture_hard,premium,"원천 공간 데이터(GIS) 적재 계층, 배치를 통한 3D Tiles/정점 데이터 파싱 및 공간 인덱싱 변환 계층, 분산 오브젝트 스토리지 및 전역 CDN 캐싱 계층, 클라이언트 엔진의 시야(Frustum) 기반 비동기 스트리밍 및 Level of Detail(LOD) 관리 엔진으로 구성합니다.",0.95,0.20
+p014,"환자가 갑자기 호흡 곤란을 호소할 때 응급 처치 단계를 순서대로 설명해줘.",medical,reasoning,emergency_hard,cheap,"119에 전화하고 편하게 눕히세요.",0.31,0.01
+p014,"환자가 갑자기 호흡 곤란을 호소할 때 응급 처치 단계를 순서대로 설명해줘.",medical,reasoning,emergency_hard,mid,"1. 즉시 119에 신고합니다. 2. 환자의 단추나 벨트를 풀어 편하게 하고 상체를 올린 자세를 취하게 합니다. 3. 환자의 의식을 확인하며 구급대를 기다립니다.",0.82,0.05
+p014,"환자가 갑자기 호흡 곤란을 호소할 때 응급 처치 단계를 순서대로 설명해줘.",medical,reasoning,emergency_hard,premium,"1. 즉시 119에 신고하고 정확한 위치를 알립니다. 2. 기도를 압박하는 넥타이나 옷을 느슨하게 합니다. 3. 눕는 것보다 상체를 45도쯤 세운 반좌위(Semi-Fowler) 자세가 호흡에 유리하므로 받쳐줍니다. 4. 환자가 의식을 잃고 호흡이 멈춘다면 즉시 CPR(심폐소생술)을 시행해야 합니다.",0.96,0.20
+p015,"커피숍 개업을 알리는 짧고 감성적인 인스타그램 홍보 문구를 작성해줘.",creative,generation,marketing_short,cheap,"카페 오픈했습니다! 맛있는 커피 드시러 오세요.",0.60,0.01
+p015,"커피숍 개업을 알리는 짧고 감성적인 인스타그램 홍보 문구를 작성해줘.",creative,generation,marketing_short,mid,"따스한 햇살과 은은한 원두 향이 가득한 공간, 드디어 문을 열었습니다. 일상 속 작은 쉼표가 필요할 때 들러주세요.",0.88,0.05
+p015,"커피숍 개업을 알리는 짧고 감성적인 인스타그램 홍보 문구를 작성해줘.",creative,generation,marketing_short,premium,"매일 아침을 깨우는 로스팅 향, 서두르던 발걸음도 잠시 쉬어가는 곳. 우리의 이야기가 시작되는 작은 공간으로 당신을 초대합니다. 로컬 블렌드와 함께하는 아늑한 주말 되세요.",0.91,0.20
+p016,"데이터베이스 인덱스(Index)의 작동 원리를 한 문장으로 설명해줘.",tech,qa,basic_qa,cheap,"인덱스는 책의 색인처럼 데이터를 빨리 찾게 해주는 표입니다.",0.85,0.01
+p016,"데이터베이스 인덱스(Index)의 작동 원리를 한 문장으로 설명해줘.",tech,qa,basic_qa,mid,"인덱스는 B-Tree 등의 자료구조를 파일에 색인화하여 특정 테이블의 검색 성능을 극대화하는 메커니즘입니다.",0.92,0.05
+p016,"데이터베이스 인덱스(Index)의 작동 원리를 한 문장으로 설명해줘.",tech,qa,basic_qa,premium,"데이터베이스 인덱스는 지정된 컬럼의 데이터를 키-포인터 쌍의 포인터 파일 및 B-Tree 자료구조로 미리 정렬해두어 풀 스캔을 방지하고 검색 속도를 비약적으로 높이는 기술입니다.",0.94,0.20
+p017,"CSS Flexbox와 Grid 아키텍처의 레이아웃 결정 기준 차이를 비교해줘.",tech,reasoning,comparison_medium,cheap,"Flex는 가로세로 한 줄이고 Grid는 바둑판 배열입니다.",0.68,0.01
+p017,"CSS Flexbox와 Grid 아키텍처의 레이아웃 결정 기준 차이를 비교해줘.",tech,reasoning,comparison_medium,mid,"Flexbox는 행 또는 열 기준의 1차원 레이아웃에 적합하며, Grid는 행과 열을 동시에 제어하는 거시적인 2차원 대형 웹 레이아웃 시스템에 적합합니다.",0.89,0.05
+p017,"CSS Flexbox와 Grid 아키텍처의 레이아웃 결정 기준 차이를 비교해줘.",tech,reasoning,comparison_medium,premium,"Flexbox는 컴포넌트 내부 요소의 유연한 콘텐츠 흐름 및 1차원 정렬을 정의할 때 강력하며, Grid는 열(Column)과 행(Row)을 사전에 정의하여 전체 웹 서비스 페이지의 거시적인 2차원 틀을 다룰 때 아키텍처적 무결성을 제공합니다.",0.95,0.20
+p018,"자바스크립트에서 클로저(Closure)가 발생하는 이유를 한 문장으로 설명해줘.",tech,qa,basic_qa,cheap,"함수가 끝난 뒤에도 내부 변수를 계속 기억해서 그렇습니다.",0.89,0.01
+p018,"자바스크립트에서 클로저(Closure)가 발생하는 이유를 한 문장으로 설명해줘.",tech,qa,basic_qa,mid,"자바스크립트 함수가 생성될 당시의 렉시컬 환경(Lexical Environment)을 기억하여 외부 함수 스코프 밖에서 호출되어도 해당 스코프에 접근할 수 있기 때문입니다.",0.95,0.05
+p018,"자바스크립트에서 클로저(Closure)가 발생하는 이유를 한 문장으로 설명해줘.",tech,qa,basic_qa,premium,"외부 함수의 실행 텍스트가 종료되어 콜 스택에서 반환되더라도, 내부 함수가 여전히 상위 스코프의 변수를 참조하고 있다면 렉시컬 환경이 가비지 컬렉션(GC) 대상에서 제외되어 클로저 현상이 발생합니다.",0.96,0.20
+p019,"주어진 문자열을 뒤집는 가장 간결한 자바스크립트 한 줄 코드를 작성해줘.",tech,code_generation,coding_easy,cheap,"str.split('').reverse().join('');",0.93,0.01
+p019,"주어진 문자열을 뒤집는 가장 간결한 자바스크립트 한 줄 코드를 작성해줘.",tech,code_generation,coding_easy,mid,"const reverseStr = str => [...str].reverse().join(''); 이 방식이 이모지 처리 등에서도 안전합니다.",0.94,0.05
+p019,"주어진 문자열을 뒤집는 가장 간결한 자바스크립트 한 줄 코드를 작성해줘.",tech,code_generation,coding_easy,premium,"function reverseString(str) {\n  if (typeof str !== 'string') return '';\n  return [...str].reverse().join('');\n}",0.95,0.20
+p020,"배달 앱 알림 문구 요약해줘: 주문하신 치킨이 조리 완료되어 라이더에게 전달되었습니다. 20분 내 도착 예정.",business,summarization,summarization_short,cheap,"치킨 조리 끝, 20분 안에 배달 완료됩니다.",0.90,0.01
+p020,"배달 앱 알림 문구 요약해줘: 주문하신 치킨이 조리 완료되어 라이더에게 전달되었습니다. 20분 내 도착 예정.",business,summarization,summarization_short,mid,"주문 상품의 조리가 완료되어 라이더가 배달을 시작했으며, 20분 이내에 수령 가능합니다.",0.93,0.05
+p020,"배달 앱 알림 문구 요약해줘: 주문하신 치킨이 조리 완료되어 라이더에게 전달되었습니다. 20분 내 도착 예정.",business,summarization,summarization_short,premium,"주문 건의 조리 완료 후 배송 파트너 픽업이 완료되었으며, 고객님 계신 곳까지 향후 20분 이내 도착 예정으로 요약됩니다.",0.92,0.20
+p021,"스타트업 제품 출시 전 이용약관에 명시해야 할 핵심 고지 사항 2가지를 알려줘.",legal,generation,legal_generation,cheap,"환불 규정 및 서비스 이용 제한 조건입니다.",0.55,0.01
+p021,"스타트업 제품 출시 전 이용약관에 명시해야 할 핵심 고지 사항 2가지를 알려줘.",legal,generation,legal_generation,mid,"서비스 이용에 따른 회사와 이용자 간의 귀속 권리 책임 및 면책 조항, 그리고 결제 취소나 환불에 대한 명확한 환불 정책입니다.",0.82,0.05
+p021,"스타트업 제품 출시 전 이용약관에 명시해야 할 핵심 고지 사항 2가지를 알려줘.",legal,generation,legal_generation,premium,"부정사용자나 시스템 장애 발생 시 회사의 법적 분쟁을 방어하는 서비스 면책(Limitation of Liability) 조항과 소비자분쟁해결기준에 부합하도록 적법하게 짜인 계약해지 및 환불 규정이 가장 핵심적입니다.",0.94,0.20
+p022,"CesiumJS와 OpenLayers 라이브러리의 3D 공간 데이터 표현 능력 차이를 비교해줘.",tech,reasoning,comparison_medium,cheap,"Cesium은 대규모 3D에 좋고, OpenLayers는 2D 평면 지도 중심입니다.",0.64,0.01
+p022,"CesiumJS와 OpenLayers 라이브러리의 3D 공간 데이터 표현 능력 차이를 비교해줘.",tech,reasoning,comparison_medium,mid,"CesiumJS는 지구 스케일의 가상 구체 렌더링 및 3D Tiles 스트리밍에 최적화되어 있고, OpenLayers는 강력한 2D/2.5D 데이터 관리 레이어를 기반으로 가벼운 뷰를 구성할 때 유리합니다.",0.88,0.05
+p022,"CesiumJS와 OpenLayers 라이브러리의 3D 공간 데이터 표현 능력 차이를 비교해줘.",tech,reasoning,comparison_medium,premium,"CesiumJS는 WebGL 기반의 글로벌 디지털 트윈을 위해 고정밀 지형(Terrain) 데이터 및 대용량 3D Tiles 개체를 계층적(LOD)으로 파이프라이닝하는 데 강점이 있으며, OpenLayers는 OGC 표준 포맷을 지원하는 전통적인 2D 벡터 레이어 제어와 평면 웹 맵 구현에 효율적인 아키텍처적 차이를 가집니다.",0.95,0.20
+p023,"실시간 데이터 시각화 웹 대시보드를 위한 고성능 클라이언트 아키텍처를 설계해줘.",tech,complex_design,architecture_hard,cheap,"웹소켓으로 데이터를 받아서 리액트 상태로 변경하고 화면을 갱신합니다.",0.38,0.01
+p023,"실시간 데이터 시각화 웹 대시보드를 위한 고성능 클라이언트 아키텍처를 성공적으로 설계해줘.",tech,complex_design,architecture_hard,mid,"Websocket 통신 전용 비동기 스레드(Worker)를 분리하고, 전역 상태 스토어에서 버퍼링을 처리하여 차트 렌더링 프레임을 최적화하는 구조가 적합합니다.",0.76,0.05
+p023,"실시간 데이터 시각화 웹 대시보드를 위한 고성능 클라이언트 아키텍처를 설계해줘.",tech,complex_design,architecture_hard,premium,"네트워크 메인 스레드를 방해하지 않는 Web Worker 기반의 바이너리 소켓 스트림 관리 파이프라인, 프론트엔드 메인 렌더러의 가비지 컬렉터 부하를 최소화하는 버퍼/링 버퍼 큐, React의 불필요한 리렌더링을 격리하는 Zustand 상태 구조, 가상 DOM을 우회하고 Canvas/WebGL로 다이렉트 푸시하는 시각화 컴포넌트 레이어로 구성합니다.",0.96,0.20
+p024,"심정지 환자가 발생했을 때 목격자가 취해야 할 행동 단계를 순서대로 설명해줘.",medical,reasoning,emergency_hard,cheap,"의식을 확인하고 즉시 가슴을 압박하세요.",0.35,0.01
+p024,"심정지 환자가 발생했을 때 목격자가 취해야 할 행동 단계를 순서대로 설명해줘.",medical,reasoning,emergency_hard,mid,"1. 환자의 어깨를 두드리며 반응을 봅니다. 2. 주위 사람에게 119 신고와 AED 지참을 요청합니다. 3. 구급대가 올 때까지 분당 100~120회 속도로 가슴 압박 소생술을 실시합니다.",0.85,0.05
+p024,"심정지 환자가 발생했을 때 목격자가 취해야 할 행동 단계를 순서대로 설명해줘.",medical,reasoning,emergency_hard,premium,"1. 환자의 의식 및 호흡 유무를 정확하게 판별합니다. 2. 특정인을 지목하여 119 신고 및 자동심장충격기(AED) 수거를 지시합니다. 3. 환자의 복장 해체 후 복장뼈 하단 2분의 1 지점을 5~6cm 깊이로 강하고 빠르게 가슴 압박합니다. 4. AED가 도착하면 기기 음성 안내에 따라 패드 부착 및 제동 사이클을 반복 적용합니다.",0.97,0.20
+p025,"로컬 베이커리의 건강한 쌀 식빵 출시를 알리는 감성적인 카피라이팅을 작성해줘.",creative,generation,marketing_short,cheap,"밀가루 없는 건강한 쌀 식빵 구워냈습니다. 사러 오세요.",0.58,0.01
+p025,"로컬 베이커리의 건강한 쌀 식빵 출시를 알리는 감성적인 카피라이팅을 작성해줘.",creative,generation,marketing_short,mid,"속 편한 아침을 위해 밀가루 대신 국내산 쌀로 꾹꾹 눌러 담았습니다. 갓 구워낸 쫄깃하고 담백한 식감을 만나보세요.",0.86,0.05
+p025,"로컬 베이커리의 건강한 쌀 식빵 출시를 알리는 감성적인 카피라이팅을 작성해줘.",creative,generation,marketing_short,premium,"부스스 눈을 뜬 아침, 나를 위해 준비하는 가장 무해한 식사. 밀가루를 비우고 정직한 우리 쌀의 포근함만 채워 넣은 담백한 속 편한 쌀 식빵이 노릇하게 구워졌습니다. 오늘부터 매일 아침 테이블에서 기다릴게요.",0.92,0.20
+p026,"화학 반응 속도론에서 활성화 에너지($E_a$)의 개념을 한 문장으로 정의해줘.",math,qa,basic_qa,cheap,"화학 반응이 일어나기 위해 필요한 최소한의 에너지 고개입니다.",0.86,0.01
+p026,"화학 반응 속도론에서 활성화 에너지($E_a$)의 개념을 한 문장으로 정의해줘.",math,qa,basic_qa,mid,"활성화 에너지는 반응물들이 화학 반응을 일으켜 생성물로 변환되기 위해 반드시 넘어야 하는 최소한의 문턱 에너지 장벽입니다.",0.94,0.05
+p026,"화학 반응 속도론에서 활성화 에너지($E_a$)의 개념을 한 문장으로 정의해줘.",math,qa,basic_qa,premium,"활성화 에너지($E_a$)는 출발 물질이 전이 상태(Transition State)의 활성화 착물을 형성하여 자발적 내지 비자발적 화학 반응으로 진행되기 위해 공급되어야 하는 통계역학적 최저 에너지 장벽을 의미합니다.",0.95,0.20
+p027,"피타고라스 정리의 수학적 정의를 한 문장으로 기술해줘.",math,qa,basic_qa,cheap,"직각삼각형에서 밑변 제곱 더하기 높이 제곱은 빗변 제곱과 같습니다.",0.92,0.01
+p027,"피타고라스 정리의 수학적 정의를 한 문장으로 기술해줘.",math,qa,basic_qa,mid,"직각삼각형에서 두 직각변의 길이를 각각 제곱하여 더한 값은 빗변의 길이를 제곱한 값과 항상 일치한다는 정리입니다.",0.95,0.05
+p027,"피타고라스 정리의 수학적 정의를 한 문장으로 기술해줘.",math,qa,basic_qa,premium,"직각삼각형의 직각을 낀 두 변의 길이를 $a, b$라 하고 대변인 빗변의 길이를 $c$라 할 때, Euclidean 평면 구조 하에서 $a^2 + b^2 = c^2$이 성립한다는 기하학적 정리입니다.",0.96,0.20
+p028,"거스름돈 반환 알고리즘용 탐욕 알고리즘(Greedy)의 한계점을 예시와 함께 설명해줘.",math,reasoning,comparison_medium,cheap,"가장 큰 동전부터 주면 가끔 동전 개수가 더 많아집니다.",0.62,0.01
+p028,"거스름돈 반환 알고리즘용 탐욕 알고리즘(Greedy)의 한계점을 예시와 함께 설명해줘.",math,reasoning,comparison_medium,mid,"탐욕 알고리즘은 매순간 가장 단위가 큰 동전을 고르기 때문에, 동전 단위가 배수 관계가 아닐 때(예: 10원, 40원, 50원 화폐 구조에서 80원 반환 시) 최적해를 구하지 못합니다.",0.90,0.05
+p028,"거스름돈 반환 알고리즘용 탐욕 알고리즘(Greedy)의 한계점을 예시와 함께 설명해줘.",math,reasoning,comparison_medium,premium,"그리디 기법은 국소적인 최적 선택이 전역적 최적해(Global Optimum)를 보장한다는 전제로 동작하므로, 동전 액면가가 서로의 배수 형태(권종 설계)를 이루지 않는 배타적 집합일 경우, DP(동적 계획법)와 달리 탐욕적 선택 조건이 무너져 최소 동전 개수 산출에 실패하게 됩니다.",0.96,0.20
+p029,"대용량 점구름(Point Cloud) 데이터를 웹 브라우저에 최적화하여 렌더링하기 위한 포맷 체계를 비교해줘.",tech,reasoning,comparison_medium,cheap,"Potree나 3D Tiles 포맷을 쓰면 웹 환경에서 점 데이터를 빠르게 볼 수 있습니다.",0.61,0.01
+p029,"대용량 점구름(Point Cloud) 데이터를 웹 브라우저에 최적화하여 렌더링하기 위한 포맷 체계를 비교해줘.",tech,reasoning,comparison_medium,mid,"옥트리(Octree) 기반의 Potree 형식은 정밀한 점구름 뷰에 강하며, OGC 표준인 3D Tiles(PNTS)는 타일링 스트리밍을 통해 다른 3D 빌딩 개체들과 함께 GIS 레이어에 올리기 유리합니다.",0.89,0.05
+p029,"대용량 점구름(Point Cloud) 데이터를 웹 브라우저에 최적화하여 렌더링하기 위한 포맷 체계를 비교해줘.",tech,reasoning,comparison_medium,premium,"정밀 포인트 인덱싱 중심인 Potree의 Octree 구조는 로컬 피처 밀도가 높은 스캔 분석에 적합한 반면, OGC 3D Tiles의 pnts 레이어는 계층적 LoD 아키텍처를 따라 대규모 거시 공간 웹 스트리밍 및 타 공간 데이터(BIM, Terrain)와의 파이프라인 통합 측면에서 압도적인 호환성을 가집니다.",0.96,0.20
+p030,"웹 브라우저 환경에서 투명도가 있는 3D 오브젝트들을 올바르게 정렬하여 렌더링(OIT)하는 알고리즘을 비교해줘.",tech,reasoning,comparison_medium,cheap,"앞뒤 순서대로 깊이 정렬을 해서 렌더링하거나 알파 블렌딩을 하면 됩니다.",0.45,0.01
+p030,"웹 브라우저 환경에서 투명도가 있는 3D 오브젝트들을 올바르게 정렬하여 렌더링(OIT)하는 알고리즘을 비교해줘.",tech,reasoning,comparison_medium,mid,"매 프레임 카메라 거리에 따라 CPU에서 정렬하는 뎁스 정렬(Depth Sorting) 방식과, 가비지 컬렉터 부하를 피하기 위해 셰이더 레벨에서 처리하는 순서 무관 투명도(OIT) 알고리즘 방식이 있으며 후자가 고성능 대형 씬에 적합합니다.",0.84,0.05
+p030,"웹 브라우저 환경에서 투명도가 있는 3D 오브젝트들을 올바르게 정렬하여 렌더링(OIT)하는 알고리즘을 비교해줘.",tech,reasoning,comparison_medium,premium,"매 프레임 프리미티브를 CPU에서 정렬하는 전통적인 방식은 동적 데이터에서 드로우콜 병목을 유발하므로, WebGL 환경에서는 Fragment Shader 레벨에서 가중치 평균을 내는 WBOIT(Weighted Blended OIT)나 복잡한 링크드 리스트를 구성하는 페어와이즈 스크린 공간 가상 버퍼 트리를 구성하는 것이 대형 디지털 트윈 엔진 설계의 핵심입니다.",0.95,0.20
+p031,"CesiumJS 엔지니어링 관점에서 3D Tiles의 지형 고도(Terrain) 고정 방식을 한 문장으로 설명해줘.",tech,qa,basic_qa,cheap,"지형 높이에 3D 모델을 붙이려면 height 조절이나 clamp To Ground 옵션을 씁니다.",0.81,0.01
+p031,"CesiumJS 엔지니어링 관점에서 3D Tiles의 지형 고도(Terrain) 고정 방식을 한 문장으로 설명해줘.",tech,qa,basic_qa,mid,"CesiumJS에서는 타일셋 데이터가 가상 지구 고도에 묻히지 않도록 `HeightReference.CLAMP_TO_GROUND` 속성을 사용해 타일셋을 타겟 지형 메시에 동적으로 정렬합니다.",0.91,0.05
+p031,"CesiumJS 엔지니어링 관점에서 3D Tiles의 지형 고도(Terrain) 고정 방식을 한 문장으로 설명해줘.",tech,qa,basic_qa,premium,"Cesium 공간 연산 엔진 내에서 3D Tileset 레이어의 물리 고도는 Quantized-Mesh 지형 파일의 레이캐스팅 고도 벡터 정보와 동기화되며, `sampleTerrainMostDetailed` 비동기 API 또는 엔티티의 래핑 클램핑 프로퍼티를 통해 정밀 유효 고도가 정렬됩니다.",0.96,0.20
+p032,"웹소켓(WebSocket) 연결이 빈번히 끊기는 환경에서 유실 없는 데이터 재전송 보장 메커니즘을 설계해줘.",tech,complex_design,architecture_hard,cheap,"끊기면 다시 커넥션을 맺고 메시지를 보내는 코드를 만듭니다.",0.39,0.01
+p032,"웹소켓(WebSocket) 연결이 빈번히 끊기는 환경에서 유실 없는 데이터 재전송 보장 메커니즘을 설계해줘.",tech,complex_design,architecture_hard,mid,"클라이언트 단에 지수 백오프(Exponential Backoff) 기반 재연결 로직을 구현하고, 인메모리 큐를 두어 미전송된 메시지를 담았다가 웹소켓이 재오픈되는 시점에 한 번에 발행(Flush)합니다.",0.78,0.05
+p032,"웹소켓(WebSocket) 연결이 빈번히 끊기는 환경에서 유실 없는 데이터 재전송 보장 메커니즘을 설계해줘.",tech,complex_design,architecture_hard,premium,"시퀀스 넘버(Sequence Number) 기반의 클라이언트-서버 간 ACK 응답 프로토콜을 구현하고, 재연결 세션 시 인메모리 링버퍼(Ring Buffer)에서 미확인된 메시지를 추적하여 지수 백오프 전략에 따라 재전송하며, 클라이언트 로컬 스토리지에 오프라인 이벤트 로그 스토어를 두어 네트워크 단절 장기화 시 브라우저 크래시와 데이터 유실을 방어하는 복합 아키텍처를 설계합니다.",0.95,0.20
+p033,"리액트 19(React 19)에 도입된 Server Actions의 핵심 개념과 이점을 한 문장으로 요약해줘.",tech,qa,basic_qa,cheap,"클라이언트 컴포넌트에서 서버 함수를 직접 불러와 실행하는 새로운 데이터 통신 방식입니다.",0.88,0.01
+p033,"리액트 19(React 19)에 도입된 Server Actions의 핵심 개념과 이점을 한 문장으로 요약해줘.",tech,qa,basic_qa,mid,"Server Actions는 별도의 백엔드 API 엔드포인트를 개설하지 않고도 비동기 RPC 함수를 정의해 폼 제출 및 클라이언트 상태 업데이트를 서버 측에서 직접 실행하도록 돕는 기능입니다.",0.94,0.05
+p033,"리액트 19(React 19)에 도입된 Server Actions의 핵심 개념과 이점을 한 문장으로 요약해줘.",tech,qa,basic_qa,premium,"React 19의 Server Actions는 클라이언트-서버 경계를 제거한 네트워크 단일화 RPC 아키텍처로, 폼 바인딩과 유효성 검사, 낙관적 업데이트(useOptimistic)와의 원활한 결합을 통해 네트워크 오버헤드와 보일러플레이트 코드를 근본적으로 줄여줍니다.",0.96,0.20
+p034,"이진 검색 트리(Binary Search Tree)가 한쪽으로 편향되었을 때의 문제점과 해결책을 설명해줘.",math,reasoning,comparison_medium,cheap,"노드가 한 줄로 늘어서면 탐색 속도가 느려지므로 균형 잡힌 트리로 바꿔야 합니다.",0.65,0.01
+p034,"이진 검색 트리(Binary Search Tree)가 한쪽으로 편향되었을 때의 문제점과 해결책을 설명해줘.",math,reasoning,comparison_medium,mid,"트리가 한쪽으로 쏠리면 최악의 경우 검색 시간 복잡도가 $O(\log N)$에서 $O(N)$으로 악화되어 연결 리스트와 다름없어집니다. 이를 방지하기 위해 AVL 트리나 레드-블랙 트리(Red-Black Tree) 같은 자가 균형 트리 알고리즘을 사용합니다.",0.92,0.05
+p034,"이진 검색 트리(Binary Search Tree)가 한쪽으로 편향되었을 때의 문제점과 해결책을 설명해줘.",math,reasoning,comparison_medium,premium,"데이터가 정렬된 순서대로 삽입될 때 BST는 편향 트리(Skewed Tree)로 퇴화하여 최악의 조회 연산 성능인 $O(N)$을 유발합니다. 이를 아키텍처적으로 개선하기 위해 삽입 및 삭제 연산 시 노드의 balance factor를 검사하고 트리 회전(Rotation) 연산을 수행하여 서브트리의 높이 균형을 $O(\log N)$으로 강제 조율하는 자가 균형 이진 탐색 알고리즘(AVL, RB-Tree)을 도입해야 합니다.",0.97,0.20
+p035,"산림 디지털 트윈 환경에서 개별 나무(단목)의 수고(높이) 및 흉고직경 데이터를 추출하는 알고리즘 프로세스를 작성해줘.",tech,complex_design,architecture_hard,cheap,"드론으로 찍은 포인트 클라우드에서 나무 꼭대기와 아래를 재서 높이를 구합니다.",0.32,0.01
+p035,"산림 디지털 트윈 환경에서 개별 나무(단목)의 수고(높이) 및 흉고직경 데이터를 추출하는 알고리즘 프로세스를 작성해줘.",tech,complex_design,architecture_hard,mid,"LiDAR 점구름 데이터에서 지면(DTM)과 산림 표고(DSM)를 분리하여 수관고안내도(CHM)를 생성하고, 국지 최댓값 필터를 이용해 나무 꼭대기를 찾아 수고를 정한 뒤 1.2m 높이 단면에서 점들을 피팅하여 흉고직경을 산출합니다.",0.74,0.05
+p035,"산림 디지털 트윈 환경에서 개별 나무(단목)의 수고(높이) 및 흉고직경 데이터를 추출하는 알고리즘 프로세스를 작성해줘.",tech,complex_design,architecture_hard,premium,"항공/지상형 LiDAR 로우 데이터를 기하 보정 후 CSF(Cloth Simulation Filter) 알고리즘을 적용해 지면 포인트와 식생 포인트를 분리합니다. 지면 제거 후 CHM(Canopy Height Model) 상에서 임목 영역 분할 알고리즘(Watershed 또는 Region Growing)으로 단목을 개별 세그멘테이션하고, 각 세그먼트의 최상단 z값 차이로 수고를 추출하며, 지면으로부터 대략 1.2~1.3m 높이 레이어의 포인트 클라우드 단면 분포를 RANSAC 알고리즘 원형 피팅으로 추정하여 흉고직경(DBH)을 수학적으로 산출하는 아키텍처 파이프라인을 구축합니다.",0.96,0.20
+p036,"회사의 오픈소스 컴포넌트를 사내 사설 npm 저장소에 배포하기 위해 필요한 CI/CD 파이프라인 단계를 작성해줘.",tech,code_generation,coding_easy,cheap,"코드 빌드하고 npm publish 명령어로 패키지를 저장소에 올립니다.",0.75,0.01
+p036,"회사의 오픈소스 컴포넌트를 사내 사설 npm 저장소에 배포하기 위해 필요한 CI/CD 파이프라인 단계를 작성해줘.",tech,code_generation,coding_easy,mid,"Git에 태그나 푸시가 감지되면 1) 린트 및 테스트 실행, 2) 빌드 도구로 컴포넌트 번들링, 3) `.npmrc` 파일에 사설 레지스트리 토큰 바인딩 후 `npm publish`를 자동 실행하는 파이프라인을 구성합니다.",0.90,0.05
+p036,"회사의 오픈소스 컴포넌트를 사내 사설 npm 저장소에 배포하기 위해 필요한 CI/CD 파이프라인 단계를 작성해줘.",tech,code_generation,coding_easy,premium,"GitHub Actions 또는 GitLab CI에서 checkout, dependency install, lint, test, build, version validation, .npmrc registry token injection, npm publish, release note generation 순서로 구성하고, 배포 토큰은 CI secret으로 관리하며 태그 또는 main 브랜치 머지 조건에서만 publish되도록 제한합니다.",0.96,0.20
+e001,"2 + 3의 값만 숫자로 답해줘.",math,exact_match,cheap_exact,cheap,"5",1.00,0.01
+e001,"2 + 3의 값만 숫자로 답해줘.",math,exact_match,cheap_exact,mid,"5",1.00,0.05
+e001,"2 + 3의 값만 숫자로 답해줘.",math,exact_match,cheap_exact,premium,"5입니다.",0.00,0.20
+e002,"대한민국의 수도를 한 단어로 답해줘.",fact,exact_match,cheap_exact,cheap,"서울",1.00,0.01
+e002,"대한민국의 수도를 한 단어로 답해줘.",fact,exact_match,cheap_exact,mid,"서울",1.00,0.05
+e002,"대한민국의 수도를 한 단어로 답해줘.",fact,exact_match,cheap_exact,premium,"서울입니다.",0.00,0.20
+e003,"문자열 'abc'를 대문자로 변환해줘.",string,exact_match,cheap_exact,cheap,"ABC",1.00,0.01
+e003,"문자열 'abc'를 대문자로 변환해줘.",string,exact_match,cheap_exact,mid,"ABC",1.00,0.05
+e003,"문자열 'abc'를 대문자로 변환해줘.",string,exact_match,cheap_exact,premium,"'abc'를 대문자로 변환하면 ABC입니다.",0.00,0.20
+e004,"다음 중 짝수를 고르세요: 3, 7, 10, 15",math,exact_match,cheap_exact,cheap,"10",1.00,0.01
+e004,"다음 중 짝수를 고르세요: 3, 7, 10, 15",math,exact_match,cheap_exact,mid,"10",1.00,0.05
+e004,"다음 중 짝수를 고르세요: 3, 7, 10, 15",math,exact_match,cheap_exact,premium,"짝수는 10입니다.",0.00,0.20
+e005,"다음 문자열의 앞뒤 공백을 제거해줘: '  hello  '",string,exact_match,cheap_exact,cheap,"hello",1.00,0.01
+e005,"다음 문자열의 앞뒤 공백을 제거해줘: '  hello  '",string,exact_match,cheap_exact,mid,"hello",1.00,0.05
+e005,"다음 문자열의 앞뒤 공백을 제거해줘: '  hello  '",string,exact_match,cheap_exact,premium,"hello",1.00,0.20
+e006,"두 숫자를 더해 반환하는 파이썬 함수 add(a, b)를 작성해줘.",tech,unit_test,cheap_code,cheap,"def add(a, b): return a + b",1.00,0.01
+e006,"두 숫자를 더해 반환하는 파이썬 함수 add(a, b)를 작성해줘.",tech,unit_test,cheap_code,mid,"def add(a, b):\n    return a + b",1.00,0.05
+e006,"두 숫자를 더해 반환하는 파이썬 함수 add(a, b)를 작성해줘.",tech,unit_test,cheap_code,premium,"def add(a, b):\n    if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):\n        raise TypeError('numbers required')\n    return a + b",1.00,0.20
+e101,"정수 n을 입력받아 0 이상이면 n번째 피보나치 수를 반복문으로 반환하고, 음수면 ValueError를 발생시키는 파이썬 함수 fibonacci(n)를 작성해줘.",tech,unit_test,mid_code,cheap,"def fibonacci(n): return n if n < 2 else fibonacci(n-1) + fibonacci(n-2)",0.40,0.01
+e101,"정수 n을 입력받아 0 이상이면 n번째 피보나치 수를 반복문으로 반환하고, 음수면 ValueError를 발생시키는 파이썬 함수 fibonacci(n)를 작성해줘.",tech,unit_test,mid_code,mid,"def fibonacci(n):\n    if n < 0:\n        raise ValueError('n must be non-negative')\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a",1.00,0.05
+e101,"정수 n을 입력받아 0 이상이면 n번째 피보나치 수를 반복문으로 반환하고, 음수면 ValueError를 발생시키는 파이썬 함수 fibonacci(n)를 작성해줘.",tech,unit_test,mid_code,premium,"def fibonacci(n):\n    if n < 0:\n        raise ValueError('n must be non-negative')\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a",1.00,0.20
+e102,"다음 내용을 정확히 2개의 불릿으로 요약해줘. 첫 번째 불릿에는 출시 연기 기간과 이유를, 두 번째 불릿에는 담당 팀과 다음 조치를 포함해야 한다: 결제 장애로 출시가 3주 연기되었고, 플랫폼 팀은 환불 로직을 수정한 뒤 회귀 테스트를 수행한다.",business,constraint_check,mid_summary,cheap,"- 출시가 연기되었습니다.\n- 팀이 테스트합니다.",0.35,0.01
+e102,"다음 내용을 정확히 2개의 불릿으로 요약해줘. 첫 번째 불릿에는 출시 연기 기간과 이유를, 두 번째 불릿에는 담당 팀과 다음 조치를 포함해야 한다: 결제 장애로 출시가 3주 연기되었고, 플랫폼 팀은 환불 로직을 수정한 뒤 회귀 테스트를 수행한다.",business,constraint_check,mid_summary,mid,"- 결제 장애로 출시가 3주 연기되었습니다.\n- 플랫폼 팀은 환불 로직을 수정한 뒤 회귀 테스트를 수행합니다.",1.00,0.05
+e102,"다음 내용을 정확히 2개의 불릿으로 요약해줘. 첫 번째 불릿에는 출시 연기 기간과 이유를, 두 번째 불릿에는 담당 팀과 다음 조치를 포함해야 한다: 결제 장애로 출시가 3주 연기되었고, 플랫폼 팀은 환불 로직을 수정한 뒤 회귀 테스트를 수행한다.",business,constraint_check,mid_summary,premium,"- 결제 장애로 출시가 3주 연기되었습니다.\n- 플랫폼 팀은 환불 로직 수정 후 회귀 테스트를 수행합니다.",1.00,0.20
+e103,"다음 CSV 문자열을 JSON 배열로 변환해줘. age는 숫자여야 한다. name,age Kim,30 Lee,25",data,exact_json,mid_transform,cheap,"[{""name"":""Kim"",""age"":""30""},{""name"":""Lee"",""age"":""25""}]",0.60,0.01
+e103,"다음 CSV 문자열을 JSON 배열로 변환해줘. age는 숫자여야 한다. name,age Kim,30 Lee,25",data,exact_json,mid_transform,mid,"[{""name"":""Kim"",""age"":30},{""name"":""Lee"",""age"":25}]",1.00,0.05
+e103,"다음 CSV 문자열을 JSON 배열로 변환해줘. age는 숫자여야 한다. name,age Kim,30 Lee,25",data,exact_json,mid_transform,premium,"[{""name"":""Kim"",""age"":30},{""name"":""Lee"",""age"":25}]",1.00,0.20
+e201,"멀티테넌트 SaaS 결제 시스템을 설계해줘. 조건: 테넌트별 데이터 격리, Stripe 웹훅 중복 수신 멱등성, 사용량 기반 과금, 월말 청구서 생성, 결제 실패 재시도, 감사 로그, 개인정보와 결제 데이터 분리, 장애 시 재처리 가능성. 구성요소, 데이터 흐름, 핵심 테이블, 실패 시나리오, 보안 통제를 구분해 설명해줘.",tech,rubric_check,premium_architecture,cheap,"API 서버와 데이터베이스, 결제 API를 둡니다.",0.15,0.01
+e201,"멀티테넌트 SaaS 결제 시스템을 설계해줘. 조건: 테넌트별 데이터 격리, Stripe 웹훅 중복 수신 멱등성, 사용량 기반 과금, 월말 청구서 생성, 결제 실패 재시도, 감사 로그, 개인정보와 결제 데이터 분리, 장애 시 재처리 가능성. 구성요소, 데이터 흐름, 핵심 테이블, 실패 시나리오, 보안 통제를 구분해 설명해줘.",tech,rubric_check,premium_architecture,mid,"구성요소는 API, 결제 서비스, 웹훅 처리기, DB입니다. 데이터 흐름은 사용량 집계 후 청구서를 만들고 결제 실패 시 재시도합니다. 감사 로그를 남깁니다.",0.55,0.05
+e201,"멀티테넌트 SaaS 결제 시스템을 설계해줘. 조건: 테넌트별 데이터 격리, Stripe 웹훅 중복 수신 멱등성, 사용량 기반 과금, 월말 청구서 생성, 결제 실패 재시도, 감사 로그, 개인정보와 결제 데이터 분리, 장애 시 재처리 가능성. 구성요소, 데이터 흐름, 핵심 테이블, 실패 시나리오, 보안 통제를 구분해 설명해줘.",tech,rubric_check,premium_architecture,premium,"구성요소: tenant-aware API, billing service, usage aggregator, invoice service, Stripe webhook worker, retry scheduler, DLQ, audit logger, reconciliation job. 데이터 흐름: usage event 수집, tenant isolation 검증, 월말 invoice 생성, idempotency key로 webhook deduplication, 결제 실패 retry와 DLQ 재처리. 핵심 테이블: tenants, subscriptions, usage_events, invoices, payments, webhook_events, audit_logs, reconciliation_runs. 실패 시나리오: 중복 웹훅, 결제 실패, worker crash, 재처리 불일치. 보안 통제: PII separation, payment tokenization, tenant scoped access, audit log immutability.",1.00,0.20
+e202,"WebSocket 이벤트 전송 시스템을 설계해줘. 네트워크 단절, 중복 전송, 메시지 순서 뒤바뀜, 브라우저 종료, 서버 재시작이 발생해도 이벤트를 유실하지 않아야 한다. exactly-once가 실제로 가능한지 구분하고 sequence number, ACK, 재전송, 영속 큐, 중복 제거, 순서 복구 방식을 포함해줘.",tech,rubric_check,premium_distributed,cheap,"끊기면 다시 연결해서 보내면 됩니다.",0.10,0.01
+e202,"WebSocket 이벤트 전송 시스템을 설계해줘. 네트워크 단절, 중복 전송, 메시지 순서 뒤바뀜, 브라우저 종료, 서버 재시작이 발생해도 이벤트를 유실하지 않아야 한다. exactly-once가 실제로 가능한지 구분하고 sequence number, ACK, 재전송, 영속 큐, 중복 제거, 순서 복구 방식을 포함해줘.",tech,rubric_check,premium_distributed,mid,"sequence number와 ACK를 사용하고 재연결 시 미확인 메시지를 다시 보냅니다. 서버는 중복 ID를 저장해 중복을 제거합니다.",0.65,0.05
+e202,"WebSocket 이벤트 전송 시스템을 설계해줘. 네트워크 단절, 중복 전송, 메시지 순서 뒤바뀜, 브라우저 종료, 서버 재시작이 발생해도 이벤트를 유실하지 않아야 한다. exactly-once가 실제로 가능한지 구분하고 sequence number, ACK, 재전송, 영속 큐, 중복 제거, 순서 복구 방식을 포함해줘.",tech,rubric_check,premium_distributed,premium,"네트워크 수준 strict exactly-once는 보장하기 어렵고 at-least-once plus idempotent consumer로 설계해야 합니다. 클라이언트는 persistent outbox에 event_id와 sequence number를 저장하고 reconnect handshake에서 마지막 ACK를 교환합니다. ACK되지 않은 이벤트는 재전송하며 서버는 deduplication key를 durable store에 기록합니다. ordering window로 순서 복구를 수행하고 gap이 있으면 replay를 요청합니다. 브라우저 종료와 서버 재시작은 영속 큐와 checkpoint로 복구합니다.",1.00,0.20
+e203,"TypeScript로 제한 동시성 비동기 작업 실행기 runWithConcurrency를 작성해줘. 입력은 (() => Promise<T>)[]와 concurrency이고, 반환값은 입력 순서대로 정렬되어야 한다. concurrency가 1 미만이면 오류를 발생시키고, 작업 하나가 실패하면 나머지 실행 중 작업은 마무리하되 새 작업은 시작하지 않고 첫 오류를 reject해야 한다. 빈 배열도 처리해야 한다.",tech,unit_test,premium_code,cheap,"async function runWithConcurrency(tasks, concurrency) { return Promise.all(tasks.map(t => t())); }",0.20,0.01
+e203,"TypeScript로 제한 동시성 비동기 작업 실행기 runWithConcurrency를 작성해줘. 입력은 (() => Promise<T>)[]와 concurrency이고, 반환값은 입력 순서대로 정렬되어야 한다. concurrency가 1 미만이면 오류를 발생시키고, 작업 하나가 실패하면 나머지 실행 중 작업은 마무리하되 새 작업은 시작하지 않고 첫 오류를 reject해야 한다. 빈 배열도 처리해야 한다.",tech,unit_test,premium_code,mid,"async function runWithConcurrency(tasks, concurrency) { const results = []; let i = 0; async function worker(){ while(i < tasks.length){ const idx = i++; results[idx] = await tasks[idx](); }} await Promise.all(Array.from({length: concurrency}, worker)); return results; }",0.65,0.05
+e203,"TypeScript로 제한 동시성 비동기 작업 실행기 runWithConcurrency를 작성해줘. 입력은 (() => Promise<T>)[]와 concurrency이고, 반환값은 입력 순서대로 정렬되어야 한다. concurrency가 1 미만이면 오류를 발생시키고, 작업 하나가 실패하면 나머지 실행 중 작업은 마무리하되 새 작업은 시작하지 않고 첫 오류를 reject해야 한다. 빈 배열도 처리해야 한다.",tech,unit_test,premium_code,premium,"async function runWithConcurrency<T>(tasks: Array<() => Promise<T>>, concurrency: number): Promise<T[]> { if (concurrency < 1) throw new Error('invalid concurrency'); if (tasks.length === 0) return []; const results: T[] = new Array(tasks.length); let next = 0; let firstError: unknown; async function worker() { while (firstError === undefined && next < tasks.length) { const index = next++; try { results[index] = await tasks[index](); } catch (err) { if (firstError === undefined) firstError = err; break; } } } const workers = Array.from({ length: Math.min(concurrency, tasks.length) }, worker); await Promise.allSettled(workers); if (firstError !== undefined) throw firstError; return results; }",1.00,0.20
+e301,"이 계약이 법적으로 유효한지 판단해줘.",legal,required_clarification,abstain_case,cheap,"유효합니다.",0.00,0.01
+e301,"이 계약이 법적으로 유효한지 판단해줘.",legal,required_clarification,abstain_case,mid,"계약 내용을 봐야 하지만 일반적으로 서명하면 유효합니다.",0.30,0.05
+e301,"이 계약이 법적으로 유효한지 판단해줘.",legal,required_clarification,abstain_case,premium,"계약서 내용과 관할 법률, 당사자 정보가 없으므로 법적 유효성을 판단할 수 없습니다. 계약 전문과 국가 또는 지역, 체결 상황을 제공해 주세요.",1.00,0.20
+e302,"다음 코드를 고쳐줘.",tech,required_clarification,abstain_case,cheap,"코드를 수정했습니다.",0.00,0.01
+e302,"다음 코드를 고쳐줘.",tech,required_clarification,abstain_case,mid,"어떤 오류인지 알려주시면 수정하겠습니다.",0.70,0.05
+e302,"다음 코드를 고쳐줘.",tech,required_clarification,abstain_case,premium,"수정할 코드가 제공되지 않았습니다. 문제가 발생하는 코드, 기대 동작, 실제 오류 메시지를 보내주시면 원인을 분석해 수정안을 제시하겠습니다.",1.00,0.20
+e401,"HTTP의 기본 포트 번호는?",tech,exact_match,contrast_pair,cheap,"80",1.00,0.01
+e401,"HTTP의 기본 포트 번호는?",tech,exact_match,contrast_pair,mid,"80",1.00,0.05
+e401,"HTTP의 기본 포트 번호는?",tech,exact_match,contrast_pair,premium,"HTTP의 기본 포트 번호는 80입니다.",0.00,0.20
+e402,"이 계약의 면책 조항이 무효인지 판단해줘.",legal,required_clarification,contrast_pair,cheap,"무효입니다.",0.00,0.01
+e402,"이 계약의 면책 조항이 무효인지 판단해줘.",legal,required_clarification,contrast_pair,mid,"계약 조항을 봐야 정확히 판단할 수 있습니다.",0.70,0.05
+e402,"이 계약의 면책 조항이 무효인지 판단해줘.",legal,required_clarification,contrast_pair,premium,"면책 조항의 문구, 계약 전체 내용, 관할 법률, 당사자 관계가 없으므로 무효 여부를 단정할 수 없습니다. 조항 전문과 적용 국가 또는 지역을 제공해야 합니다.",1.00,0.20
+e403,"다음 문장에서 '사과'라는 단어가 몇 번 나오는지 숫자로 답해줘: 사과 사과 바나나 사과 포도 사과 바나나 사과",text,exact_match,contrast_pair,cheap,"5",1.00,0.01
+e403,"다음 문장에서 '사과'라는 단어가 몇 번 나오는지 숫자로 답해줘: 사과 사과 바나나 사과 포도 사과 바나나 사과",text,exact_match,contrast_pair,mid,"5",1.00,0.05
+e403,"다음 문장에서 '사과'라는 단어가 몇 번 나오는지 숫자로 답해줘: 사과 사과 바나나 사과 포도 사과 바나나 사과",text,exact_match,contrast_pair,premium,"사과는 총 5번 나옵니다.",0.00,0.20
+e404,"이중지불을 막는 결제 멱등성 설계해줘.",tech,rubric_check,contrast_pair,cheap,"요청을 한 번만 처리하면 됩니다.",0.20,0.01
+e404,"이중지불을 막는 결제 멱등성 설계해줘.",tech,rubric_check,contrast_pair,mid,"idempotency key를 요청마다 받고 payments 테이블에 저장해 중복 요청이면 기존 결과를 반환합니다.",0.75,0.05
+e404,"이중지불을 막는 결제 멱등성 설계해줘.",tech,rubric_check,contrast_pair,premium,"클라이언트가 idempotency key를 생성하고 서버는 tenant_id, operation_type, key에 unique constraint를 둡니다. 최초 요청은 pending row를 만들고 provider charge id와 결과를 저장합니다. 재시도나 webhook 중복 수신은 같은 key와 provider event id로 deduplication하며, 트랜잭션 경계와 reconciliation job으로 pending stuck 상태를 복구합니다.",1.00,0.20

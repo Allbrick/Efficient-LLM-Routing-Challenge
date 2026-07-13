@@ -141,7 +141,7 @@ def build_viewer_data(data_path: Path, artifacts_dir: Path) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build static viewer data for router evaluation.")
-    parser.add_argument("--data_path", default="data/public/example_train.csv")
+    parser.add_argument("--data_path", default="../data/public/example_train.csv")
     parser.add_argument("--artifacts_dir", default="artifacts")
     parser.add_argument("--output", default="viewer/router_eval.json")
     args = parser.parse_args()

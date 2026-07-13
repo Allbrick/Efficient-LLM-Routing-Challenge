@@ -1,7 +1,9 @@
+artifacts/
+data/
+*.pkl
+*.pyc
 __pycache__/
 .pytest_cache/
-*.pyc
-*.pkl
 *.egg-info/
 dist/
 build/

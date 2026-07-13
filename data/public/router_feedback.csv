@@ -1,0 +1,13 @@
+case_id,prompt,budget_tier,expected_model,evaluation_type,reference_answer,reason
+f001,"2 + 3의 값만 숫자로 답해줘.",fast,cheap,exact_match,"5",exact_answer
+f002,"2 + 3의 값만 숫자로 답해줘.",balanced,cheap,exact_match,"5",exact_answer
+f003,"2 + 3의 값만 숫자로 답해줘.",premium,cheap,exact_match,"5",exact_answer
+f004,"안녕",fast,cheap,exact_match,,ultra_simple
+f005,"안녕",balanced,cheap,exact_match,,ultra_simple
+f006,"안녕",premium,cheap,exact_match,,ultra_simple
+f007,"다음 코드를 고쳐줘.",fast,mid,required_clarification,,missing_context
+f008,"다음 코드를 고쳐줘.",balanced,premium,required_clarification,,missing_context
+f009,"다음 코드를 고쳐줘.",premium,premium,required_clarification,,missing_context
+f010,"대한민국의 수도를 한 단어로 답해줘.",fast,cheap,exact_match,"서울",exact_answer
+f011,"대한민국의 수도를 한 단어로 답해줘.",balanced,cheap,exact_match,"서울",exact_answer
+f012,"대한민국의 수도를 한 단어로 답해줘.",premium,cheap,exact_match,"서울",exact_answer
