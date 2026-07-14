@@ -13,6 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from geometric_router.evaluator import build_training_labels
 from geometric_router.router import GeometricRouter
+from geometric_router.tuning import tune_router_policy
 
 
 def main() -> None:
@@ -23,6 +24,8 @@ def main() -> None:
     parser.add_argument("--labels_output", default="artifacts/geometric_labels.csv")
     parser.add_argument("--fallback_threshold", type=float, default=0.85)
     parser.add_argument("--radius_quantile", type=float, default=0.90)
+    parser.add_argument("--no_synthetic", action="store_true")
+    parser.add_argument("--no_tune", action="store_true")
     args = parser.parse_args()
 
     train_df = pd.read_csv(args.train_path)
@@ -33,7 +36,11 @@ def main() -> None:
         specs_df,
         fallback_threshold=args.fallback_threshold,
         radius_quantile=args.radius_quantile,
+        include_synthetic=not args.no_synthetic,
     )
+    tuning = None
+    if not args.no_tune:
+        tuning = tune_router_policy(router, train_df, specs_df)
     router.save(args.output)
 
     labels = build_training_labels(train_df, specs_df, fallback_threshold=args.fallback_threshold)
@@ -53,6 +60,12 @@ def main() -> None:
             for model, envelope in router.envelopes.items()
         },
         "frontier": router.frontier,
+        "policy": {
+            "radius_multipliers": router.radius_multipliers,
+            "fallback_cost_weight": router.fallback_cost_weight,
+            "pass_thresholds": router.pass_thresholds,
+            "tuning": tuning,
+        },
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 

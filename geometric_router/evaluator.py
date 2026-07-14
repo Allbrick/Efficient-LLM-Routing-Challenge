@@ -33,9 +33,9 @@ class OutputEvaluator:
         evaluation_type = str(spec.get("evaluation_type", "")).strip()
         reference = "" if pd.isna(spec.get("reference_answer", "")) else str(spec.get("reference_answer", ""))
 
-        if evaluation_type == "exact_match":
+        if evaluation_type in {"exact_match", "numeric_count"}:
             success = str(output).strip() == reference
-            return EvaluationResult(success, 1.0 if success else 0.0, "exact_match")
+            return EvaluationResult(success, 1.0 if success else 0.0, evaluation_type)
 
         if evaluation_type == "exact_json":
             success = self._json_equal(output, reference)

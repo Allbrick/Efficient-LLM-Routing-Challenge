@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Geometric LLM Router</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>Geometric LLM Router</h1>
+          <p>feasibility envelope와 파레토 힌트로 모델 선택 근거를 확인합니다.</p>
+        </div>
+        <button id="refreshSimulation" type="button">시뮬레이션 갱신</button>
+      </header>
+
+      <section class="workspace">
+        <form id="routeForm" class="panel route-panel">
+          <label for="prompt">프롬프트</label>
+          <textarea id="prompt" rows="7">2 + 3의 값만 숫자로 답해줘.</textarea>
+
+          <div class="grid">
+            <label>
+              Budget Tier
+              <select id="tier">
+                <option value="fast">Fast</option>
+                <option value="balanced" selected>Balanced</option>
+                <option value="premium">Premium</option>
+              </select>
+            </label>
+            <label>
+              Task Type
+              <input id="taskType" value="math_exact" />
+            </label>
+            <label>
+              Difficulty
+              <select id="difficulty">
+                <option value="">auto</option>
+                <option value="trivial" selected>trivial</option>
+                <option value="medium">medium</option>
+                <option value="hard">hard</option>
+                <option value="unknown">unknown</option>
+              </select>
+            </label>
+            <label>
+              Risk
+              <select id="riskLevel">
+                <option value="">auto</option>
+                <option value="low" selected>low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+              </select>
+            </label>
+            <label>
+              Evaluation
+              <select id="evaluationType">
+                <option value="">unknown</option>
+                <option value="exact_match" selected>exact_match</option>
+                <option value="unit_test">unit_test</option>
+                <option value="exact_json">exact_json</option>
+                <option value="constraint_check">constraint_check</option>
+                <option value="rubric_check">rubric_check</option>
+                <option value="required_clarification">required_clarification</option>
+              </select>
+            </label>
+          </div>
+
+          <button type="submit">라우팅</button>
+        </form>
+
+        <section class="panel result-panel">
+          <h2>선택 결과</h2>
+          <div id="decision" class="decision empty">아직 실행하지 않았습니다.</div>
+          <h3>후보 모델 거리</h3>
+          <div id="candidates" class="candidate-list"></div>
+        </section>
+      </section>
+
+      <section class="panel">
+        <h2>Public Set 시뮬레이션</h2>
+        <div id="simulation" class="simulation-grid"></div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

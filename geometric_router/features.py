@@ -28,6 +28,7 @@ EVALUATION_TYPES = (
     "unknown",
     "exact_match",
     "numeric_check",
+    "numeric_count",
     "unit_test",
     "exact_json",
     "constraint_check",
@@ -47,7 +48,6 @@ TASK_HINTS = {
 
 MISSING_CONTEXT_TERMS = ("다음", "이 ", "해당", "위 ", "아래", "첨부", "코드", "계약", "문서", "파일", "조항")
 CLARIFICATION_TASK_TERMS = ("고쳐", "수정", "판단", "분석", "검토", "유효", "무효")
-EXACT_TERMS = ("숫자로", "값만", "한 단어", "단답", "그대로", "대문자", "소문자")
 
 
 @dataclass(frozen=True)
@@ -80,7 +80,7 @@ class PromptEvidence:
 
 
 class EvidenceExtractor:
-    """Extract compact, explainable coordinates for the geometric router."""
+    """Extract compact coordinates from metadata and structural prompt features."""
 
     def transform(
         self,
@@ -92,31 +92,27 @@ class EvidenceExtractor:
     ) -> PromptEvidence:
         text = str(prompt)
         lowered = text.lower()
-        tokens = text.split()
+        code_like = self._has_hint(lowered, TASK_HINTS["code"])
+        eval_type = str(evaluation_type or "unknown")
+        exact_answer = self._exact_answer(text, eval_type)
         length_norm = min(len(text) / 500.0, 1.0)
         line_norm = min((text.count("\n") + 1) / 12.0, 1.0)
 
-        inferred_difficulty = self._infer_difficulty(text, lowered, task_type)
+        inferred_difficulty = self._infer_difficulty(text, lowered, task_type, eval_type)
         inferred_risk = self._infer_risk(text, lowered, task_type)
         difficulty_score = DIFFICULTY_SCORE.get(str(difficulty).lower(), inferred_difficulty)
         risk_score = RISK_SCORE.get(str(risk_level).lower(), inferred_risk)
 
-        condition_count = self._condition_count(text, lowered)
-        missing_context = self._missing_context(text, lowered)
-        exact_answer = self._exact_answer(text, lowered)
-        code_like = self._has_hint(lowered, TASK_HINTS["code"])
-        eval_type_id = self._eval_type_id(evaluation_type)
-
         return PromptEvidence(
             difficulty_score=float(difficulty_score),
             risk_score=float(risk_score),
-            condition_count=float(condition_count),
-            missing_context=float(missing_context),
+            condition_count=float(self._condition_count(text, lowered)),
+            missing_context=float(self._missing_context(text)),
             exact_answer=float(exact_answer),
             code_like=float(code_like),
             length_norm=float(length_norm),
             line_norm=float(line_norm),
-            eval_type_id=float(eval_type_id),
+            eval_type_id=float(self._eval_type_id(eval_type)),
         )
 
     def explain(
@@ -140,16 +136,16 @@ class EvidenceExtractor:
             "eval_type_id": evidence.eval_type_id,
         }
 
-    def _infer_difficulty(self, text: str, lowered: str, task_type: str) -> float:
-        if self._exact_answer(text, lowered):
+    def _infer_difficulty(self, text: str, lowered: str, task_type: str, evaluation_type: str) -> float:
+        if evaluation_type in {"exact_match", "numeric_check", "numeric_count"}:
             return 0.10
-        if self._missing_context(text, lowered):
+        if self._missing_context(text):
             return 0.65
         if self._has_hint(lowered, TASK_HINTS["architecture"]):
             return 0.85
-        if self._has_hint(lowered, TASK_HINTS["code"]) and self._condition_count(text, lowered) >= 2:
+        if self._has_hint(lowered, TASK_HINTS["code"]) and self._condition_count(text, lowered) >= 0.25:
             return 0.60
-        if len(text) > 220 or self._condition_count(text, lowered) >= 4:
+        if len(text) > 220 or self._condition_count(text, lowered) >= 0.50:
             return 0.75
         if task_type:
             if "hard" in task_type or "architecture" in task_type or "distributed" in task_type:
@@ -159,7 +155,7 @@ class EvidenceExtractor:
         return 0.30
 
     def _infer_risk(self, text: str, lowered: str, task_type: str) -> float:
-        if self._missing_context(text, lowered) and self._has_hint(lowered, TASK_HINTS["legal"]):
+        if self._missing_context(text) and self._has_hint(lowered, TASK_HINTS["legal"]):
             return 0.90
         if self._has_hint(lowered, TASK_HINTS["legal"]):
             return 0.80
@@ -174,17 +170,17 @@ class EvidenceExtractor:
         bullets = len(re.findall(r"^\s*[-*0-9]", text, flags=re.MULTILINE))
         return min(float(separators + bullets), 8.0) / 8.0
 
-    def _missing_context(self, text: str, lowered: str) -> float:
+    def _missing_context(self, text: str) -> float:
         short = len(text) <= 80
         has_pointer = any(term in text for term in MISSING_CONTEXT_TERMS)
         has_task = any(term in text for term in CLARIFICATION_TASK_TERMS)
         return 1.0 if short and has_pointer and has_task else 0.0
 
-    def _exact_answer(self, text: str, lowered: str) -> float:
-        has_exact_term = any(term in text for term in EXACT_TERMS)
+    def _exact_answer(self, text: str, evaluation_type: str) -> float:
+        if evaluation_type in {"exact_match", "numeric_check", "numeric_count"}:
+            return 1.0
         has_simple_math = bool(re.search(r"\d+\s*[+\-*/]\s*\d+", text))
-        quoted_literal = bool(re.search(r"'[^']+'|\"[^\"]+\"", text))
-        return 1.0 if has_exact_term or has_simple_math or quoted_literal else 0.0
+        return 1.0 if has_simple_math else 0.0
 
     def _has_hint(self, lowered: str, hints: tuple[str, ...]) -> float:
         return 1.0 if any(hint.lower() in lowered for hint in hints) else 0.0

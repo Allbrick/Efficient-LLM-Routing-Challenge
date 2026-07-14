@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.pkl
 artifacts/
+*.log
 *.egg-info/
 dist/
 build/

@@ -1,0 +1,244 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, "Noto Sans KR", sans-serif;
+  background: #f6f7f9;
+  color: #17202a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.shell {
+  width: min(1180px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 28px;
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+h3 {
+  font-size: 15px;
+  margin: 18px 0 10px;
+}
+
+p {
+  margin-top: 6px;
+  color: #617080;
+}
+
+button,
+select,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 6px;
+  background: #1d4ed8;
+  color: white;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1e40af;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.95fr) minmax(420px, 1.05fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #d9e0e8;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.route-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #3b4652;
+  font-size: 13px;
+}
+
+textarea,
+input,
+select {
+  width: 100%;
+  border: 1px solid #c9d2dc;
+  border-radius: 6px;
+  padding: 9px 10px;
+  background: #fbfcfd;
+  color: #17202a;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.decision {
+  border: 1px solid #d9e0e8;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fbfcfd;
+}
+
+.decision strong {
+  display: block;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.empty {
+  color: #617080;
+}
+
+.evidence {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.metric {
+  border: 1px solid #e1e7ee;
+  border-radius: 6px;
+  padding: 8px;
+  background: white;
+}
+
+.metric span {
+  display: block;
+  color: #617080;
+  font-size: 12px;
+}
+
+.metric b {
+  font-size: 15px;
+}
+
+.candidate-list {
+  display: grid;
+  gap: 10px;
+}
+
+.candidate {
+  border: 1px solid #d9e0e8;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.candidate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.badge.ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.bar > div {
+  height: 100%;
+  background: #2563eb;
+}
+
+.simulation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sim-card {
+  border: 1px solid #d9e0e8;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fbfcfd;
+}
+
+.sim-card h3 {
+  margin-top: 0;
+}
+
+.sim-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  color: #3b4652;
+}
+
+@media (max-width: 860px) {
+  .workspace,
+  .simulation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    flex-direction: column;
+  }
+}

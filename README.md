@@ -39,11 +39,42 @@ pip install -r requirements.txt
 python scripts\train_geometric_router.py
 ```
 
+학습 명령은 기본적으로 public set simulation을 이용해 tier별 radius policy도 함께
+튜닝합니다. 이미 생성된 artifact의 policy만 다시 튜닝하려면 아래 명령을 사용합니다.
+
+```powershell
+python scripts\tune_geometric_policy.py
+```
+
+Public set 시뮬레이션:
+
+```powershell
+python scripts\simulate_geometric_router.py
+```
+
+Fast tier 전체 예산 안에서 batch allocation을 확인하려면 아래 명령을 사용합니다.
+
+```powershell
+python scripts\simulate_geometric_router.py --allocate --tier fast
+```
+
+Batch allocation은 프롬프트별 독립 선택이 아니라 tier 전체 예산 안에서 어떤
+프롬프트를 승급할지 고릅니다. 후보별 `pass_probability`,
+`sufficiency_probability`, envelope 거리, 비용을 함께 사용합니다.
+
 단일 프롬프트 라우팅:
 
 ```powershell
 python scripts\route_geometric_prompt.py "2 + 3의 값만 숫자로 답해줘." --tier balanced --task_type math_exact --difficulty trivial --risk_level low --evaluation_type exact_match
 ```
+
+Viewer 실행:
+
+```powershell
+python scripts\serve_geometric_viewer.py --port 4010
+```
+
+브라우저에서 `http://127.0.0.1:4010/`을 엽니다.
 
 테스트:
 
