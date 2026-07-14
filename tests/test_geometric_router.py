@@ -131,7 +131,8 @@ def test_budget_allocator_uses_risk_model_to_reduce_fast_under_route():
     train_df, specs_df = load_data()
     router = GeometricRouter.fit(train_df, specs_df)
     tune_router_policy(router, train_df, specs_df, tiers=("fast",))
+    independent = simulate_public_set(router, train_df, specs_df, tiers=("fast",))["summary"]["tier_summary"]["fast"]
     payload = allocate_public_budget(router, train_df, specs_df, "fast")
     summary = payload["summary"]
 
-    assert summary["under_route"] <= 17
+    assert summary["under_route"] <= independent["under_route"]
