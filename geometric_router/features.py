@@ -1,0 +1,195 @@
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+
+import numpy as np
+
+
+MODEL_ORDER = ("cheap", "mid", "premium")
+MODEL_RANK = {model: idx for idx, model in enumerate(MODEL_ORDER)}
+
+DIFFICULTY_SCORE = {
+    "trivial": 0.10,
+    "easy": 0.25,
+    "medium": 0.55,
+    "hard": 0.85,
+    "unknown": 0.65,
+}
+
+RISK_SCORE = {
+    "low": 0.10,
+    "medium": 0.50,
+    "high": 0.90,
+    "unknown": 0.60,
+}
+
+EVALUATION_TYPES = (
+    "unknown",
+    "exact_match",
+    "numeric_check",
+    "unit_test",
+    "exact_json",
+    "constraint_check",
+    "rubric_check",
+    "required_clarification",
+    "clarification",
+)
+
+TASK_HINTS = {
+    "code": ("코드", "함수", "파이썬", "javascript", "typescript", "def ", "function", "class "),
+    "legal": ("계약", "법적", "법률", "조항", "무효", "관할"),
+    "math": ("계산", "값", "+", "-", "*", "/", "수식", "숫자"),
+    "data": ("json", "csv", "표", "배열", "필드"),
+    "summary": ("요약", "불릿", "bullet", "정리"),
+    "architecture": ("설계", "시스템", "파이프라인", "멀티테넌트", "분산", "장애"),
+}
+
+MISSING_CONTEXT_TERMS = ("다음", "이 ", "해당", "위 ", "아래", "첨부", "코드", "계약", "문서", "파일", "조항")
+CLARIFICATION_TASK_TERMS = ("고쳐", "수정", "판단", "분석", "검토", "유효", "무효")
+EXACT_TERMS = ("숫자로", "값만", "한 단어", "단답", "그대로", "대문자", "소문자")
+
+
+@dataclass(frozen=True)
+class PromptEvidence:
+    difficulty_score: float
+    risk_score: float
+    condition_count: float
+    missing_context: float
+    exact_answer: float
+    code_like: float
+    length_norm: float
+    line_norm: float
+    eval_type_id: float
+
+    def as_vector(self) -> np.ndarray:
+        return np.array(
+            [
+                self.difficulty_score,
+                self.risk_score,
+                self.condition_count,
+                self.missing_context,
+                self.exact_answer,
+                self.code_like,
+                self.length_norm,
+                self.line_norm,
+                self.eval_type_id,
+            ],
+            dtype=np.float64,
+        )
+
+
+class EvidenceExtractor:
+    """Extract compact, explainable coordinates for the geometric router."""
+
+    def transform(
+        self,
+        prompt: str,
+        task_type: str = "",
+        difficulty: str = "",
+        risk_level: str = "",
+        evaluation_type: str = "",
+    ) -> PromptEvidence:
+        text = str(prompt)
+        lowered = text.lower()
+        tokens = text.split()
+        length_norm = min(len(text) / 500.0, 1.0)
+        line_norm = min((text.count("\n") + 1) / 12.0, 1.0)
+
+        inferred_difficulty = self._infer_difficulty(text, lowered, task_type)
+        inferred_risk = self._infer_risk(text, lowered, task_type)
+        difficulty_score = DIFFICULTY_SCORE.get(str(difficulty).lower(), inferred_difficulty)
+        risk_score = RISK_SCORE.get(str(risk_level).lower(), inferred_risk)
+
+        condition_count = self._condition_count(text, lowered)
+        missing_context = self._missing_context(text, lowered)
+        exact_answer = self._exact_answer(text, lowered)
+        code_like = self._has_hint(lowered, TASK_HINTS["code"])
+        eval_type_id = self._eval_type_id(evaluation_type)
+
+        return PromptEvidence(
+            difficulty_score=float(difficulty_score),
+            risk_score=float(risk_score),
+            condition_count=float(condition_count),
+            missing_context=float(missing_context),
+            exact_answer=float(exact_answer),
+            code_like=float(code_like),
+            length_norm=float(length_norm),
+            line_norm=float(line_norm),
+            eval_type_id=float(eval_type_id),
+        )
+
+    def explain(
+        self,
+        prompt: str,
+        task_type: str = "",
+        difficulty: str = "",
+        risk_level: str = "",
+        evaluation_type: str = "",
+    ) -> dict[str, float]:
+        evidence = self.transform(prompt, task_type, difficulty, risk_level, evaluation_type)
+        return {
+            "difficulty_score": evidence.difficulty_score,
+            "risk_score": evidence.risk_score,
+            "condition_count": evidence.condition_count,
+            "missing_context": evidence.missing_context,
+            "exact_answer": evidence.exact_answer,
+            "code_like": evidence.code_like,
+            "length_norm": evidence.length_norm,
+            "line_norm": evidence.line_norm,
+            "eval_type_id": evidence.eval_type_id,
+        }
+
+    def _infer_difficulty(self, text: str, lowered: str, task_type: str) -> float:
+        if self._exact_answer(text, lowered):
+            return 0.10
+        if self._missing_context(text, lowered):
+            return 0.65
+        if self._has_hint(lowered, TASK_HINTS["architecture"]):
+            return 0.85
+        if self._has_hint(lowered, TASK_HINTS["code"]) and self._condition_count(text, lowered) >= 2:
+            return 0.60
+        if len(text) > 220 or self._condition_count(text, lowered) >= 4:
+            return 0.75
+        if task_type:
+            if "hard" in task_type or "architecture" in task_type or "distributed" in task_type:
+                return 0.85
+            if "medium" in task_type or "constraints" in task_type:
+                return 0.55
+        return 0.30
+
+    def _infer_risk(self, text: str, lowered: str, task_type: str) -> float:
+        if self._missing_context(text, lowered) and self._has_hint(lowered, TASK_HINTS["legal"]):
+            return 0.90
+        if self._has_hint(lowered, TASK_HINTS["legal"]):
+            return 0.80
+        if "medical" in task_type or "finance" in task_type:
+            return 0.80
+        if self._has_hint(lowered, TASK_HINTS["architecture"]):
+            return 0.55
+        return 0.15
+
+    def _condition_count(self, text: str, lowered: str) -> float:
+        separators = len(re.findall(r",|;| 그리고 | 또한 | 각각 | 모두 | and | or | must | should ", lowered))
+        bullets = len(re.findall(r"^\s*[-*0-9]", text, flags=re.MULTILINE))
+        return min(float(separators + bullets), 8.0) / 8.0
+
+    def _missing_context(self, text: str, lowered: str) -> float:
+        short = len(text) <= 80
+        has_pointer = any(term in text for term in MISSING_CONTEXT_TERMS)
+        has_task = any(term in text for term in CLARIFICATION_TASK_TERMS)
+        return 1.0 if short and has_pointer and has_task else 0.0
+
+    def _exact_answer(self, text: str, lowered: str) -> float:
+        has_exact_term = any(term in text for term in EXACT_TERMS)
+        has_simple_math = bool(re.search(r"\d+\s*[+\-*/]\s*\d+", text))
+        quoted_literal = bool(re.search(r"'[^']+'|\"[^\"]+\"", text))
+        return 1.0 if has_exact_term or has_simple_math or quoted_literal else 0.0
+
+    def _has_hint(self, lowered: str, hints: tuple[str, ...]) -> float:
+        return 1.0 if any(hint.lower() in lowered for hint in hints) else 0.0
+
+    def _eval_type_id(self, evaluation_type: str) -> float:
+        if evaluation_type not in EVALUATION_TYPES:
+            evaluation_type = "unknown"
+        return EVALUATION_TYPES.index(evaluation_type) / max(len(EVALUATION_TYPES) - 1, 1)
