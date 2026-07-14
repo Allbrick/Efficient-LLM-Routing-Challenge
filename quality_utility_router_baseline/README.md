@@ -1,25 +1,23 @@
 # Quality Utility Router Baseline
 
-This folder contains the previous router implementation: a quality-prediction
-router that calibrates candidate model quality, applies prompt priors, then
-selects the candidate with the best budget-tier utility.
+이 폴더는 이전 라우터 구현을 보관합니다. 현재 구현은 후보 모델별 품질을
+예측하고, 예측값을 보정한 뒤, 프롬프트 prior와 budget tier별 utility를 적용해
+가장 적합한 후보 모델을 선택하는 방식입니다.
 
-It is kept as a runnable baseline while the repository root is used for the
-next router design. Shared challenge material such as `PROJECT.md` and `data/`
-stays at the repository root because it applies to both the baseline and the
-new implementation.
+저장소 루트는 다음 라우터 설계에 사용하고, 이 폴더는 실행 가능한 기존
+베이스라인으로 유지합니다. `PROJECT.md`, `data/`처럼 새 구현에도 동일하게
+적용되는 공통 자료는 루트에 둡니다.
 
-## Run From This Folder
+## 실행 방법
 
-Open a terminal in `quality_utility_router_baseline` before running the
-commands below.
+아래 명령은 `quality_utility_router_baseline` 폴더에서 실행합니다.
 
 ```powershell
 pip install -r requirements.txt
 python -m pytest -q
 ```
 
-## Rebuild The Legacy Pipeline
+## 베이스라인 파이프라인 재생성
 
 ```powershell
 python -m training.01_data_validation --data_path ../data/public/example_train.csv
@@ -32,22 +30,25 @@ python -m training.07_feedback_tune
 python scripts/build_viewer_data.py
 ```
 
-## Run The Viewer
+## Viewer 실행
 
 ```powershell
 python scripts/serve_router_viewer.py --port 4003
 ```
 
-Then open:
+그다음 아래 주소를 엽니다.
 
 ```text
 http://127.0.0.1:4003/
 ```
 
-## Current Design Status
+## 현재 설계 상태
 
-This version is useful as a working baseline, but it should not be the
-foundation for the next implementation. The main limitation is that routing is
-still driven by a small training set plus manual prompt priors and feedback
-rules. The next router should move the decision boundary toward objective
-evaluators, pass/fail evidence, and explicit budget-aware risk handling.
+이 버전은 동작하는 베이스라인으로는 유용하지만, 다음 구현의 기반으로 그대로
+사용하기에는 부족합니다. 가장 큰 한계는 라우팅 판단이 아직 작은 학습 데이터,
+수동 프롬프트 prior, feedback 규칙에 많이 의존한다는 점입니다. 다음 라우터는
+객관적 evaluator, pass/fail 근거, 명시적인 budget-aware risk handling 쪽으로
+판단 기준을 옮겨야 합니다.
+
+이 베이스라인의 상세 평가와 다음 라우터에서 해결해야 할 설계 문제는
+`../docs/03-review/implementation-review.md`를 참고합니다.

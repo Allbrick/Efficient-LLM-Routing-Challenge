@@ -22,7 +22,7 @@ data/public/
   example_eval_specs.csv
   router_feedback.csv
 
-src/
+quality_utility_router_baseline/src/
   feature_extractor.py
   candidate_expander.py
   quality_predictor.py
@@ -31,7 +31,7 @@ src/
   prompt_policy.py
   router.py
 
-training/
+quality_utility_router_baseline/training/
   01_data_validation.py
   02_oracle_analysis.py
   03_train_oof.py
@@ -40,7 +40,7 @@ training/
   06_final_build.py
   07_feedback_tune.py
 
-viewer/
+quality_utility_router_baseline/viewer/
   index.html
   app.js
   styles.css
@@ -695,4 +695,3 @@ generated: artifacts, viewer/router_eval.*
 ```
 
 가장 중요한 다음 단계는 규칙을 더 늘리는 것이 아니라, `example_eval_specs.csv` 기반 evaluator를 만들어 `expected_min_model`과 `success`를 자동 계산하고, 이를 직접 학습하는 구조로 바꾸는 것이다.
-
