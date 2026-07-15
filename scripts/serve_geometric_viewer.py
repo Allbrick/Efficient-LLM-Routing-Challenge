@@ -15,6 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from geometric_router.router import GeometricRouter
+from geometric_router.budget_allocator import allocate_public_budget
 from geometric_router.simulator import simulate_public_set
 
 
@@ -24,6 +25,7 @@ class GeometricRouterService:
         self.train_df = pd.read_csv(train_path)
         self.specs_df = pd.read_csv(specs_path) if specs_path.exists() else pd.DataFrame()
         self._simulation_cache: dict | None = None
+        self._allocation_cache: dict[str, dict] = {}
 
     def route(self, payload: dict) -> dict:
         prompt = str(payload.get("prompt", "")).strip()
@@ -45,6 +47,12 @@ class GeometricRouterService:
             self._simulation_cache = simulate_public_set(self.router, self.train_df, self.specs_df)
         return self._simulation_cache
 
+    def allocation(self, tier: str) -> dict:
+        tier = tier.lower()
+        if tier not in self._allocation_cache:
+            self._allocation_cache[tier] = allocate_public_budget(self.router, self.train_df, self.specs_df, tier)
+        return self._allocation_cache[tier]
+
 
 def make_handler(viewer_dir: Path, service: GeometricRouterService):
     class Handler(SimpleHTTPRequestHandler):
@@ -60,8 +68,13 @@ def make_handler(viewer_dir: Path, service: GeometricRouterService):
             self.wfile.write(body)
 
         def do_GET(self) -> None:
-            if urlparse(self.path).path == "/api/simulation":
+            parsed = urlparse(self.path)
+            if parsed.path == "/api/simulation":
                 self._send_json(200, service.simulation())
+                return
+            if parsed.path == "/api/allocation":
+                params = dict(item.split("=", 1) for item in parsed.query.split("&") if "=" in item)
+                self._send_json(200, service.allocation(params.get("tier", "fast")))
                 return
             super().do_GET()
 

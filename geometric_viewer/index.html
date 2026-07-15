@@ -3,17 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Geometric LLM Router</title>
+    <title>Geometric LLM Router Viewer</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="shell">
       <header class="topbar">
         <div>
-          <h1>Geometric LLM Router</h1>
-          <p>feasibility envelope와 파레토 힌트로 모델 선택 근거를 확인합니다.</p>
+          <h1>Geometric LLM Router Viewer</h1>
+          <p>단일 프롬프트 라우팅, 후보 확률, public simulation, batch allocation 결과를 확인합니다.</p>
         </div>
-        <button id="refreshSimulation" type="button">시뮬레이션 갱신</button>
+        <div class="top-actions">
+          <button id="refreshSimulation" type="button">Simulation 갱신</button>
+          <button id="refreshAllocation" type="button">Allocation 갱신</button>
+        </div>
       </header>
 
       <section class="workspace">
@@ -51,36 +54,86 @@
                 <option value="low" selected>low</option>
                 <option value="medium">medium</option>
                 <option value="high">high</option>
+                <option value="unknown">unknown</option>
               </select>
             </label>
             <label>
               Evaluation
               <select id="evaluationType">
-                <option value="">unknown</option>
+                <option value="">auto</option>
                 <option value="exact_match" selected>exact_match</option>
+                <option value="numeric_count">numeric_count</option>
                 <option value="unit_test">unit_test</option>
                 <option value="exact_json">exact_json</option>
                 <option value="constraint_check">constraint_check</option>
                 <option value="rubric_check">rubric_check</option>
                 <option value="required_clarification">required_clarification</option>
+                <option value="refusal_check">refusal_check</option>
               </select>
             </label>
           </div>
 
-          <button type="submit">라우팅</button>
+          <button type="submit">라우팅 실행</button>
         </form>
 
         <section class="panel result-panel">
           <h2>선택 결과</h2>
           <div id="decision" class="decision empty">아직 실행하지 않았습니다.</div>
-          <h3>후보 모델 거리</h3>
+          <h3>프롬프트별 후보 비교</h3>
           <div id="candidates" class="candidate-list"></div>
         </section>
       </section>
 
       <section class="panel">
-        <h2>Public Set 시뮬레이션</h2>
+        <h2>Public Set Simulation</h2>
         <div id="simulation" class="simulation-grid"></div>
+      </section>
+
+      <section class="panel allocation-panel">
+        <div class="section-header">
+          <div>
+            <h2>Batch Allocation</h2>
+            <p>총 예산 제약에서 선택된 action과 route error를 확인합니다.</p>
+          </div>
+          <div class="filters">
+            <label>
+              Tier
+              <select id="allocationTier">
+                <option value="fast" selected>Fast</option>
+                <option value="balanced">Balanced</option>
+                <option value="premium">Premium</option>
+              </select>
+            </label>
+            <label>
+              Error
+              <select id="allocationFilter">
+                <option value="all" selected>all</option>
+                <option value="under_route">under_route</option>
+                <option value="over_route">over_route</option>
+                <option value="should_abstain">should_abstain</option>
+                <option value="ok">ok</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div id="allocationSummary" class="summary-strip"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>prompt_id</th>
+                <th>expected</th>
+                <th>selected</th>
+                <th>error</th>
+                <th>quality</th>
+                <th>cost</th>
+                <th>under risk</th>
+                <th>gain/cost</th>
+              </tr>
+            </thead>
+            <tbody id="allocationRows"></tbody>
+          </table>
+        </div>
       </section>
     </main>
     <script src="app.js"></script>

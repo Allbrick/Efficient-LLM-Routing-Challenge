@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
   font-family: Arial, "Noto Sans KR", sans-serif;
-  background: #f6f7f9;
+  background: #f5f7fa;
   color: #17202a;
 }
 
@@ -14,17 +14,25 @@ body {
 }
 
 .shell {
-  width: min(1180px, calc(100vw - 32px));
+  width: min(1280px, calc(100vw - 32px));
   margin: 0 auto;
   padding: 24px 0 40px;
 }
 
-.topbar {
+.topbar,
+.section-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.top-actions,
+.filters {
+  display: flex;
+  gap: 10px;
+  align-items: end;
 }
 
 h1,
@@ -40,7 +48,7 @@ h1 {
 
 h2 {
   font-size: 18px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 h3 {
@@ -63,19 +71,20 @@ textarea {
 button {
   border: 0;
   border-radius: 6px;
-  background: #1d4ed8;
+  background: #1f5fbf;
   color: white;
   padding: 10px 14px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 button:hover {
-  background: #1e40af;
+  background: #174a99;
 }
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(360px, 0.95fr) minmax(420px, 1.05fr);
+  grid-template-columns: minmax(360px, 0.9fr) minmax(460px, 1.1fr);
   gap: 16px;
   margin-bottom: 16px;
 }
@@ -85,6 +94,7 @@ button:hover {
   border: 1px solid #d9e0e8;
   border-radius: 8px;
   padding: 18px;
+  margin-bottom: 16px;
 }
 
 .route-panel {
@@ -147,20 +157,25 @@ textarea {
   margin-top: 12px;
 }
 
-.metric {
+.metric,
+.summary-pill {
   border: 1px solid #e1e7ee;
   border-radius: 6px;
   padding: 8px;
   background: white;
 }
 
-.metric span {
+.metric span,
+.summary-pill span,
+.kv-grid span {
   display: block;
   color: #617080;
   font-size: 12px;
 }
 
-.metric b {
+.metric b,
+.summary-pill b,
+.kv-grid b {
   font-size: 15px;
 }
 
@@ -175,11 +190,16 @@ textarea {
   padding: 12px;
 }
 
+.candidate.selected {
+  border-color: #1f5fbf;
+  background: #f4f8ff;
+}
+
 .candidate-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .badge {
@@ -195,16 +215,39 @@ textarea {
   color: #166534;
 }
 
-.bar {
+.prob-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 52px;
+  gap: 8px;
+  align-items: center;
+  margin: 7px 0;
+  color: #3b4652;
+  font-size: 13px;
+}
+
+.prob-track {
   height: 8px;
   border-radius: 999px;
   background: #e5e7eb;
   overflow: hidden;
 }
 
-.bar > div {
+.prob-track > div {
   height: 100%;
-  background: #2563eb;
+  background: #1f5fbf;
+}
+
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.kv-grid > div {
+  border: 1px solid #e1e7ee;
+  border-radius: 6px;
+  padding: 8px;
 }
 
 .simulation-grid {
@@ -232,13 +275,98 @@ textarea {
   color: #3b4652;
 }
 
-@media (max-width: 860px) {
+.selection-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.selection-counts span {
+  border-radius: 999px;
+  background: #eef2f7;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.table-wrap {
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid #d9e0e8;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th,
+td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #e5eaf0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 1;
+}
+
+tr.under_route {
+  background: #fff7ed;
+}
+
+tr.over_route {
+  background: #eff6ff;
+}
+
+tr.should_abstain {
+  background: #fef2f2;
+}
+
+tr.ok {
+  background: #f7fff9;
+}
+
+.route-error {
+  border-radius: 999px;
+  background: #eef2f7;
+  padding: 4px 8px;
+}
+
+@media (max-width: 920px) {
   .workspace,
-  .simulation-grid {
+  .simulation-grid,
+  .summary-strip {
     grid-template-columns: 1fr;
   }
 
-  .topbar {
+  .topbar,
+  .section-header,
+  .top-actions,
+  .filters {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kv-grid,
+  .evidence {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prob-row {
+    grid-template-columns: 1fr;
   }
 }
