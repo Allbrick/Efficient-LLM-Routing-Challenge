@@ -60,14 +60,18 @@ def allocate_public_budget(
         options = []
         for candidate in decision.candidates:
             model_id = candidate["model_id"]
-            actual_row = rows_by_model.loc[model_id]
+            if model_id == "abstain":
+                actual_quality = 1.0 if expected_by_prompt[prompt_id] == "abstain" else 0.0
+            else:
+                actual_row = rows_by_model.loc[model_id]
+                actual_quality = float(actual_row["quality_score"])
             options.append(
                 {
                     "model_id": model_id,
                     "cost_units": int(round(float(candidate["cost"]) * cost_scale)),
                     "cost": float(candidate["cost"]),
                     "predicted_score": _candidate_score(candidate),
-                    "actual_quality": float(actual_row["quality_score"]),
+                    "actual_quality": actual_quality,
                 }
             )
         prompt_ids.append(prompt_id)
@@ -108,6 +112,7 @@ def allocate_public_budget(
         "cost_over_limit": int((result_df["cost"] > BUDGET_LIMITS[tier]).sum()),
         "under_route": int((result_df["error_type"] == "under_route").sum()),
         "over_route": int((result_df["error_type"] == "over_route").sum()),
+        "should_abstain": int((result_df["error_type"] == "should_abstain").sum()),
         "ok": int((result_df["error_type"] == "ok").sum()),
         "selection_counts": result_df["selected_model_id"].value_counts().to_dict(),
     }
@@ -115,11 +120,25 @@ def allocate_public_budget(
 
 
 def _candidate_score(candidate: dict) -> float:
+    if candidate.get("model_id") == "abstain":
+        abstain_probability = float(candidate.get("sufficiency_probability", 0.0))
+        return -0.2 if abstain_probability < 0.55 else 2.0 * abstain_probability
     pass_probability = float(candidate.get("pass_probability", 0.0))
     sufficiency_probability = float(candidate.get("sufficiency_probability", pass_probability))
     feasible_bonus = 0.08 if candidate.get("feasible") else 0.0
     distance_penalty = 0.04 * float(candidate.get("normalized_distance", 1.0))
-    return 0.70 * sufficiency_probability + 0.30 * pass_probability + feasible_bonus - distance_penalty
+    confidence_bonus = max(0.0, sufficiency_probability - 0.55) * 1.0
+    premium_bonus = 0.0
+    if candidate.get("model_id") == "premium":
+        premium_bonus = max(0.0, sufficiency_probability - 0.90) * 4.0
+    return (
+        0.70 * sufficiency_probability
+        + 0.30 * pass_probability
+        + feasible_bonus
+        + confidence_bonus
+        + premium_bonus
+        - distance_penalty
+    )
 
 
 def _dynamic_program(prompt_options: list[list[dict]], budget_units: int) -> list[dict]:
@@ -147,6 +166,10 @@ def _dynamic_program(prompt_options: list[list[dict]], budget_units: int) -> lis
 def _classify(expected: str, selected: str) -> str:
     if expected == selected:
         return "ok"
+    if expected == "abstain":
+        return "should_abstain"
+    if selected == "abstain":
+        return "under_route"
     if MODEL_RANK[selected] < MODEL_RANK[expected]:
         return "under_route"
     return "over_route"

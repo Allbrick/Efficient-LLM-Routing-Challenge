@@ -7,6 +7,7 @@ import numpy as np
 
 
 MODEL_ORDER = ("cheap", "mid", "premium")
+ROUTE_ACTIONS = ("abstain", "cheap", "mid", "premium")
 MODEL_RANK = {model: idx for idx, model in enumerate(MODEL_ORDER)}
 
 DIFFICULTY_SCORE = {
@@ -34,6 +35,7 @@ EVALUATION_TYPES = (
     "constraint_check",
     "rubric_check",
     "required_clarification",
+    "refusal_check",
     "clarification",
 )
 

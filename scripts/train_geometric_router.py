@@ -64,6 +64,7 @@ def main() -> None:
             "radius_multipliers": router.radius_multipliers,
             "fallback_cost_weight": router.fallback_cost_weight,
             "pass_thresholds": router.pass_thresholds,
+            "abstain_thresholds": router.abstain_thresholds,
             "tuning": tuning,
         },
     }

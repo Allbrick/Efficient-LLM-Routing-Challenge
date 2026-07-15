@@ -41,6 +41,12 @@ DEFAULT_PASS_THRESHOLDS = {
     "premium": 0.90,
 }
 
+DEFAULT_ABSTAIN_THRESHOLDS = {
+    "fast": 0.55,
+    "balanced": 0.55,
+    "premium": 0.55,
+}
+
 
 @dataclass
 class RouteDecision:
@@ -65,6 +71,7 @@ class GeometricRouter:
         radius_multipliers: dict[str, dict[str, float]] | None = None,
         fallback_cost_weight: dict[str, float] | None = None,
         pass_thresholds: dict[str, float] | None = None,
+        abstain_thresholds: dict[str, float] | None = None,
         metadata: dict | None = None,
     ):
         self.envelopes = envelopes
@@ -78,6 +85,7 @@ class GeometricRouter:
         }
         self.fallback_cost_weight = fallback_cost_weight or DEFAULT_FALLBACK_COST_WEIGHT.copy()
         self.pass_thresholds = pass_thresholds or DEFAULT_PASS_THRESHOLDS.copy()
+        self.abstain_thresholds = abstain_thresholds or DEFAULT_ABSTAIN_THRESHOLDS.copy()
         self.metadata = metadata or {}
         self.extractor = EvidenceExtractor()
 
@@ -159,6 +167,7 @@ class GeometricRouter:
         radius_multipliers: dict[str, dict[str, float]] | None = None,
         fallback_cost_weight: dict[str, float] | None = None,
         pass_thresholds: dict[str, float] | None = None,
+        abstain_thresholds: dict[str, float] | None = None,
     ) -> None:
         if radius_multipliers is not None:
             self.radius_multipliers = radius_multipliers
@@ -166,6 +175,8 @@ class GeometricRouter:
             self.fallback_cost_weight = fallback_cost_weight
         if pass_thresholds is not None:
             self.pass_thresholds = pass_thresholds
+        if abstain_thresholds is not None:
+            self.abstain_thresholds = abstain_thresholds
 
     def route(
         self,
@@ -194,6 +205,24 @@ class GeometricRouter:
         sufficiency_probabilities = self.risk_model.predict_all(x, prompt) if self.risk_model is not None else {}
         candidates = []
 
+        abstain_probability = float(sufficiency_probabilities.get("abstain", 0.0))
+        if evaluation_type in {"required_clarification", "refusal_check"}:
+            abstain_probability = max(abstain_probability, 0.85)
+        candidates.append(
+            {
+                "model_id": "abstain",
+                "action_type": "abstain",
+                "cost": 0.0,
+                "distance": 0.0,
+                "radius": 0.0,
+                "normalized_distance": 0.0,
+                "pass_probability": round(abstain_probability, 6),
+                "sufficiency_probability": round(abstain_probability, 6),
+                "feasible": abstain_probability >= self.abstain_thresholds.get(tier, 0.55),
+                "sample_count": 0,
+            }
+        )
+
         for model_id in MODEL_ORDER:
             envelope = self.envelopes[model_id]
             distance = envelope.distance(x)
@@ -203,6 +232,7 @@ class GeometricRouter:
             candidates.append(
                 {
                     "model_id": model_id,
+                    "action_type": "model_call",
                     "cost": self.model_costs.get(model_id, 0.0),
                     "distance": round(distance, 6),
                     "radius": round(envelope.radius * radius_multiplier, 6),
@@ -216,8 +246,15 @@ class GeometricRouter:
 
         selected = None
         reason = ""
+        abstain_candidate = candidates[0]
+        if abstain_candidate["feasible"]:
+            selected = "abstain"
+            reason = "abstain_probability"
+
         pass_threshold = self.pass_thresholds.get(tier, DEFAULT_PASS_THRESHOLDS[tier])
-        for candidate in candidates:
+        for candidate in candidates[1:]:
+            if selected is not None:
+                break
             if candidate["pass_probability"] >= pass_threshold:
                 selected = candidate["model_id"]
                 reason = "cheapest_passing_probability"
@@ -231,7 +268,7 @@ class GeometricRouter:
             max_cost = max(self.model_costs.values()) if self.model_costs else 1.0
             cost_weight = self.fallback_cost_weight.get(tier, 0.0)
             selected_candidate = min(
-                candidates,
+                candidates[1:],
                 key=lambda item: (
                     item["normalized_distance"] + cost_weight * (item["cost"] / max_cost),
                     item["cost"],
@@ -262,6 +299,7 @@ class GeometricRouter:
             "radius_multipliers": self.radius_multipliers,
             "fallback_cost_weight": self.fallback_cost_weight,
             "pass_thresholds": self.pass_thresholds,
+            "abstain_thresholds": self.abstain_thresholds,
             "metadata": self.metadata,
         }
         output = Path(path)
@@ -291,5 +329,6 @@ class GeometricRouter:
             radius_multipliers=payload.get("radius_multipliers"),
             fallback_cost_weight=payload.get("fallback_cost_weight"),
             pass_thresholds=payload.get("pass_thresholds"),
+            abstain_thresholds=payload.get("abstain_thresholds"),
             metadata=payload.get("metadata", {}),
         )

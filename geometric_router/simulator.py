@@ -24,6 +24,10 @@ class SimulationRow:
 def classify_route(expected: str, selected: str) -> str:
     if expected == selected:
         return "ok"
+    if expected == "abstain":
+        return "should_abstain"
+    if selected == "abstain":
+        return "under_route"
     if MODEL_RANK[selected] < MODEL_RANK[expected]:
         return "under_route"
     return "over_route"
@@ -56,15 +60,21 @@ def simulate_public_set(
                 risk_level=str(spec.get("risk_level", "")),
                 evaluation_type=str(spec.get("evaluation_type", "")),
             )
-            selected_row = group[group["model_id"] == decision.selected_model_id].iloc[0]
+            if decision.selected_model_id == "abstain":
+                actual_quality = 1.0 if expected == "abstain" else 0.0
+                cost = 0.0
+            else:
+                selected_row = group[group["model_id"] == decision.selected_model_id].iloc[0]
+                actual_quality = float(selected_row["quality_score"])
+                cost = float(selected_row["cost"])
             rows.append(
                 SimulationRow(
                     prompt_id=prompt_id,
                     budget_tier=tier,
                     expected_min_model=expected,
                     selected_model_id=decision.selected_model_id,
-                    actual_quality=float(selected_row["quality_score"]),
-                    cost=float(selected_row["cost"]),
+                    actual_quality=actual_quality,
+                    cost=cost,
                     error_type=classify_route(expected, decision.selected_model_id),
                     selection_reason=decision.selection_reason,
                 )
@@ -84,6 +94,7 @@ def simulate_public_set(
             "cost_over_limit": int((group["cost"] > budget_limit).sum()),
             "under_route": int((group["error_type"] == "under_route").sum()),
             "over_route": int((group["error_type"] == "over_route").sum()),
+            "should_abstain": int((group["error_type"] == "should_abstain").sum()),
             "ok": int((group["error_type"] == "ok").sum()),
             "selection_counts": group["selected_model_id"].value_counts().to_dict(),
         }
