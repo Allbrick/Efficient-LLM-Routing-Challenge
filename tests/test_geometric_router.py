@@ -7,6 +7,7 @@ from geometric_router.evaluator import OutputEvaluator, build_training_labels
 from geometric_router.budget_allocator import allocate_public_budget
 from geometric_router.router import GeometricRouter
 from geometric_router.simulator import simulate_public_set
+from geometric_router.task_classifier import TaskClassifier
 from geometric_router.tuning import tune_router_policy
 
 
@@ -136,6 +137,20 @@ def test_geometric_router_can_abstain_for_impossible_request():
 
     assert decision.selected_model_id == "abstain"
     assert decision.selection_reason == "abstain_probability"
+
+
+def test_task_classifier_predicts_independent_heads():
+    _train_df, specs_df = load_data()
+    classifier = TaskClassifier.fit(specs_df)
+
+    impossible = classifier.predict("이 세상 모든 코드를 가져와줘.")
+    exact = classifier.predict("2 + 3의 값만 숫자로 답해줘.")
+
+    assert impossible["evaluation_type"] == "refusal_check"
+    assert impossible["risk_level"] in {"medium", "high"}
+    assert exact["evaluation_type"] in {"exact_match", "numeric_count", "numeric_check"}
+    assert exact["difficulty"] == "trivial"
+    assert "field_confidence" in impossible
 
 
 def test_training_labels_capture_exact_answer_failure():
