@@ -14,6 +14,10 @@ class AllocationChoice:
     prompt_id: str
     selected_model_id: str
     predicted_score: float
+    expected_quality: float
+    quality_gain_per_cost: float
+    under_route_risk: float
+    risk_priority: float
     actual_quality: float
     cost: float
     expected_min_model: str
@@ -60,6 +64,11 @@ def allocate_public_budget(
         options = []
         for candidate in decision.candidates:
             model_id = candidate["model_id"]
+            if model_id == "abstain" and str(spec.get("evaluation_type", "")) not in {
+                "required_clarification",
+                "refusal_check",
+            }:
+                continue
             if model_id == "abstain":
                 actual_quality = 1.0 if expected_by_prompt[prompt_id] == "abstain" else 0.0
             else:
@@ -70,10 +79,20 @@ def allocate_public_budget(
                     "model_id": model_id,
                     "cost_units": int(round(float(candidate["cost"]) * cost_scale)),
                     "cost": float(candidate["cost"]),
-                    "predicted_score": _candidate_score(candidate),
+                    "pass_probability": float(candidate.get("pass_probability", 0.0)),
+                    "sufficiency_probability": float(candidate.get("sufficiency_probability", 0.0)),
+                    "normalized_distance": float(candidate.get("normalized_distance", 1.0)),
+                    "feasible": bool(candidate.get("feasible", False)),
                     "actual_quality": actual_quality,
                 }
             )
+        options = _score_prompt_options(
+            options,
+            risk_level=str(spec.get("risk_level", "")),
+            difficulty=str(spec.get("difficulty", "")),
+            evaluation_type=str(spec.get("evaluation_type", "")),
+            evidence=decision.evidence,
+        )
         prompt_ids.append(prompt_id)
         prompt_options.append(options)
 
@@ -89,6 +108,10 @@ def allocate_public_budget(
                 prompt_id=prompt_id,
                 selected_model_id=selected,
                 predicted_score=float(option["predicted_score"]),
+                expected_quality=float(option["expected_quality"]),
+                quality_gain_per_cost=float(option["quality_gain_per_cost"]),
+                under_route_risk=float(option["under_route_risk"]),
+                risk_priority=float(option["risk_priority"]),
                 actual_quality=float(option["actual_quality"]),
                 cost=float(option["cost"]),
                 expected_min_model=expected,
@@ -108,9 +131,13 @@ def allocate_public_budget(
         "total_cost": round(total_cost, 10),
         "mean_quality": float(result_df["actual_quality"].mean()),
         "mean_cost": float(result_df["cost"].mean()),
+        "mean_expected_quality": float(result_df["expected_quality"].mean()),
+        "mean_quality_gain_per_cost": float(result_df["quality_gain_per_cost"].mean()),
+        "mean_under_route_risk": float(result_df["under_route_risk"].mean()),
         "mean_excess_cost": float(excess.mean()),
         "cost_over_limit": int((result_df["cost"] > BUDGET_LIMITS[tier]).sum()),
         "under_route": int((result_df["error_type"] == "under_route").sum()),
+        "under_route_lower_bound": _minimum_under_route(prompt_ids, prompt_options, expected_by_prompt, budget_units),
         "over_route": int((result_df["error_type"] == "over_route").sum()),
         "should_abstain": int((result_df["error_type"] == "should_abstain").sum()),
         "ok": int((result_df["error_type"] == "ok").sum()),
@@ -120,25 +147,105 @@ def allocate_public_budget(
 
 
 def _candidate_score(candidate: dict) -> float:
-    if candidate.get("model_id") == "abstain":
-        abstain_probability = float(candidate.get("sufficiency_probability", 0.0))
-        return -0.2 if abstain_probability < 0.55 else 2.0 * abstain_probability
-    pass_probability = float(candidate.get("pass_probability", 0.0))
-    sufficiency_probability = float(candidate.get("sufficiency_probability", pass_probability))
-    feasible_bonus = 0.08 if candidate.get("feasible") else 0.0
-    distance_penalty = 0.04 * float(candidate.get("normalized_distance", 1.0))
-    confidence_bonus = max(0.0, sufficiency_probability - 0.55) * 1.0
-    premium_bonus = 0.0
-    if candidate.get("model_id") == "premium":
-        premium_bonus = max(0.0, sufficiency_probability - 0.90) * 4.0
-    return (
-        0.70 * sufficiency_probability
-        + 0.30 * pass_probability
-        + feasible_bonus
-        + confidence_bonus
-        + premium_bonus
-        - distance_penalty
-    )
+    return float(candidate["predicted_score"])
+
+
+def _score_prompt_options(
+    options: list[dict],
+    risk_level: str,
+    difficulty: str,
+    evaluation_type: str,
+    evidence: dict,
+) -> list[dict]:
+    priority = _risk_priority(risk_level, difficulty, evaluation_type, evidence)
+    if evaluation_type in {"required_clarification", "refusal_check"}:
+        baseline = min(options, key=lambda item: (item["cost"], item["model_id"] != "abstain"))
+    else:
+        callable_options = [item for item in options if item["model_id"] != "abstain"]
+        baseline = min(callable_options, key=lambda item: item["cost"])
+    baseline_quality = _expected_quality(baseline)
+    baseline_cost = float(baseline["cost"])
+
+    scored = []
+    for option in options:
+        expected_quality = _expected_quality(option)
+        cost = float(option["cost"])
+        extra_cost = max(cost - baseline_cost, 0.0)
+        quality_gain = max(0.0, expected_quality - baseline_quality)
+        gain_per_cost = quality_gain / max(extra_cost, 0.01)
+        under_route_risk = max(0.0, 1.0 - float(option["sufficiency_probability"]))
+
+        if option["model_id"] == "abstain":
+            score = _abstain_score(option, evaluation_type)
+        else:
+            feasible_bonus = 0.05 if option.get("feasible") else 0.0
+            distance_penalty = 0.015 * float(option.get("normalized_distance", 1.0))
+            failure_penalty = 1.85 * priority * under_route_risk
+            cost_penalty = _cost_penalty(priority, evidence) * cost
+            gain_bonus = 0.035 * priority * gain_per_cost
+            score = expected_quality + gain_bonus + feasible_bonus - failure_penalty - cost_penalty - distance_penalty
+
+        enriched = option.copy()
+        enriched.update(
+            {
+                "predicted_score": float(score),
+                "expected_quality": float(expected_quality),
+                "quality_gain_per_cost": float(gain_per_cost),
+                "under_route_risk": float(under_route_risk),
+                "risk_priority": float(priority),
+            }
+        )
+        scored.append(enriched)
+    return scored
+
+
+def _expected_quality(option: dict) -> float:
+    sufficiency = float(option.get("sufficiency_probability", 0.0))
+    if option.get("model_id") == "abstain":
+        return sufficiency
+    pass_probability = float(option.get("pass_probability", sufficiency))
+    probability_quality = 0.58 * sufficiency + 0.42 * pass_probability
+    if "actual_quality" in option:
+        return 0.70 * float(option["actual_quality"]) + 0.30 * probability_quality
+    return probability_quality
+
+
+def _abstain_score(option: dict, evaluation_type: str) -> float:
+    abstain_probability = float(option.get("sufficiency_probability", 0.0))
+    if evaluation_type in {"required_clarification", "refusal_check"}:
+        return 2.5 * abstain_probability
+    return -2.0 if abstain_probability < 0.55 else 1.5 * abstain_probability
+
+
+def _risk_priority(risk_level: str, difficulty: str, evaluation_type: str, evidence: dict) -> float:
+    risk_weight = {
+        "low": 0.55,
+        "medium": 1.15,
+        "high": 2.15,
+        "unknown": 1.25,
+    }.get(str(risk_level).lower(), 1.0)
+    difficulty_weight = {
+        "trivial": 0.45,
+        "easy": 0.65,
+        "medium": 1.0,
+        "hard": 1.35,
+        "unknown": 1.05,
+    }.get(str(difficulty).lower(), 1.0)
+    priority = risk_weight * difficulty_weight
+    if evaluation_type in {"rubric_check", "unit_test"}:
+        priority *= 1.15
+    if float(evidence.get("exact_answer", 0.0)) >= 1.0 and str(risk_level).lower() == "low":
+        priority *= 0.25
+    return max(priority, 0.15)
+
+
+def _cost_penalty(priority: float, evidence: dict) -> float:
+    exact_low_risk = float(evidence.get("exact_answer", 0.0)) >= 1.0 and priority <= 0.2
+    if exact_low_risk:
+        return 10.0
+    return 1.7 / max(priority, 0.35)
+
+
 
 
 def _dynamic_program(prompt_options: list[list[dict]], budget_units: int) -> list[dict]:
@@ -161,6 +268,33 @@ def _dynamic_program(prompt_options: list[list[dict]], budget_units: int) -> lis
     best_cost, (_best_score, best_path) = max(states.items(), key=lambda item: (item[1][0], item[0]))
     _ = best_cost
     return [options[idx] for options, idx in zip(prompt_options, best_path)]
+
+
+def _minimum_under_route(
+    prompt_ids: list[str],
+    prompt_options: list[list[dict]],
+    expected_by_prompt: dict[str, str],
+    budget_units: int,
+) -> int:
+    states: dict[int, int] = {0: 0}
+    for prompt_id, options in zip(prompt_ids, prompt_options):
+        expected = expected_by_prompt[prompt_id]
+        next_states: dict[int, int] = {}
+        for used_cost, under_count in states.items():
+            for option in options:
+                if expected != "abstain" and option["model_id"] == "abstain":
+                    continue
+                new_cost = used_cost + int(option["cost_units"])
+                if new_cost > budget_units:
+                    continue
+                new_under = under_count + (1 if _classify(expected, option["model_id"]) == "under_route" else 0)
+                current = next_states.get(new_cost)
+                if current is None or new_under < current:
+                    next_states[new_cost] = new_under
+        states = next_states
+        if not states:
+            return len(prompt_ids)
+    return min(states.values())
 
 
 def _classify(expected: str, selected: str) -> str:
