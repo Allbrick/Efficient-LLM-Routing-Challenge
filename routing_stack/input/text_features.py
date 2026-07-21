@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass
 
-from routing_stack.input.token_estimator import estimate_text_tokens
+from routing_stack.input.token_estimator import estimate_prompt_tokens
 
 
 _CODE_PATTERN = re.compile(
@@ -21,6 +21,10 @@ class TextFeatures:
     prompt_length: int
     whitespace_token_count: int
     estimated_input_tokens: int
+    estimated_output_tokens: int
+    token_per_char: float
+    code_token_pressure: float
+    json_or_table_pressure: float
     line_count: int
     sentence_count: int
     punctuation_ratio: float
@@ -48,6 +52,7 @@ def analyze_text_prompt(prompt: str) -> TextFeatures:
     code_like = bool(_CODE_PATTERN.search(stripped))
     list_like = bool(_LIST_PATTERN.search(stripped))
     missing_context = _has_missing_context(stripped)
+    token_estimate = estimate_prompt_tokens(stripped)
     simple_directive = (
         0 < length <= 40
         and line_count == 1
@@ -60,7 +65,11 @@ def analyze_text_prompt(prompt: str) -> TextFeatures:
     return TextFeatures(
         prompt_length=length,
         whitespace_token_count=whitespace_tokens,
-        estimated_input_tokens=estimate_text_tokens(stripped),
+        estimated_input_tokens=token_estimate.estimated_input_tokens,
+        estimated_output_tokens=token_estimate.estimated_output_tokens,
+        token_per_char=token_estimate.token_per_char,
+        code_token_pressure=token_estimate.code_token_pressure,
+        json_or_table_pressure=token_estimate.json_or_table_pressure,
         line_count=line_count,
         sentence_count=sum(stripped.count(mark) for mark in (".", "!", "?")),
         punctuation_ratio=round(punctuation / max(length, 1), 6),
