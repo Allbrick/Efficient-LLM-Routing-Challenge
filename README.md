@@ -71,10 +71,26 @@ python routing_stack\app\router_server.py --routers geometric,quality_utility --
 python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4100 --port 4010
 ```
 
+## 라우터 품질 예측 비교
+
+난이도 하나를 예측하는 대신 `quality(prompt, model)`을 모델별로 비교합니다.
+다음 명령은 같은 프롬프트를 여러 라우터와 tier에 넣고, `cheap`, `mid`, `premium`별 품질 예측과 선택 결과를 JSON으로 출력합니다.
+
+```powershell
+python -m routing_stack.experiments.router_compare "이모티콘좀 그만 써라"
+```
+
+출력의 핵심 필드는 다음과 같습니다.
+
+- `model_quality`: 라우터가 보는 모델별 품질 예측입니다.
+- `model_utility`: 비용 패널티까지 반영한 선택 점수입니다.
+- `selected_model_id`: 실제 선택된 모델입니다.
+- `selection_reason`: 선택 이유입니다.
+
 ## 테스트
 
 ```powershell
-python -m pytest routing_stack\app\tests router_impls\geometric\tests -q
+python -m pytest routing_stack\app\tests routing_stack\input\tests routing_stack\experiments\tests router_impls\geometric\tests -q
 ```
 
 
