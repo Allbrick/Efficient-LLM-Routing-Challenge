@@ -3,24 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LLM 라우팅 작업대</title>
+    <title>LLM 라우팅 워크스페이스</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <header class="topbar">
-        <div>
-          <h1>LLM 라우팅 작업대</h1>
-          <p id="stackInfo">라우터 서버 정보를 불러오는 중...</p>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="라우터 설정">
+        <div class="brand">
+          <div class="brand-mark">R</div>
+          <div>
+            <h1>Routing Lab</h1>
+            <p>로컬 AI 라우터</p>
+          </div>
         </div>
-      </header>
 
-      <section class="workspace">
-        <form id="routeForm" class="panel input-panel">
-          <label for="prompt">프롬프트</label>
-          <textarea id="prompt" rows="9">2 + 3의 값만 숫자로 답해줘.</textarea>
+        <button id="newChat" class="new-chat" type="button">새 대화</button>
 
-          <div class="grid">
+        <details class="side-panel">
+          <summary>라우터 설정</summary>
+          <div class="settings-list">
             <label>
               라우터
               <select id="router"></select>
@@ -33,6 +34,12 @@
                 <option value="premium">Premium</option>
               </select>
             </label>
+          </div>
+        </details>
+
+        <details class="side-panel">
+          <summary>고급 입력</summary>
+          <div class="settings-list">
             <label>
               작업 유형
               <input id="taskType" placeholder="auto" />
@@ -72,23 +79,52 @@
               </select>
             </label>
           </div>
+        </details>
 
-          <button type="submit">실행</button>
-        </form>
+        <div id="stackInfo" class="stack-info">라우터 서버 연결 중...</div>
+      </aside>
 
-        <section class="panel result-panel">
-          <h2>라우터 결정</h2>
-          <div id="routerDecision" class="decision empty">아직 요청이 없습니다.</div>
-          <h3>후보</h3>
-          <div id="candidates" class="candidate-list"></div>
+      <main class="chat-pane">
+        <header class="chat-header">
+          <div>
+            <h2>AI 라우팅</h2>
+            <p>프롬프트를 입력하면 라우터가 모델을 고르고 AI 응답을 보여줍니다.</p>
+          </div>
+          <div id="routeSummary" class="route-summary empty">대기 중</div>
+        </header>
+
+        <section id="transcript" class="transcript" aria-live="polite">
+          <div class="welcome-card">
+            <h3>무엇을 라우팅할까요?</h3>
+            <p>기본 화면은 프롬프트와 AI 출력에 집중합니다. 라우터 설정과 후보 비교는 필요할 때만 펼쳐서 확인할 수 있습니다.</p>
+          </div>
         </section>
-      </section>
 
-      <section class="panel output-panel">
-        <h2>AI 출력</h2>
-        <div id="aiOutput" class="output empty">아직 출력이 없습니다.</div>
-      </section>
-    </main>
+        <form id="routeForm" class="composer">
+          <textarea id="prompt" rows="1" placeholder="메시지를 입력하세요. 예: 2 + 3의 값만 숫자로 답해줘"></textarea>
+          <button type="submit" aria-label="전송">전송</button>
+        </form>
+      </main>
+
+      <aside class="inspector" aria-label="라우팅 결과">
+        <div class="inspector-panel">
+          <div class="inspector-title">
+            <span>AI 상태</span>
+            <b id="aiMeta">대기 중</b>
+          </div>
+        </div>
+
+        <details class="inspector-panel">
+          <summary>라우팅 요약</summary>
+          <div id="routerDecision" class="decision empty">아직 요청이 없습니다.</div>
+        </details>
+
+        <details class="inspector-panel">
+          <summary>후보 비교</summary>
+          <div id="candidates" class="candidate-list"></div>
+        </details>
+      </aside>
+    </div>
     <script src="app.js"></script>
   </body>
 </html>
