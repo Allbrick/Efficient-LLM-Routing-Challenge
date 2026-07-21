@@ -248,13 +248,12 @@ class GeometricRouter:
         selected = None
         reason = ""
         abstain_candidate = candidates[0]
-        if abstain_candidate["feasible"]:
-            selected = "abstain"
-            reason = "abstain_probability"
-
-        if selected is None and simple_prompt_prior:
+        if simple_prompt_prior:
             selected = "cheap"
             reason = "simple_prompt_prior"
+        elif abstain_candidate["feasible"]:
+            selected = "abstain"
+            reason = "abstain_probability"
 
         pass_threshold = self.pass_thresholds.get(tier, DEFAULT_PASS_THRESHOLDS[tier])
         for candidate in candidates[1:]:
@@ -298,8 +297,6 @@ class GeometricRouter:
     def _has_simple_prompt_prior(self, prompt: str, evidence: object, evaluation_type: str) -> bool:
         text = str(prompt).strip()
         if not text:
-            return False
-        if str(evaluation_type).lower() in {"required_clarification", "refusal_check"}:
             return False
         if len(text) > 40 or "\n" in text:
             return False

@@ -5,10 +5,14 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from routing_stack.input.token_estimator import estimate_text_tokens
+from router_impls.geometric.task_classifier import hashed_char_ngrams
+
 
 MODEL_ORDER = ("cheap", "mid", "premium")
 ROUTE_ACTIONS = ("abstain", "cheap", "mid", "premium")
 MODEL_RANK = {model: idx for idx, model in enumerate(MODEL_ORDER)}
+CHAR_NGRAM_FEATURES = 16
 
 DIFFICULTY_SCORE = {
     "trivial": 0.10,
@@ -63,9 +67,13 @@ class PromptEvidence:
     length_norm: float
     line_norm: float
     eval_type_id: float
+    char_ngram_vector: tuple[float, ...]
+    token_count_norm: float
+    estimated_input_tokens_norm: float
+    cost_estimate_norm: float
 
     def as_vector(self) -> np.ndarray:
-        return np.array(
+        base = np.array(
             [
                 self.difficulty_score,
                 self.risk_score,
@@ -79,6 +87,16 @@ class PromptEvidence:
             ],
             dtype=np.float64,
         )
+        text_shape = np.array(self.char_ngram_vector, dtype=np.float64)
+        token_cost = np.array(
+            [
+                self.token_count_norm,
+                self.estimated_input_tokens_norm,
+                self.cost_estimate_norm,
+            ],
+            dtype=np.float64,
+        )
+        return np.concatenate([base, text_shape, token_cost])
 
 
 class EvidenceExtractor:
@@ -99,6 +117,8 @@ class EvidenceExtractor:
         exact_answer = self._exact_answer(text, eval_type)
         length_norm = min(len(text) / 500.0, 1.0)
         line_norm = min((text.count("\n") + 1) / 12.0, 1.0)
+        whitespace_tokens = len(text.split())
+        estimated_input_tokens = estimate_text_tokens(text)
 
         inferred_difficulty = self._infer_difficulty(text, lowered, task_type, eval_type)
         inferred_risk = self._infer_risk(text, lowered, task_type)
@@ -115,6 +135,12 @@ class EvidenceExtractor:
             length_norm=float(length_norm),
             line_norm=float(line_norm),
             eval_type_id=float(self._eval_type_id(eval_type)),
+            char_ngram_vector=tuple(
+                float(value) for value in hashed_char_ngrams(text, n_features=CHAR_NGRAM_FEATURES)
+            ),
+            token_count_norm=float(min(whitespace_tokens / 120.0, 1.0)),
+            estimated_input_tokens_norm=float(min(estimated_input_tokens / 800.0, 1.0)),
+            cost_estimate_norm=float(min((estimated_input_tokens / 1000.0) * (1.0 + 2.0 * code_like), 1.0)),
         )
 
     def explain(
@@ -136,6 +162,11 @@ class EvidenceExtractor:
             "length_norm": evidence.length_norm,
             "line_norm": evidence.line_norm,
             "eval_type_id": evidence.eval_type_id,
+            "char_ngram_dim": float(len(evidence.char_ngram_vector)),
+            "char_ngram_norm": float(np.linalg.norm(np.array(evidence.char_ngram_vector, dtype=np.float64))),
+            "token_count_norm": evidence.token_count_norm,
+            "estimated_input_tokens_norm": evidence.estimated_input_tokens_norm,
+            "cost_estimate_norm": evidence.cost_estimate_norm,
         }
 
     def _infer_difficulty(self, text: str, lowered: str, task_type: str, evaluation_type: str) -> float:

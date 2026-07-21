@@ -196,6 +196,16 @@ def test_geometric_router_keeps_short_directive_on_cheap():
         assert decision.evidence["simple_prompt_prior"] == 1.0
 
 
+def test_loaded_geometric_artifact_keeps_short_directive_on_cheap():
+    artifact = Path(__file__).resolve().parents[3] / "artifacts" / "geometric_router.json"
+    router = GeometricRouter.load(artifact)
+
+    decision = router.route("이모티콘좀 그만 써라", budget_tier="fast")
+
+    assert decision.selected_model_id == "cheap"
+    assert decision.selection_reason == "simple_prompt_prior"
+
+
 def test_geometric_router_escalates_hard_architecture_prompt():
     train_df, specs_df = load_data()
     router = GeometricRouter.fit(train_df, specs_df)
