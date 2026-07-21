@@ -1,30 +1,80 @@
-# Efficient LLM Routing Challenge
+﻿# Efficient LLM Routing Challenge
 
-이 저장소는 LLM 요청을 비용과 품질의 균형에 맞게 라우팅하는 실험 코드입니다.
-현재 주 구현체는 `geometric_router/` 아래에 정리되어 있습니다.
+이 저장소는 LLM 라우팅을 실험하는 프로젝트입니다. 실행 구조는 다음 3단계로 고정합니다.
+
+```text
+viewer -> router -> ai
+```
+
+`routing_stack/viewer`와 `routing_stack/ai`는 항상 동일하게 유지하고, 중간의 adapter만 교체합니다.
 
 ## 구조
 
-- `geometric_router/`: geometric router 패키지, 실행 스크립트, 테스트, 뷰어
-- `geometric_router/README.md`: geometric router 시작 방법과 구현 설명
-- `data/public/`: 공개 예제 학습 및 평가 데이터
-- `artifacts/`: 학습된 router artifact와 실행 결과
-- `quality_utility_router_baseline/`: 이전 quality-utility baseline 구현
-- `docs/`: 아이디어와 구현 기록
-- `scripts/`: 데이터 보정 등 공용 유틸리티 스크립트
+- `routing_stack/`: 공통 `viewer -> router -> ai` 실행 스택
+- `routing_stack/app/`: 공통 서버와 앱 조립 계층
+- `routing_stack/viewer/`: 공통 UI와 HTTP API 서버
+- `routing_stack/adapters/`: 교체 가능한 router adapter와 공통 router 계약
+- `routing_stack/ai/`: `cheap`, `mid`, `premium`을 실행하는 공통 로컬 AI 계층
+- `router_impls/geometric/`: geometric router 구현체
+- `router_impls/quality_utility/`: quality-utility baseline router 구현체
+- `data/public/`: 공개 예제 데이터
+- `artifacts/`: geometric router 학습 산출물
+- `docs/ROUTING_STACK_RULES.md`: 공통 스택 규칙
 
 ## 빠른 시작
 
+의존성을 설치합니다.
+
 ```powershell
 pip install -r requirements.txt
-python geometric_router\scripts\run_geometric_router.py train --no_tune
-python geometric_router\scripts\run_geometric_router.py route "2 + 3의 값만 숫자로 답해줘." --tier fast
 ```
 
-자세한 실행 방법은 `geometric_router/README.md`를 참고하세요.
+라우터 서버를 먼저 실행합니다. 라우터 서버는 등록된 라우터를 모두 로드하고 AI 호출까지 담당합니다.
+
+```powershell
+python routing_stack\app\router_server.py --ai mock --port 4100
+```
+
+다른 터미널에서 뷰어 서버를 실행합니다.
+
+```powershell
+python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4100 --port 4010
+```
+
+브라우저에서 `http://127.0.0.1:4010/`에 접속합니다.
+
+## 로컬 무료 AI 연결
+
+Ollama를 설치하고 로컬 모델을 받은 뒤 같은 viewer를 Ollama와 함께 실행합니다.
+
+```powershell
+ollama pull qwen3:4b-instruct
+ollama pull qwen3:8b
+ollama pull qwen3:14b
+python routing_stack\app\router_server.py --ai ollama --port 4100
+```
+
+AI 계층의 기본 모델 매핑은 다음과 같습니다.
+
+```text
+cheap   -> qwen3:4b-instruct
+mid     -> qwen3:8b
+premium -> qwen3:14b
+```
+
+## 라우터 선택
+
+라우터 서버는 기본적으로 `geometric`, `quality_utility`를 모두 로드합니다. 뷰어에서 라우터를 선택해 같은 입력을 다른 라우터로 실행할 수 있습니다.
+
+```powershell
+python routing_stack\app\router_server.py --routers geometric,quality_utility --ai ollama --port 4100
+python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4100 --port 4010
+```
 
 ## 테스트
 
 ```powershell
-python -m pytest geometric_router\tests -q
+python -m pytest routing_stack\app\tests router_impls\geometric\tests -q
 ```
+
+

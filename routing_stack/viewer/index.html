@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM 라우팅 작업대</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>LLM 라우팅 작업대</h1>
+          <p id="stackInfo">라우터 서버 정보를 불러오는 중...</p>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <form id="routeForm" class="panel input-panel">
+          <label for="prompt">프롬프트</label>
+          <textarea id="prompt" rows="9">2 + 3의 값만 숫자로 답해줘.</textarea>
+
+          <div class="grid">
+            <label>
+              라우터
+              <select id="router"></select>
+            </label>
+            <label>
+              예산 tier
+              <select id="tier">
+                <option value="fast">Fast</option>
+                <option value="balanced" selected>Balanced</option>
+                <option value="premium">Premium</option>
+              </select>
+            </label>
+            <label>
+              작업 유형
+              <input id="taskType" placeholder="auto" />
+            </label>
+            <label>
+              난이도
+              <select id="difficulty">
+                <option value="" selected>auto</option>
+                <option value="trivial">trivial</option>
+                <option value="medium">medium</option>
+                <option value="hard">hard</option>
+                <option value="unknown">unknown</option>
+              </select>
+            </label>
+            <label>
+              위험도
+              <select id="riskLevel">
+                <option value="" selected>auto</option>
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+                <option value="unknown">unknown</option>
+              </select>
+            </label>
+            <label>
+              평가 방식
+              <select id="evaluationType">
+                <option value="" selected>auto</option>
+                <option value="exact_match">exact_match</option>
+                <option value="numeric_count">numeric_count</option>
+                <option value="unit_test">unit_test</option>
+                <option value="exact_json">exact_json</option>
+                <option value="constraint_check">constraint_check</option>
+                <option value="rubric_check">rubric_check</option>
+                <option value="required_clarification">required_clarification</option>
+                <option value="refusal_check">refusal_check</option>
+              </select>
+            </label>
+          </div>
+
+          <button type="submit">실행</button>
+        </form>
+
+        <section class="panel result-panel">
+          <h2>라우터 결정</h2>
+          <div id="routerDecision" class="decision empty">아직 요청이 없습니다.</div>
+          <h3>후보</h3>
+          <div id="candidates" class="candidate-list"></div>
+        </section>
+      </section>
+
+      <section class="panel output-panel">
+        <h2>AI 출력</h2>
+        <div id="aiOutput" class="output empty">아직 출력이 없습니다.</div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
