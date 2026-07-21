@@ -16,6 +16,15 @@ const fmt = (value, digits = 3) => {
   return Number(value).toFixed(digits);
 };
 
+const displayValue = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+  if (typeof value === "number") return fmt(value);
+  if (typeof value === "boolean") return value ? "true" : "false";
+  if (Array.isArray(value)) return value.join(", ") || "-";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
 function formPayload() {
   return {
     router: routerSelect.value,
@@ -97,6 +106,9 @@ function renderSummary(router, ai) {
 function renderDecision(payload, assistantMessage) {
   const router = payload.router;
   const ai = payload.ai;
+  const diagnostics = router.diagnostics || {};
+  const uncertainty = diagnostics.uncertainty || null;
+  const geometricSignals = diagnostics.geometric_signals || null;
   renderSummary(router, ai);
 
   routerDecision.classList.remove("empty");
@@ -105,6 +117,8 @@ function renderDecision(payload, assistantMessage) {
     <div class="decision-row"><span>선택 모델</span><b>${router.selected_model_id}</b></div>
     <div class="decision-row"><span>동작</span><b>${router.action_type}</b></div>
     <div class="decision-row"><span>이유</span><b>${router.selection_reason}</b></div>
+    ${uncertainty ? renderUncertainty(uncertainty) : ""}
+    ${geometricSignals ? renderGeometricSignals(geometricSignals) : ""}
   `;
 
   candidatesEl.innerHTML = (router.candidates || [])
@@ -143,6 +157,28 @@ function renderDecision(payload, assistantMessage) {
   }
 
   updateMessage(assistantMessage, ai.output || "", `${router.router_name} -> ${router.selected_model_id}`);
+}
+
+function renderUncertainty(uncertainty) {
+  return `
+    <div class="decision-row"><span>확신도</span><b>${fmt(uncertainty.confidence)}</b></div>
+    <div class="decision-row"><span>불확실성</span><b>${uncertainty.uncertain ? "높음" : "낮음"}</b></div>
+    <div class="decision-row"><span>판단 근거</span><b>${uncertainty.reason || "-"}</b></div>
+  `;
+}
+
+function renderGeometricSignals(geometricSignals) {
+  if (!geometricSignals.available) {
+    return `<div class="decision-row"><span>기하 신호</span><b>없음</b></div>`;
+  }
+  const signals = geometricSignals.signals || {};
+  const activeSignals = Object.entries(signals)
+    .filter(([, value]) => value)
+    .map(([key]) => key);
+  return `
+    <div class="decision-row"><span>기하 선택</span><b>${geometricSignals.selected_model_id || "-"}</b></div>
+    <div class="decision-row"><span>기하 신호</span><b>${displayValue(activeSignals)}</b></div>
+  `;
 }
 
 async function routePrompt(event) {

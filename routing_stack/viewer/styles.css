@@ -328,6 +328,8 @@ input {
 
 .decision-row b {
   color: #202124;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .candidate-list {

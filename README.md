@@ -16,6 +16,8 @@ viewer -> router -> ai
 - `routing_stack/input/`: 입력 정규화와 router feature 추출 계층
 - `routing_stack/adapters/`: 교체 가능한 router adapter와 공통 router 계약
 - `routing_stack/ai/`: `cheap`, `mid`, `premium`을 실행하는 공통 로컬 AI 계층
+- `routing_stack/planning/`: 여러 라우터 결과를 종합하는 uncertainty/orchestrator 계층
+- `routing_stack/experiments/`: 라우터 비교와 public set 근사 평가 도구
 - `router_impls/geometric/`: geometric router 구현체
 - `router_impls/quality_utility/`: quality-utility baseline router 구현체
 - `data/public/`: 공개 예제 데이터
@@ -84,11 +86,19 @@ premium -> qwen3:14b
 
 ## 라우터 선택
 
-라우터 서버는 기본적으로 `geometric`, `quality_utility`를 모두 로드합니다. 뷰어에서 라우터를 선택해 같은 입력을 다른 라우터로 실행할 수 있습니다.
+라우터 서버는 기본적으로 `geometric`, `quality_utility`, `orchestrator`를 모두 로드합니다. 뷰어에서 라우터를 선택해 같은 입력을 다른 라우터로 실행할 수 있습니다.
+
+`orchestrator`는 답변을 생성하는 AI가 아니라, 내부적으로 base router 결과를 비교해 최종 모델을 고르는 planning 라우터입니다.
 
 ```powershell
-python routing_stack\app\router_server.py --routers geometric,quality_utility --ai ollama --port 4100
+python routing_stack\app\router_server.py --routers geometric,quality_utility,orchestrator --ai ollama --port 4100
 python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4100 --port 4010
+```
+
+orchestrator만 서버에 노출하고 싶다면 다음처럼 실행할 수 있습니다.
+
+```powershell
+python routing_stack\app\router_server.py --routers orchestrator --default_router orchestrator --ai mock --port 4100
 ```
 
 ## 라우터 품질 예측 비교
@@ -97,7 +107,7 @@ python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4
 다음 명령은 같은 프롬프트를 여러 라우터와 tier에 넣고, `cheap`, `mid`, `premium`별 품질 예측과 선택 결과를 JSON으로 출력합니다.
 
 ```powershell
-python -m routing_stack.experiments.router_compare "이모티콘좀 그만 써라"
+python -m routing_stack.experiments.router_compare "이모티콘좀 그만 써라" --include_orchestrator
 ```
 
 출력의 핵심 필드는 다음과 같습니다.
@@ -106,11 +116,20 @@ python -m routing_stack.experiments.router_compare "이모티콘좀 그만 써�
 - `model_utility`: 비용 패널티까지 반영한 선택 점수입니다.
 - `selected_model_id`: 실제 선택된 모델입니다.
 - `selection_reason`: 선택 이유입니다.
+- `planning`: orchestrator가 사용한 uncertainty와 geometric signal입니다.
+
+## public set 근사 평가
+
+private simulator를 대체하는 정식 평가는 아니지만, 공개 train 샘플에서 선택 모델의 공개 quality/cost를 lookup해 라우터별 경향을 볼 수 있습니다.
+
+```powershell
+python -m routing_stack.experiments.orchestrator_eval --tiers fast
+```
 
 ## 테스트
 
 ```powershell
-python -m pytest routing_stack\app\tests routing_stack\input\tests routing_stack\experiments\tests router_impls\geometric\tests -q
+python -m pytest routing_stack\app\tests routing_stack\input\tests routing_stack\planning\tests routing_stack\adapters\tests routing_stack\experiments\tests router_impls\geometric\tests -q
 ```
 
 
