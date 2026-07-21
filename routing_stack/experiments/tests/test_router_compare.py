@@ -40,6 +40,7 @@ def test_compare_routers_returns_model_quality_table():
         router_factory=lambda name: FakeRouter(name),
     )
 
+    assert payload["normalized_input"]["input_type"] == "text"
     assert payload["input_features"]["simple_directive"] is True
     assert [row["router"] for row in payload["rows"]] == ["a", "b"]
     assert payload["rows"][0]["model_quality"] == {"cheap": 0.7, "mid": 0.75}

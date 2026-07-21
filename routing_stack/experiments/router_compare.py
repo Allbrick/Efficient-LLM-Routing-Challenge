@@ -15,7 +15,7 @@ os.chdir(PROJECT_ROOT)
 
 from routing_stack.adapters.contract import Candidate, RouteRequest, RouteResult, RouterAdapter
 from routing_stack.adapters.registry import available_routers, create_router
-from routing_stack.input import analyze_text_prompt
+from routing_stack.input import normalize_input
 
 
 RouterFactory = Callable[[str], RouterAdapter]
@@ -32,7 +32,8 @@ def compare_routers(
     if not text:
         raise ValueError("prompt_required")
 
-    input_features = analyze_text_prompt(text).to_dict()
+    normalized = normalize_input({"input_type": "text", "prompt": text})
+    input_features = normalized.router_features
     routers = {name: router_factory(name) for name in router_names}
     rows = []
     for tier in tiers:
@@ -42,7 +43,8 @@ def compare_routers(
             rows.append(_result_to_row(tier, result))
 
     return {
-        "prompt": text,
+        "prompt": normalized.text,
+        "normalized_input": normalized.to_dict(),
         "input_features": input_features,
         "rows": rows,
     }

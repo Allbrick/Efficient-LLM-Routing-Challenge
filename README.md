@@ -13,6 +13,7 @@ viewer -> router -> ai
 - `routing_stack/`: 공통 `viewer -> router -> ai` 실행 스택
 - `routing_stack/app/`: 공통 서버와 앱 조립 계층
 - `routing_stack/viewer/`: 공통 UI와 HTTP API 서버
+- `routing_stack/input/`: 입력 정규화와 router feature 추출 계층
 - `routing_stack/adapters/`: 교체 가능한 router adapter와 공통 router 계약
 - `routing_stack/ai/`: `cheap`, `mid`, `premium`을 실행하는 공통 로컬 AI 계층
 - `router_impls/geometric/`: geometric router 구현체
@@ -20,6 +21,25 @@ viewer -> router -> ai
 - `data/public/`: 공개 예제 데이터
 - `artifacts/`: geometric router 학습 산출물
 - `docs/ROUTING_STACK_RULES.md`: 공통 스택 규칙
+
+## 입력 정규화
+
+라우터는 원본 파일이나 이미지를 직접 보지 않고, 정규화된 입력과 feature만 받습니다.
+
+```text
+Text input
+File input
+Image input
+PDF input
+        ↓
+Input Normalizer
+        ↓
+Router Feature Vector
+        ↓
+Router
+```
+
+현재 구현된 입력은 `text`입니다. 이후 파일, 이미지, PDF를 추가할 때도 router adapter 계약은 유지하고 `routing_stack/input/` 안에서 정규화 계층만 확장합니다.
 
 ## 빠른 시작
 

@@ -16,7 +16,7 @@ os.chdir(PROJECT_ROOT)
 from routing_stack.adapters.contract import RouteRequest, RouterAdapter
 from routing_stack.adapters.registry import available_routers, create_router
 from routing_stack.ai.local_ai import LocalAI, ModelConfig
-from routing_stack.input import analyze_text_prompt
+from routing_stack.input import normalize_input
 
 
 class RouterServerApp:
@@ -41,10 +41,9 @@ class RouterServerApp:
         }
 
     def route_and_run(self, payload: dict) -> dict:
-        prompt = str(payload.get("prompt", "")).strip()
-        if not prompt:
-            raise ValueError("prompt_required")
-        input_features = analyze_text_prompt(prompt).to_dict()
+        normalized = normalize_input(payload)
+        prompt = normalized.text
+        input_features = normalized.router_features
         router_name = str(payload.get("router", self.default_router)).strip().lower().replace("-", "_")
         if router_name not in self.routers:
             raise ValueError(f"알 수 없는 라우터입니다: {router_name}")
@@ -60,7 +59,7 @@ class RouterServerApp:
         route_result = self.routers[router_name].route(request)
         ai_result = self.ai.run(route_result.model_slot, prompt)
         return {
-            "input": {**request.__dict__, "router": router_name},
+            "input": {**request.__dict__, "router": router_name, "normalized": normalized.to_dict()},
             "router": route_result.to_dict(),
             "ai": ai_result.to_dict(),
         }
