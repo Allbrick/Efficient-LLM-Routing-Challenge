@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from dataclasses import asdict
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -10,9 +11,10 @@ from urllib.parse import urlparse
 
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+os.chdir(PROJECT_ROOT)
 
 from geometric_router.router import GeometricRouter
 from geometric_router.budget_allocator import allocate_public_budget
@@ -99,7 +101,7 @@ def main() -> None:
     parser.add_argument("--artifact", default="artifacts/geometric_router.json")
     parser.add_argument("--train_path", default="data/public/example_train.csv")
     parser.add_argument("--specs_path", default="data/public/example_eval_specs.csv")
-    parser.add_argument("--viewer_dir", default="geometric_viewer")
+    parser.add_argument("--viewer_dir", default="geometric_router/viewer")
     args = parser.parse_args()
 
     service = GeometricRouterService(Path(args.artifact), Path(args.train_path), Path(args.specs_path))
