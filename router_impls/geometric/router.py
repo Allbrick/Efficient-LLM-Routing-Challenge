@@ -204,6 +204,7 @@ class GeometricRouter:
         pass_probabilities = self.pass_model.predict_all(x) if self.pass_model is not None else {}
         sufficiency_probabilities = self.risk_model.predict_all(x, prompt) if self.risk_model is not None else {}
         candidates = []
+        simple_prompt_prior = self._has_simple_prompt_prior(prompt, evidence_obj, evaluation_type)
 
         abstain_probability = float(sufficiency_probabilities.get("abstain", 0.0))
         if evaluation_type in {"required_clarification", "refusal_check"}:
@@ -251,6 +252,10 @@ class GeometricRouter:
             selected = "abstain"
             reason = "abstain_probability"
 
+        if selected is None and simple_prompt_prior:
+            selected = "cheap"
+            reason = "simple_prompt_prior"
+
         pass_threshold = self.pass_thresholds.get(tier, DEFAULT_PASS_THRESHOLDS[tier])
         for candidate in candidates[1:]:
             if selected is not None:
@@ -278,14 +283,30 @@ class GeometricRouter:
             reason = "nearest_envelope_fallback"
 
         frontier_hint = best_under_budget(self.frontier, BUDGET_LIMITS[tier])
+        evidence = self.extractor.explain(prompt, task_type, difficulty, risk_level, evaluation_type)
+        evidence["simple_prompt_prior"] = 1.0 if simple_prompt_prior else 0.0
         return RouteDecision(
             prompt=prompt,
             budget_tier=tier,
             selected_model_id=selected,
             selection_reason=reason,
-            evidence=self.extractor.explain(prompt, task_type, difficulty, risk_level, evaluation_type),
+            evidence=evidence,
             candidates=candidates,
             frontier_hint=frontier_hint,
+        )
+
+    def _has_simple_prompt_prior(self, prompt: str, evidence: object, evaluation_type: str) -> bool:
+        text = str(prompt).strip()
+        if not text:
+            return False
+        if str(evaluation_type).lower() in {"required_clarification", "refusal_check"}:
+            return False
+        if len(text) > 40 or "\n" in text:
+            return False
+        return (
+            float(getattr(evidence, "condition_count", 0.0)) == 0.0
+            and float(getattr(evidence, "missing_context", 0.0)) == 0.0
+            and float(getattr(evidence, "code_like", 0.0)) == 0.0
         )
 
     def save(self, path: str | Path) -> None:
