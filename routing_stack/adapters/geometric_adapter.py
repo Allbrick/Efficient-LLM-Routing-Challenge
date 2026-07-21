@@ -35,13 +35,15 @@ class GeometricRouterAdapter:
                 )
             )
         action_type = "abstain" if decision.selected_model_id == "abstain" else "call_model"
+        diagnostics = asdict(decision)
+        diagnostics["input_features"] = request.input_features
         return RouteResult(
             router_name=self.name,
             selected_model_id=decision.selected_model_id,
             action_type=action_type,
             selection_reason=decision.selection_reason,
             candidates=candidates,
-            diagnostics=asdict(decision),
+            diagnostics=diagnostics,
         )
 
 

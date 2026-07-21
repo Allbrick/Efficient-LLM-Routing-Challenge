@@ -50,6 +50,7 @@ def test_router_server_keeps_viewer_router_ai_contract():
     assert payload["router"]["router_name"] == "fixed"
     assert payload["router"]["model_slot"] == "cheap"
     assert payload["ai"]["model_name"] == "cheap-local"
+    assert payload["input"]["input_features"]["simple_directive"] is True
 
 
 def test_router_server_uses_requested_router():

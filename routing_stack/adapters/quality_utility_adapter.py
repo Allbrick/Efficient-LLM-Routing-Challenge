@@ -68,6 +68,7 @@ class QualityUtilityRouterAdapter:
                 "resolved_tier": tier,
                 "prompt_complexity": round(float(estimate_prompt_complexity(request.prompt)), 6),
                 "lambda": self.lambda_params.get(tier),
+                "input_features": request.input_features,
             },
         )
 

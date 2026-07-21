@@ -15,6 +15,7 @@ class RouteRequest:
     difficulty: str = ""
     risk_level: str = ""
     evaluation_type: str = ""
+    input_features: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

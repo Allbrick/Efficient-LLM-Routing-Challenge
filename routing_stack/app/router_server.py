@@ -16,6 +16,7 @@ os.chdir(PROJECT_ROOT)
 from routing_stack.adapters.contract import RouteRequest, RouterAdapter
 from routing_stack.adapters.registry import available_routers, create_router
 from routing_stack.ai.local_ai import LocalAI, ModelConfig
+from routing_stack.input import analyze_text_prompt
 
 
 class RouterServerApp:
@@ -43,6 +44,7 @@ class RouterServerApp:
         prompt = str(payload.get("prompt", "")).strip()
         if not prompt:
             raise ValueError("prompt_required")
+        input_features = analyze_text_prompt(prompt).to_dict()
         router_name = str(payload.get("router", self.default_router)).strip().lower().replace("-", "_")
         if router_name not in self.routers:
             raise ValueError(f"알 수 없는 라우터입니다: {router_name}")
@@ -53,6 +55,7 @@ class RouterServerApp:
             difficulty=str(payload.get("difficulty", "")),
             risk_level=str(payload.get("risk_level", "")),
             evaluation_type=str(payload.get("evaluation_type", "")),
+            input_features=input_features,
         )
         route_result = self.routers[router_name].route(request)
         ai_result = self.ai.run(route_result.model_slot, prompt)
