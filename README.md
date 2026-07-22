@@ -150,7 +150,7 @@ python -m routing_stack.training.train_prompt_label_router --csv data\router_lab
 python routing_stack\app\router_server.py --routers learned_label,orchestrator --default_router learned_label --ai mock --port 4100
 ```
 
-이 라우터는 프롬프트를 그대로 암기하는 방식이 아니라 word/char TF-IDF와 공통 text feature를 함께 사용해 유사한 작업 유형으로 일반화합니다.
+이 라우터는 word/char TF-IDF와 공통 text feature를 함께 사용해 유사한 작업 유형으로 일반화합니다. 추가로 학습 feature 공간에서 `cheap`, `mid`, `premium` 중심점 거리와 최근접 학습 예시를 계산하는 geometric memory를 사용합니다. 따라서 완전히 같은 학습 프롬프트는 사용자가 준 라벨을 우선하고, 새로운 프롬프트는 classifier 확률과 geometric similarity를 함께 반영합니다.
 
 viewer 오른쪽의 `CSV/TXT 평가·학습` 패널에서도 같은 구조의 CSV 또는 TXT를 업로드할 수 있습니다.
 

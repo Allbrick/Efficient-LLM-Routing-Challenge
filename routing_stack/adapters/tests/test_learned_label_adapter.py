@@ -18,3 +18,5 @@ def test_learned_label_adapter_returns_route_result(tmp_path: Path):
     assert result.router_name == "learned_label"
     assert result.selected_model_id in {"cheap", "mid", "premium"}
     assert result.diagnostics["probabilities"]
+    assert result.diagnostics["raw_probabilities"]
+    assert result.diagnostics["geometry"]["nearest_examples"]

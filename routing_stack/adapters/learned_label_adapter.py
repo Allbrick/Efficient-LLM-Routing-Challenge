@@ -22,7 +22,12 @@ class LearnedLabelRouterAdapter:
                 cost=_cost(label),
                 feasible=True,
                 reason="learned_label_probability",
-                metrics={"label_probability": prediction.probabilities.get(label, 0.0)},
+                metrics={
+                    "label_probability": prediction.probabilities.get(label, 0.0),
+                    "raw_probability": prediction.raw_probabilities.get(label, 0.0),
+                    "centroid_distance": prediction.geometry.get("centroid_distances", {}).get(label),
+                    "centroid_probability": prediction.geometry.get("centroid_probabilities", {}).get(label),
+                },
             )
             for label in LABELS
         ]
@@ -37,6 +42,8 @@ class LearnedLabelRouterAdapter:
                 "input_features": request.input_features,
                 "context_features": request.context_features,
                 "probabilities": prediction.probabilities,
+                "raw_probabilities": prediction.raw_probabilities,
+                "geometry": prediction.geometry,
             },
         )
 
