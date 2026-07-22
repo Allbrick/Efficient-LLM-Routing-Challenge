@@ -18,6 +18,16 @@ from routing_stack.adapters.registry import available_routers, create_router
 from routing_stack.ai.local_ai import LocalAI, ModelConfig
 from routing_stack.context import resolve_context
 from routing_stack.input import normalize_input
+from routing_stack.training.prompt_label_csv import read_prompt_label_csv_text
+from routing_stack.training.train_prompt_label_router import train_from_csv
+
+
+def _read_label_rows(csv_text: str) -> list[dict[str, str]]:
+    return read_prompt_label_csv_text(csv_text)
+
+
+def _candidate_scores(route_result) -> dict[str, float | None]:
+    return {candidate.model_id: candidate.score for candidate in route_result.candidates if candidate.model_id in {"cheap", "mid", "premium"}}
 
 
 class RouterServerApp:
@@ -74,6 +84,75 @@ class RouterServerApp:
             "ai": ai_result.to_dict(),
         }
 
+    def evaluate_csv(self, payload: dict) -> dict:
+        router_name = str(payload.get("router", self.default_router)).strip().lower().replace("-", "_")
+        tier = str(payload.get("tier", "balanced")).lower()
+        rows = _read_label_rows(str(payload.get("csv_text", "") or ""))
+        if router_name not in self.routers:
+            raise ValueError(f"알 수 없는 라우터입니다: {router_name}")
+
+        results = []
+        correct = 0
+        label_counts: dict[str, int] = {}
+        prediction_counts: dict[str, int] = {}
+        for item in rows:
+            expected = item["label"]
+            route_result = self._route_only(router_name, item["prompt"], tier)
+            actual = route_result.selected_model_id
+            is_correct = actual == expected
+            correct += int(is_correct)
+            label_counts[expected] = label_counts.get(expected, 0) + 1
+            prediction_counts[actual] = prediction_counts.get(actual, 0) + 1
+            results.append(
+                {
+                    "prompt": item["prompt"],
+                    "expected": expected,
+                    "actual": actual,
+                    "correct": is_correct,
+                    "selection_reason": route_result.selection_reason,
+                    "probabilities": _candidate_scores(route_result),
+                }
+            )
+
+        total = len(results)
+        return {
+            "router": router_name,
+            "tier": tier,
+            "row_count": total,
+            "correct_count": correct,
+            "accuracy": round(correct / max(total, 1), 6),
+            "label_counts": label_counts,
+            "prediction_counts": prediction_counts,
+            "rows": results,
+        }
+
+    def train_csv(self, payload: dict) -> dict:
+        csv_text = str(payload.get("csv_text", "") or "")
+        rows = _read_label_rows(csv_text)
+        output_path = str(payload.get("output_path", "artifacts/prompt_label_router.joblib") or "artifacts/prompt_label_router.joblib")
+        temp_path = Path("artifacts/_prompt_label_upload.csv")
+        temp_path.parent.mkdir(parents=True, exist_ok=True)
+        temp_path.write_text(csv_text, encoding="utf-8")
+        summary = train_from_csv(temp_path, output_path)
+        self.routers["learned_label"] = create_router("learned_label", output_path)
+        summary["loaded_router"] = "learned_label"
+        summary["validated_rows"] = len(rows)
+        return summary
+
+    def _route_only(self, router_name: str, prompt: str, tier: str):
+        payload = {"prompt": prompt, "tier": tier, "router": router_name}
+        normalized = normalize_input(payload)
+        routing_context = resolve_context(payload, normalized)
+        request = RouteRequest(
+            prompt=normalized.text,
+            tier=tier,
+            input_features=normalized.router_features,
+            context_features=routing_context.router_context,
+            executor_context=routing_context.executor_context,
+            call_history=routing_context.session_state.previous_calls,
+        )
+        return self.routers[router_name].route(request)
+
 
 def make_handler(app: RouterServerApp):
     class Handler(SimpleHTTPRequestHandler):
@@ -96,13 +175,19 @@ def make_handler(app: RouterServerApp):
             self._send_json(404, {"error": "not_found"})
 
         def do_POST(self) -> None:
-            if urlparse(self.path).path != "/api/route":
+            path = urlparse(self.path).path
+            if path not in {"/api/route", "/api/evaluate_csv", "/api/train_csv"}:
                 self._send_json(404, {"error": "not_found"})
                 return
             try:
                 length = int(self.headers.get("Content-Length", "0"))
                 payload = json.loads(self.rfile.read(length).decode("utf-8"))
-                self._send_json(200, app.route_and_run(payload))
+                if path == "/api/route":
+                    self._send_json(200, app.route_and_run(payload))
+                elif path == "/api/evaluate_csv":
+                    self._send_json(200, app.evaluate_csv(payload))
+                else:
+                    self._send_json(200, app.train_csv(payload))
             except Exception as exc:
                 self._send_json(400, {"error": type(exc).__name__, "message": str(exc)})
 

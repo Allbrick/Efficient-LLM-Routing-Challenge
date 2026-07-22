@@ -29,3 +29,63 @@ C++과 Rust의 메모리 관리 방식을 내부 동작 수준에서 비교하�
 SQL 실행계획을 분석하여 병목을 찾고 인덱스 전략을 제안해줘.,premium
 100만 건 이상의 로그를 실시간 처리하는 시스템 아키텍처를 설계해줘.,premium
 기존 레거시 시스템을 MSA로 전환할 때 발생하는 문제점과 단계별 마이그레이션 전략을 제시해줘.,premium
+Java에서 Interface와 Abstract Class의 차이를 알려줘.,cheap
+TCP는 무엇인가?,cheap
+OSI 7계층을 순서대로 말해줘.,cheap
+HTML과 CSS의 역할을 설명해줘.,cheap
+Git에서 merge란 무엇인가?,cheap
+DNS의 역할은 무엇인가?,cheap
+쿠키와 세션의 차이를 알려줘.,cheap
+REST API란 무엇인가?,cheap
+HTTPS가 HTTP보다 안전한 이유는?,cheap
+IPv4와 IPv6의 차이를 알려줘.,cheap
+Docker Image와 Container의 차이는?,cheap
+JSON과 XML의 차이는?,cheap
+JavaScript에서 let과 const의 차이를 알려줘.,cheap
+SQL의 SELECT 문법을 설명해줘.,cheap
+Spring Boot의 특징을 알려줘.,cheap
+React에서 useState의 역할은?,cheap
+CSS Flexbox가 무엇인가?,cheap
+브라우저 캐시란 무엇인가?,cheap
+Git clone과 pull의 차이는?,cheap
+Linux에서 ls 명령어는 무엇인가?,cheap
+JWT 인증과 Session 인증을 비교해줘.,mid
+React의 Virtual DOM 동작 원리를 설명해줘.,mid
+Spring Boot에서 Bean이 생성되는 과정을 설명해줘.,mid
+BFS와 DFS를 비교해줘.,mid
+HashMap과 TreeMap의 차이를 설명해줘.,mid
+동기와 비동기의 차이를 예제를 들어 설명해줘.,mid
+멀티스레드와 멀티프로세스의 차이를 설명해줘.,mid
+RDBMS와 NoSQL을 비교해줘.,mid
+Docker Compose를 사용하는 이유를 설명해줘.,mid
+OAuth2 인증 흐름을 설명해줘.,mid
+Redis를 캐시로 사용할 때 장단점을 설명해줘.,mid
+CI/CD 파이프라인을 단계별로 설명해줘.,mid
+HTTPS에서 TLS Handshake 과정을 설명해줘.,mid
+Garbage Collection의 원리를 설명해줘.,mid
+Binary Search의 시간복잡도를 설명해줘.,mid
+Monolithic과 MSA를 비교해줘.,mid
+Git Rebase와 Merge의 차이를 설명해줘.,mid
+REST API 설계 시 고려해야 할 원칙을 설명해줘.,mid
+Docker Network의 종류와 차이를 설명해줘.,mid
+Thread Pool을 사용하는 이유를 설명해줘.,mid
+100만 명이 동시에 접속하는 채팅 서버의 전체 아키텍처를 설계해줘.,premium
+React, Zustand, TanStack Query를 사용하는 대규모 프로젝트의 상태관리 전략을 설계해줘.,premium
+분산 시스템에서 Raft와 Paxos를 비교하고 각각의 장단점을 설명해줘.,premium
+LLM Router를 비용 대비 품질이 최대가 되도록 설계해줘.,premium
+GitHub Actions와 GitLab CI를 활용한 대규모 CI/CD 파이프라인을 설계해줘.,premium
+PostgreSQL 성능이 급격히 저하된 원인을 분석하고 해결 전략을 제안해줘.,premium
+JWT 기반 인증 시스템의 보안 취약점을 분석하고 개선 방안을 제안해줘.,premium
+OpenAPI 기반 코드 생성 프로젝트의 전체 아키텍처를 설계해줘.,premium
+Transformer의 Self-Attention 연산을 수식과 함께 설명해줘.,premium
+메모리 누수가 발생하는 Java 애플리케이션의 원인을 추론하고 해결 방법을 제시해줘.,premium
+실시간 지도 서비스의 백엔드 아키텍처를 설계해줘.,premium
+Kubernetes 환경에서 Blue-Green과 Canary 배포 전략을 비교하고 적절한 선택 기준을 설명해줘.,premium
+수백 개의 마이크로서비스를 운영하는 환경에서 권한 관리 구조를 설계해줘.,premium
+대규모 React 프로젝트의 Feature-Sliced Design 아키텍처를 설계해줘.,premium
+분산 캐시 환경에서 데이터 일관성을 유지하는 방법을 설명해줘.,premium
+기존 모놀리식 시스템을 MSA로 전환하는 단계별 전략을 제시해줘.,premium
+Python으로 LRU Cache를 구현하고 시간복잡도를 증명해줘.,premium
+SQL 실행계획을 분석하여 병목 원인을 찾는 절차를 설명해줘.,premium
+멀티테넌트 SaaS 시스템의 데이터베이스 구조를 설계해줘.,premium
+대규모 로그 분석 플랫폼의 전체 데이터 파이프라인을 설계해줘.,premium

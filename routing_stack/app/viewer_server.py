@@ -59,7 +59,8 @@ def make_handler(viewer_dir: Path, router_server_url: str):
             super().do_GET()
 
         def do_POST(self) -> None:
-            if urlparse(self.path).path != "/api/route":
+            path = urlparse(self.path).path
+            if path not in {"/api/route", "/api/evaluate_csv", "/api/train_csv"}:
                 self._send_json(404, {"error": "not_found"})
                 return
             try:
@@ -68,7 +69,7 @@ def make_handler(viewer_dir: Path, router_server_url: str):
             except json.JSONDecodeError as exc:
                 self._send_json(400, {"error": "invalid_json", "message": str(exc)})
                 return
-            status, response_payload = _request_json(router_server_url, "/api/route", payload)
+            status, response_payload = _request_json(router_server_url, path, payload)
             self._send_json(status, response_payload)
 
     return Handler

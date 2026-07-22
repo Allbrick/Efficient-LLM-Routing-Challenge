@@ -83,3 +83,39 @@ def test_router_server_resolves_code_reference_from_conversation():
     assert context["missing_context"] is False
 
 
+def test_router_server_evaluates_prompt_label_csv():
+    ai = LocalAI(provider="mock")
+    app = RouterServerApp(routers={"fixed": FixedRouter()}, ai=ai, default_router="fixed")
+    csv_text = "Prompt,정답\n안녕,cheap\n"
+
+    payload = app.evaluate_csv({"router": "fixed", "tier": "balanced", "csv_text": csv_text})
+
+    assert payload["row_count"] == 1
+    assert payload["correct_count"] == 1
+    assert payload["accuracy"] == 1.0
+
+
+def test_router_server_accepts_korean_alias_csv_headers():
+    ai = LocalAI(provider="mock")
+    app = RouterServerApp(routers={"fixed": FixedRouter()}, ai=ai, default_router="fixed")
+    csv_text = "번호,프롬프트,예상\n1,안녕,cheap\n"
+
+    payload = app.evaluate_csv({"router": "fixed", "tier": "balanced", "csv_text": csv_text})
+
+    assert payload["row_count"] == 1
+    assert payload["correct_count"] == 1
+
+
+def test_router_server_trains_prompt_label_csv(tmp_path):
+    ai = LocalAI(provider="mock")
+    app = RouterServerApp(routers={"fixed": FixedRouter()}, ai=ai, default_router="fixed")
+    output = tmp_path / "prompt_label_router.joblib"
+    csv_text = "Prompt,정답\n안녕,cheap\nA와 B의 차이를 비교해줘,mid\nX를 구현하고 증명해줘,premium\n"
+
+    payload = app.train_csv({"csv_text": csv_text, "output_path": str(output)})
+
+    assert output.exists()
+    assert payload["row_count"] == 3
+    assert "learned_label" in app.routers
+
+

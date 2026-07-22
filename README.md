@@ -152,6 +152,19 @@ python routing_stack\app\router_server.py --routers learned_label,orchestrator -
 
 이 라우터는 프롬프트를 그대로 암기하는 방식이 아니라 word/char TF-IDF와 공통 text feature를 함께 사용해 유사한 작업 유형으로 일반화합니다.
 
+viewer 오른쪽의 `CSV/TXT 평가·학습` 패널에서도 같은 구조의 CSV 또는 TXT를 업로드할 수 있습니다.
+
+- `정답 비교`: 현재 선택한 라우터와 tier로 업로드 파일의 `정답` 컬럼을 비교합니다.
+- `학습`: 업로드한 CSV/TXT로 `artifacts/prompt_label_router.joblib`를 다시 만들고 `learned_label` 라우터를 갱신합니다.
+
+TXT 파일도 아래처럼 CSV와 같은 쉼표 구분 구조라면 그대로 사용할 수 있습니다.
+
+```text
+Prompt,정답
+안녕,cheap
+React Context와 Zustand를 언제 각각 사용하는 것이 좋은가?,mid
+```
+
 ## 라우터 품질 예측 비교
 
 난이도 하나를 예측하는 대신 `quality(prompt, model)`을 모델별로 비교합니다.

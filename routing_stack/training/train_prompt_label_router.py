@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import os
 import sys
@@ -13,6 +12,7 @@ if str(PROJECT_ROOT) not in sys.path:
 os.chdir(PROJECT_ROOT)
 
 from routing_stack.training.prompt_label_model import PromptLabelRouterModel
+from routing_stack.training.prompt_label_csv import read_prompt_label_csv_file
 
 
 def train_from_csv(csv_path: str | Path, output_path: str | Path) -> dict:
@@ -29,17 +29,9 @@ def train_from_csv(csv_path: str | Path, output_path: str | Path) -> dict:
 
 
 def _read_rows(csv_path: str | Path) -> tuple[list[str], list[str]]:
-    prompts: list[str] = []
-    labels: list[str] = []
-    with Path(csv_path).open("r", encoding="utf-8-sig", newline="") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            prompt = str(row.get("Prompt") or row.get("prompt") or "").strip()
-            label = str(row.get("정답") or row.get("label") or row.get("answer") or "").strip().lower()
-            if not prompt or not label:
-                continue
-            prompts.append(prompt)
-            labels.append(label)
+    rows = read_prompt_label_csv_file(csv_path)
+    prompts = [row["prompt"] for row in rows]
+    labels = [row["label"] for row in rows]
     if not prompts:
         raise ValueError("학습 가능한 row가 없습니다.")
     return prompts, labels

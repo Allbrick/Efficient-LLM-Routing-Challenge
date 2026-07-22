@@ -8,9 +8,15 @@ const candidatesEl = document.querySelector("#candidates");
 const transcript = document.querySelector("#transcript");
 const aiMeta = document.querySelector("#aiMeta");
 const newChat = document.querySelector("#newChat");
+const csvFile = document.querySelector("#csvFile");
+const evaluateCsv = document.querySelector("#evaluateCsv");
+const trainCsv = document.querySelector("#trainCsv");
+const csvStatus = document.querySelector("#csvStatus");
+const csvResult = document.querySelector("#csvResult");
 const submitButton = form.querySelector('button[type="submit"]');
 let isRouting = false;
 let conversation = [];
+let csvText = "";
 const MAX_CONVERSATION_MESSAGES = 10;
 
 const fmt = (value, digits = 3) => {
@@ -199,6 +205,95 @@ function renderGeometricSignals(geometricSignals) {
   `;
 }
 
+function setCsvBusy(busy) {
+  evaluateCsv.disabled = busy || !csvText;
+  trainCsv.disabled = busy || !csvText;
+}
+
+function setCsvStatus(message, isEmpty = false) {
+  csvStatus.textContent = message;
+  csvStatus.classList.toggle("empty", isEmpty);
+}
+
+async function readCsvFile(file) {
+  if (!file) {
+    csvText = "";
+    csvResult.innerHTML = "";
+    setCsvStatus("CSV 또는 TXT를 선택하세요.", true);
+    setCsvBusy(false);
+    return;
+  }
+  csvText = await file.text();
+  csvResult.innerHTML = "";
+  setCsvStatus(`${file.name} 선택됨`);
+  setCsvBusy(false);
+}
+
+async function postCsv(path) {
+  if (!csvText.trim()) {
+    setCsvStatus("CSV 또는 TXT를 먼저 선택하세요.");
+    return null;
+  }
+  setCsvBusy(true);
+  const payload = {
+    csv_text: csvText,
+    router: routerSelect.value,
+    tier: document.querySelector("#tier").value,
+  };
+  try {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || data.error || "요청 실패");
+    }
+    return data;
+  } catch (error) {
+    csvResult.innerHTML = "";
+    setCsvStatus(error.message);
+    return null;
+  } finally {
+    setCsvBusy(false);
+  }
+}
+
+async function evaluateSelectedCsv() {
+  setCsvStatus("정답 비교 중...");
+  const data = await postCsv("/api/evaluate_csv");
+  if (!data) return;
+  setCsvStatus(`정확도 ${fmt(data.accuracy * 100, 1)}% (${data.correct_count}/${data.row_count})`);
+  csvResult.innerHTML = (data.rows || [])
+    .slice(0, 80)
+    .map((row) => {
+      const state = row.correct ? "correct" : "wrong";
+      return `
+        <article class="csv-row ${state}">
+          <b>${row.prompt}</b>
+          <span>정답 ${row.expected} / 결과 ${row.actual}</span>
+          <span>${row.selection_reason || ""}</span>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+async function trainSelectedCsv() {
+  setCsvStatus("학습 중...");
+  const data = await postCsv("/api/train_csv");
+  if (!data) return;
+  setCsvStatus(`학습 완료: ${data.row_count} rows -> ${data.output_path}`);
+  csvResult.innerHTML = `
+    <article class="csv-row correct">
+      <b>learned_label 라우터 갱신됨</b>
+      <span>cheap=${data.label_counts?.cheap || 0}, mid=${data.label_counts?.mid || 0}, premium=${data.label_counts?.premium || 0}</span>
+    </article>
+  `;
+  await loadConfig();
+}
+
 async function routePrompt(event) {
   event.preventDefault();
   const prompt = promptInput.value.trim();
@@ -306,4 +401,10 @@ promptInput.addEventListener("keydown", (event) => {
 
 form.addEventListener("submit", routePrompt);
 newChat.addEventListener("click", resetChat);
+csvFile.addEventListener("change", () => {
+  readCsvFile(csvFile.files?.[0]);
+});
+evaluateCsv.addEventListener("click", evaluateSelectedCsv);
+trainCsv.addEventListener("click", trainSelectedCsv);
+setCsvBusy(false);
 loadConfig();

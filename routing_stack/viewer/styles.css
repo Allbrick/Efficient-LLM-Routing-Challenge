@@ -365,6 +365,67 @@ input {
   font-size: 11px;
 }
 
+.csv-tool {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.csv-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.csv-actions button {
+  border: 1px solid #d6d2ca;
+  border-radius: 9px;
+  background: #fff;
+  color: #202124;
+  padding: 8px 9px;
+  cursor: pointer;
+}
+
+.csv-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.csv-status {
+  color: #55514b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.csv-result {
+  display: grid;
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.csv-row {
+  border: 1px solid #e2ded7;
+  border-radius: 10px;
+  background: #fff;
+  padding: 9px;
+  font-size: 11px;
+}
+
+.csv-row.correct {
+  border-color: #9bc4a4;
+}
+
+.csv-row.wrong {
+  border-color: #e2a0a0;
+}
+
+.csv-row b,
+.csv-row span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 1100px) {
   .app-shell {
     grid-template-columns: 240px minmax(0, 1fr);
