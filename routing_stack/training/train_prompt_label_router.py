@@ -11,34 +11,41 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 os.chdir(PROJECT_ROOT)
 
-from routing_stack.training.prompt_label_model import PromptLabelRouterModel
 from routing_stack.training.prompt_label_csv import read_prompt_label_csv_file
+from routing_stack.training.prompt_label_model import PromptLabelRouterModel
 
 
 def train_from_csv(csv_path: str | Path, output_path: str | Path) -> dict:
-    prompts, labels = _read_rows(csv_path)
-    model = PromptLabelRouterModel().fit(prompts, labels)
+    prompts, routing_scores = _read_rows(csv_path)
+    model = PromptLabelRouterModel().fit(prompts, routing_scores)
     model.save(output_path)
-    label_counts = {label: labels.count(label) for label in sorted(set(labels))}
+    bucket_counts = {
+        "cheap": sum(1 for score in routing_scores if score <= 40),
+        "mid": sum(1 for score in routing_scores if 40 < score <= 70),
+        "premium": sum(1 for score in routing_scores if score > 70),
+    }
     return {
         "csv_path": str(csv_path),
         "output_path": str(output_path),
         "row_count": len(prompts),
-        "label_counts": label_counts,
+        "score_min": min(routing_scores),
+        "score_max": max(routing_scores),
+        "score_mean": round(sum(routing_scores) / len(routing_scores), 3),
+        "bucket_counts": bucket_counts,
     }
 
 
-def _read_rows(csv_path: str | Path) -> tuple[list[str], list[str]]:
+def _read_rows(csv_path: str | Path) -> tuple[list[str], list[float]]:
     rows = read_prompt_label_csv_file(csv_path)
-    prompts = [row["prompt"] for row in rows]
-    labels = [row["label"] for row in rows]
+    prompts = [str(row["prompt"]) for row in rows]
+    routing_scores = [float(row["routing_score"]) for row in rows]
     if not prompts:
-        raise ValueError("학습 가능한 row가 없습니다.")
-    return prompts, labels
+        raise ValueError("No trainable rows found.")
+    return prompts, routing_scores
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Prompt/정답 CSV로 learned_label 라우터 artifact를 학습합니다.")
+    parser = argparse.ArgumentParser(description="Train learned_label router artifact from prompt,routing_score CSV.")
     parser.add_argument("--csv", default="data/router_labels/prompt_labels.csv")
     parser.add_argument("--output", default="artifacts/prompt_label_router.joblib")
     args = parser.parse_args()

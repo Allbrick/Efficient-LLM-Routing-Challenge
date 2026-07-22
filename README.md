@@ -127,15 +127,19 @@ orchestrator만 서버에 노출하고 싶다면 다음처럼 실행할 수 있�
 python routing_stack\app\router_server.py --routers orchestrator --default_router orchestrator --ai mock --port 4100
 ```
 
-## Prompt/정답 기반 라우터 학습
+## Prompt/routing_score 기반 라우터 학습
 
-`data/router_labels/prompt_labels.csv`에 `Prompt,정답` 형식으로 예시를 추가하면 로컬 classifier를 다시 학습할 수 있습니다. 정답은 `cheap`, `mid`, `premium` 중 하나입니다.
+`data/router_labels/prompt_labels.csv`에 `prompt,routing_score` 형식으로 예시를 추가하면 로컬 회귀 라우터를 다시 학습할 수 있습니다. `routing_score`는 0-100 범위의 모델 필요도 점수입니다.
+
+- `0-40`: cheap
+- `41-70`: mid
+- `71-100`: premium
 
 ```csv
-Prompt,정답
-안녕,cheap
-FooDB와 BarQueue를 언제 각각 선택하는 것이 좋은가?,mid
-XAlgo를 구현하고 시간복잡도를 증명해줘,premium
+prompt,routing_score
+안녕,8
+FooDB와 BarQueue를 언제 각각 선택하는 것이 좋은가?,55
+XAlgo를 구현하고 시간복잡도를 증명해줘,86
 ```
 
 학습 명령:
@@ -150,19 +154,19 @@ python -m routing_stack.training.train_prompt_label_router --csv data\router_lab
 python routing_stack\app\router_server.py --routers learned_label,orchestrator --default_router learned_label --ai mock --port 4100
 ```
 
-이 라우터는 word/char TF-IDF와 공통 text feature를 함께 사용해 유사한 작업 유형으로 일반화합니다. 추가로 학습 feature 공간에서 `cheap`, `mid`, `premium` 중심점 거리와 최근접 학습 예시를 계산하는 geometric memory를 사용합니다. 따라서 완전히 같은 학습 프롬프트는 사용자가 준 라벨을 우선하고, 새로운 프롬프트는 classifier 확률과 geometric similarity를 함께 반영합니다.
+이 라우터는 word/char TF-IDF와 공통 text feature를 함께 사용해 유사한 작업 유형으로 일반화합니다. 추가로 학습 feature 공간에서 `cheap`, `mid`, `premium` score 구간별 중심점 거리와 최근접 학습 예시를 계산하는 geometric memory를 사용합니다. 따라서 완전히 같은 학습 프롬프트는 사용자가 준 score를 우선하고, 새로운 프롬프트는 회귀 예측값과 geometric similarity를 함께 반영합니다.
 
 viewer 오른쪽의 `CSV/TXT 평가·학습` 패널에서도 같은 구조의 CSV 또는 TXT를 업로드할 수 있습니다.
 
-- `정답 비교`: 현재 선택한 라우터와 tier로 업로드 파일의 `정답` 컬럼을 비교합니다.
+- `정답 비교`: 현재 선택한 라우터와 tier로 업로드 파일의 `routing_score`를 평가합니다. bucket accuracy와 MAE를 함께 표시합니다.
 - `학습`: 업로드한 CSV/TXT로 `artifacts/prompt_label_router.joblib`를 다시 만들고 `learned_label` 라우터를 갱신합니다.
 
 TXT 파일도 아래처럼 CSV와 같은 쉼표 구분 구조라면 그대로 사용할 수 있습니다.
 
 ```text
-Prompt,정답
-안녕,cheap
-React Context와 Zustand를 언제 각각 사용하는 것이 좋은가?,mid
+prompt,routing_score
+안녕,8
+React Context와 Zustand를 언제 각각 사용하는 것이 좋은가?,55
 ```
 
 ## 라우터 품질 예측 비교

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from routing_stack.adapters.contract import Candidate, RouteRequest, RouteResult
-from routing_stack.training.prompt_label_model import LABELS, PromptLabelRouterModel
+from routing_stack.training.prompt_label_model import MODEL_SLOTS, PromptLabelRouterModel
 
 
 class LearnedLabelRouterAdapter:
@@ -17,32 +17,36 @@ class LearnedLabelRouterAdapter:
         prediction = self.model.predict(request.prompt)
         candidates = [
             Candidate(
-                model_id=label,
-                score=prediction.probabilities.get(label, 0.0),
-                cost=_cost(label),
+                model_id=model_id,
+                score=prediction.bucket_scores.get(model_id, 0.0),
+                cost=_cost(model_id),
                 feasible=True,
-                reason="learned_label_probability",
+                reason="learned_routing_score_bucket",
                 metrics={
-                    "label_probability": prediction.probabilities.get(label, 0.0),
-                    "raw_probability": prediction.raw_probabilities.get(label, 0.0),
-                    "centroid_distance": prediction.geometry.get("centroid_distances", {}).get(label),
-                    "centroid_probability": prediction.geometry.get("centroid_probabilities", {}).get(label),
+                    "routing_score": prediction.routing_score,
+                    "raw_routing_score": prediction.raw_routing_score,
+                    "bucket_score": prediction.bucket_scores.get(model_id, 0.0),
+                    "raw_bucket_score": prediction.raw_bucket_scores.get(model_id, 0.0),
+                    "centroid_distance": prediction.geometry.get("centroid_distances", {}).get(model_id),
+                    "centroid_probability": prediction.geometry.get("centroid_probabilities", {}).get(model_id),
                 },
             )
-            for label in LABELS
+            for model_id in MODEL_SLOTS
         ]
         return RouteResult(
             router_name=self.name,
-            selected_model_id=prediction.selected_label,
+            selected_model_id=prediction.selected_model_id,
             action_type="call_model",
-            selection_reason="learned_label_probability",
+            selection_reason="learned_routing_score",
             candidates=candidates,
             diagnostics={
                 "artifact_path": self.artifact_path,
                 "input_features": request.input_features,
                 "context_features": request.context_features,
-                "probabilities": prediction.probabilities,
-                "raw_probabilities": prediction.raw_probabilities,
+                "routing_score": prediction.routing_score,
+                "raw_routing_score": prediction.raw_routing_score,
+                "bucket_scores": prediction.bucket_scores,
+                "raw_bucket_scores": prediction.raw_bucket_scores,
                 "geometry": prediction.geometry,
             },
         )

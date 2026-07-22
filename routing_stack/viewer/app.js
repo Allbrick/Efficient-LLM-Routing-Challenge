@@ -264,7 +264,7 @@ async function evaluateSelectedCsv() {
   setCsvStatus("정답 비교 중...");
   const data = await postCsv("/api/evaluate_csv");
   if (!data) return;
-  setCsvStatus(`정확도 ${fmt(data.accuracy * 100, 1)}% (${data.correct_count}/${data.row_count})`);
+  setCsvStatus(`bucket ${fmt(data.bucket_accuracy * 100, 1)}% (${data.correct_count}/${data.row_count}) / MAE ${fmt(data.mae, 2)}`);
   csvResult.innerHTML = (data.rows || [])
     .slice(0, 80)
     .map((row) => {
@@ -272,7 +272,7 @@ async function evaluateSelectedCsv() {
       return `
         <article class="csv-row ${state}">
           <b>${row.prompt}</b>
-          <span>정답 ${row.expected} / 결과 ${row.actual}</span>
+          <span>score ${fmt(row.expected_score, 1)} -> ${fmt(row.predicted_score, 1)} / bucket ${row.expected} -> ${row.actual}</span>
           <span>${row.selection_reason || ""}</span>
         </article>
       `;
@@ -288,7 +288,7 @@ async function trainSelectedCsv() {
   csvResult.innerHTML = `
     <article class="csv-row correct">
       <b>learned_label 라우터 갱신됨</b>
-      <span>cheap=${data.label_counts?.cheap || 0}, mid=${data.label_counts?.mid || 0}, premium=${data.label_counts?.premium || 0}</span>
+      <span>cheap=${data.bucket_counts?.cheap || 0}, mid=${data.bucket_counts?.mid || 0}, premium=${data.bucket_counts?.premium || 0}</span>
     </article>
   `;
   await loadConfig();

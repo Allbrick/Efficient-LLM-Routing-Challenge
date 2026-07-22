@@ -18,7 +18,7 @@ from routing_stack.adapters.registry import available_routers, create_router
 from routing_stack.ai.local_ai import LocalAI, ModelConfig
 from routing_stack.context import resolve_context
 from routing_stack.input import normalize_input
-from routing_stack.training.prompt_label_csv import read_prompt_label_csv_text
+from routing_stack.training.prompt_label_csv import model_slot_to_score, read_prompt_label_csv_text, score_to_model_slot
 from routing_stack.training.train_prompt_label_router import train_from_csv
 
 
@@ -92,25 +92,32 @@ class RouterServerApp:
             raise ValueError(f"알 수 없는 라우터입니다: {router_name}")
 
         results = []
-        correct = 0
-        label_counts: dict[str, int] = {}
+        bucket_correct = 0
+        absolute_errors: list[float] = []
+        bucket_counts: dict[str, int] = {}
         prediction_counts: dict[str, int] = {}
         for item in rows:
-            expected = item["label"]
+            expected_score = float(item["routing_score"])
+            expected_bucket = score_to_model_slot(expected_score)
             route_result = self._route_only(router_name, item["prompt"], tier)
             actual = route_result.selected_model_id
-            is_correct = actual == expected
-            correct += int(is_correct)
-            label_counts[expected] = label_counts.get(expected, 0) + 1
+            predicted_score = _predicted_routing_score(route_result)
+            is_correct = actual == expected_bucket
+            bucket_correct += int(is_correct)
+            absolute_errors.append(abs(predicted_score - expected_score))
+            bucket_counts[expected_bucket] = bucket_counts.get(expected_bucket, 0) + 1
             prediction_counts[actual] = prediction_counts.get(actual, 0) + 1
             results.append(
                 {
                     "prompt": item["prompt"],
-                    "expected": expected,
+                    "expected_score": expected_score,
+                    "expected": expected_bucket,
+                    "predicted_score": round(predicted_score, 3),
                     "actual": actual,
                     "correct": is_correct,
+                    "absolute_error": round(abs(predicted_score - expected_score), 3),
                     "selection_reason": route_result.selection_reason,
-                    "probabilities": _candidate_scores(route_result),
+                    "candidate_scores": _candidate_scores(route_result),
                 }
             )
 
@@ -119,9 +126,12 @@ class RouterServerApp:
             "router": router_name,
             "tier": tier,
             "row_count": total,
-            "correct_count": correct,
-            "accuracy": round(correct / max(total, 1), 6),
-            "label_counts": label_counts,
+            "correct_count": bucket_correct,
+            "bucket_accuracy": round(bucket_correct / max(total, 1), 6),
+            "accuracy": round(bucket_correct / max(total, 1), 6),
+            "mae": round(sum(absolute_errors) / max(total, 1), 6),
+            "bucket_counts": bucket_counts,
+            "label_counts": bucket_counts,
             "prediction_counts": prediction_counts,
             "rows": results,
         }
@@ -152,6 +162,16 @@ class RouterServerApp:
             call_history=routing_context.session_state.previous_calls,
         )
         return self.routers[router_name].route(request)
+
+
+def _predicted_routing_score(route_result) -> float:
+    diagnostics = route_result.diagnostics or {}
+    if "routing_score" in diagnostics:
+        try:
+            return float(diagnostics["routing_score"])
+        except (TypeError, ValueError):
+            pass
+    return model_slot_to_score(route_result.selected_model_id)
 
 
 def make_handler(app: RouterServerApp):

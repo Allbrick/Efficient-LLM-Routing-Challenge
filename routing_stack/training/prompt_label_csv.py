@@ -5,61 +5,84 @@ import io
 from pathlib import Path
 
 
-LABELS = {"cheap", "mid", "premium"}
-PROMPT_ALIASES = ("prompt", "프롬프트", "질문", "입력", "input", "user_prompt")
-LABEL_ALIASES = ("정답", "label", "answer", "expected", "예상", "결과", "라우터", "model", "route")
+LEGACY_LABEL_SCORES = {"cheap": 20.0, "mid": 55.0, "premium": 85.0}
+PROMPT_ALIASES = ("prompt", "프롬프트", "질문", "입력", "input", "user_prompt", "question")
+SCORE_ALIASES = ("routing_score", "score", "router_score", "route_score", "점수", "라우팅점수")
+LEGACY_LABEL_ALIASES = ("정답", "label", "answer", "expected", "예상", "결과", "model", "route")
 INDEX_ALIASES = ("no", "번호", "index", "id", "#")
 
 
-def read_prompt_label_csv_text(csv_text: str) -> list[dict[str, str]]:
-    """Prompt/정답 CSV 또는 TXT를 관대하게 읽습니다.
+def read_prompt_label_csv_text(csv_text: str) -> list[dict[str, str | float]]:
+    """Read prompt/routing_score CSV text.
 
-    지원 헤더:
-    - Prompt,정답
-    - 프롬프트,예상
-    - question,label
-    - 번호,프롬프트,정답
+    Current format:
 
-    헤더 이름을 못 찾으면 첫 두 개의 유효 컬럼을 prompt/label로 사용합니다.
+    prompt,routing_score
+    안녕,8
+
+    Older cheap/mid/premium label files are accepted as a migration aid. Their
+    labels are mapped to representative scores: cheap=20, mid=55, premium=85.
+    If a prompt contains unquoted commas, the final field is treated as the
+    score or legacy label and earlier fields are joined back into the prompt.
     """
     if not csv_text.strip():
         raise ValueError("csv_text_required")
+
     normalized_text = csv_text.lstrip("\ufeff")
     reader = csv.DictReader(io.StringIO(normalized_text), restkey="__extra_columns__")
     if not reader.fieldnames:
-        raise ValueError("CSV/TXT 헤더가 필요합니다.")
+        raise ValueError("CSV/TXT header is required.")
 
     fieldnames = [str(name or "").strip().lstrip("\ufeff") for name in reader.fieldnames]
     prompt_key = _find_column(fieldnames, PROMPT_ALIASES)
-    label_key = _find_column(fieldnames, LABEL_ALIASES)
-    if prompt_key is None or label_key is None:
-        prompt_key, label_key = _fallback_columns(fieldnames)
+    score_key = _find_column(fieldnames, SCORE_ALIASES)
+    legacy_label_key = _find_column(fieldnames, LEGACY_LABEL_ALIASES)
+    target_key = score_key or legacy_label_key
+    if prompt_key is None or target_key is None:
+        prompt_key, target_key = _fallback_columns(fieldnames)
 
-    rows = []
+    rows: list[dict[str, str | float]] = []
     for row in reader:
-        cleaned = {str(key or "").strip().lstrip("\ufeff"): value for key, value in row.items() if key != "__extra_columns__"}
+        cleaned = {
+            str(key or "").strip().lstrip("\ufeff"): value
+            for key, value in row.items()
+            if key != "__extra_columns__"
+        }
         prompt = str(cleaned.get(prompt_key, "") or "").strip()
-        label = str(cleaned.get(label_key, "") or "").strip().lower()
+        target = str(cleaned.get(target_key, "") or "").strip()
         extra_columns = [str(value or "").strip() for value in row.get("__extra_columns__", [])]
-        if extra_columns and extra_columns[-1].lower() in LABELS:
-            prompt_parts = [prompt, str(cleaned.get(label_key, "") or "").strip(), *extra_columns[:-1]]
+
+        if extra_columns and _parse_score(extra_columns[-1]) is not None:
+            prompt_parts = [prompt, target, *extra_columns[:-1]]
             prompt = ",".join(part for part in prompt_parts if part).strip()
-            label = extra_columns[-1].lower()
-        if not prompt and not label:
+            target = extra_columns[-1]
+
+        score = _parse_score(target)
+        if not prompt and target == "":
             continue
-        if not prompt or label not in LABELS:
-            raise ValueError(
-                "CSV/TXT는 프롬프트 컬럼과 정답(cheap/mid/premium) 컬럼이 필요합니다. "
-                "예: Prompt,정답 또는 프롬프트,예상"
-            )
-        rows.append({"prompt": prompt, "label": label})
+        if not prompt or score is None:
+            raise ValueError("CSV/TXT must include prompt and routing_score columns. Example: prompt,routing_score")
+        rows.append({"prompt": prompt, "routing_score": score})
+
     if not rows:
-        raise ValueError("학습/평가 가능한 row가 없습니다.")
+        raise ValueError("No trainable/evaluable rows found.")
     return rows
 
 
-def read_prompt_label_csv_file(csv_path: str | Path) -> list[dict[str, str]]:
+def read_prompt_label_csv_file(csv_path: str | Path) -> list[dict[str, str | float]]:
     return read_prompt_label_csv_text(Path(csv_path).read_text(encoding="utf-8-sig"))
+
+
+def score_to_model_slot(score: float) -> str:
+    if score <= 40:
+        return "cheap"
+    if score <= 70:
+        return "mid"
+    return "premium"
+
+
+def model_slot_to_score(model_slot: str) -> float:
+    return LEGACY_LABEL_SCORES.get(str(model_slot).strip().lower(), 0.0)
 
 
 def _find_column(fieldnames: list[str], aliases: tuple[str, ...]) -> str | None:
@@ -72,13 +95,28 @@ def _find_column(fieldnames: list[str], aliases: tuple[str, ...]) -> str | None:
 
 
 def _fallback_columns(fieldnames: list[str]) -> tuple[str, str]:
-    usable = [name for name in fieldnames if _normalize(name) not in {_normalize(alias) for alias in INDEX_ALIASES}]
+    index_aliases = {_normalize(alias) for alias in INDEX_ALIASES}
+    usable = [name for name in fieldnames if _normalize(name) not in index_aliases]
     if len(usable) >= 2:
         return usable[0], usable[1]
     if len(fieldnames) >= 2:
         return fieldnames[0], fieldnames[1]
-    raise ValueError("CSV/TXT는 최소 2개 컬럼이 필요합니다.")
+    raise ValueError("CSV/TXT needs at least two columns.")
 
 
 def _normalize(value: str) -> str:
     return str(value or "").strip().lower().replace(" ", "").replace("_", "")
+
+
+def _parse_score(value: str) -> float | None:
+    raw = str(value or "").strip()
+    legacy_score = LEGACY_LABEL_SCORES.get(raw.lower())
+    if legacy_score is not None:
+        return legacy_score
+    try:
+        score = float(raw)
+    except ValueError:
+        return None
+    if not 0.0 <= score <= 100.0:
+        return None
+    return score

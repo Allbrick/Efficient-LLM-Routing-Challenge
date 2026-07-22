@@ -9,7 +9,7 @@ def test_learned_label_adapter_returns_route_result(tmp_path: Path):
     artifact = tmp_path / "router.joblib"
     PromptLabelRouterModel().fit(
         ["안녕", "A와 B의 차이를 비교해줘", "X를 구현하고 증명해줘"],
-        ["cheap", "mid", "premium"],
+        [8, 55, 85],
     ).save(artifact)
     adapter = LearnedLabelRouterAdapter(artifact)
 
@@ -17,6 +17,7 @@ def test_learned_label_adapter_returns_route_result(tmp_path: Path):
 
     assert result.router_name == "learned_label"
     assert result.selected_model_id in {"cheap", "mid", "premium"}
-    assert result.diagnostics["probabilities"]
-    assert result.diagnostics["raw_probabilities"]
+    assert 0 <= result.diagnostics["routing_score"] <= 100
+    assert result.diagnostics["bucket_scores"]
+    assert result.diagnostics["raw_bucket_scores"]
     assert result.diagnostics["geometry"]["nearest_examples"]
