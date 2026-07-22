@@ -117,13 +117,14 @@ def main() -> None:
     parser.add_argument("--default_router", default="geometric")
     parser.add_argument("--ai", default="ollama", choices=["ollama", "mock"])
     parser.add_argument("--ollama_url", default="http://127.0.0.1:11434")
+    parser.add_argument("--ai_timeout", type=int, default=120)
     parser.add_argument("--cheap_model", default="qwen3:4b-instruct")
     parser.add_argument("--mid_model", default="qwen3:8b")
     parser.add_argument("--premium_model", default="qwen3:14b")
     args = parser.parse_args()
 
     model_config = ModelConfig(cheap=args.cheap_model, mid=args.mid_model, premium=args.premium_model)
-    ai = LocalAI(provider=args.ai, model_config=model_config, base_url=args.ollama_url)
+    ai = LocalAI(provider=args.ai, model_config=model_config, base_url=args.ollama_url, timeout_seconds=args.ai_timeout)
     router_names = [name.strip() for name in args.routers.split(",") if name.strip()]
     app = RouterServerApp.load(router_names=router_names, ai=ai, default_router=args.default_router)
     server = ThreadingHTTPServer((args.host, args.port), make_handler(app))

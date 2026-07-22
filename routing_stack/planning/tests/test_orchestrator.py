@@ -96,6 +96,32 @@ def test_fast_resolved_code_reference_prefers_mid_when_context_is_not_tiny():
     assert result.selection_reason == "resolved_code_context"
 
 
+def test_balanced_technical_task_prefers_mid_over_geometric_cheap_safe():
+    request = RouteRequest(
+        prompt="Spring Boot와 Spring Framework의 차이를 비교해줘",
+        tier="balanced",
+        input_features={"technical_explanation": True, "comparison_task": True},
+    )
+    geo = GeometricSignals(available=True, signals={"cheap_geometrically_safe": True})
+    result = orchestrate_route(request, [obs("a", "cheap")], uncertainty(router_disagreement=True), geo)
+
+    assert result.selected_model_id == "mid"
+    assert result.selection_reason == "balanced_task_complexity"
+
+
+def test_balanced_advanced_task_selects_premium():
+    request = RouteRequest(
+        prompt="Python으로 LRU Cache를 구현하고 시간복잡도를 증명해줘",
+        tier="balanced",
+        input_features={"advanced_reasoning_task": True, "technical_explanation": True},
+    )
+    geo = GeometricSignals(available=True, signals={"cheap_geometrically_safe": True})
+    result = orchestrate_route(request, [obs("a", "cheap")], uncertainty(high_premium_gap=True), geo)
+
+    assert result.selected_model_id == "premium"
+    assert result.selection_reason == "advanced_reasoning_task"
+
+
 def test_geometric_cheap_safe_blocks_fast_premium():
     request = RouteRequest(prompt="test", tier="fast")
     geo = GeometricSignals(available=True, signals={"cheap_geometrically_safe": True})

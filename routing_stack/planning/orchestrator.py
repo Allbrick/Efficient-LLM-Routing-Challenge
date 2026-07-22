@@ -51,6 +51,10 @@ def _select_model(
         return "abstain", "missing_context"
     if bool(features.get("simple_directive")) and not bool(context.get("requires_cross_turn_reasoning")):
         return "cheap", "simple_directive"
+    if tier in {"balanced", "premium"} and bool(combined.get("advanced_reasoning_task")):
+        return "premium", "advanced_reasoning_task"
+    if tier == "balanced" and _task_prefers_mid(combined):
+        return "mid", "balanced_task_complexity"
     if bool(context.get("previous_cheap_failure")) and tier in {"fast", "balanced"}:
         if tier == "fast":
             return "mid", "previous_cheap_failure"
@@ -59,7 +63,7 @@ def _select_model(
         pressure = float(context.get("context_token_pressure", 0.0) or 0.0)
         if pressure >= 0.25:
             return "mid", "resolved_code_context"
-    if geo.signals.get("cheap_geometrically_safe"):
+    if geo.signals.get("cheap_geometrically_safe") and (tier == "fast" or not _task_prefers_mid_or_higher(combined)):
         return "cheap", "cheap_geometrically_safe"
 
     votes = _vote_counts(observations)
@@ -203,3 +207,18 @@ def _mean(values: list[float]) -> float | None:
 
 def _rank(model_id: str) -> int:
     return {"cheap": 0, "mid": 1, "premium": 2}.get(model_id, 99)
+
+
+def _task_prefers_mid(features: dict) -> bool:
+    return bool(
+        features.get("technical_explanation")
+        or features.get("comparison_task")
+        or features.get("design_task")
+        or features.get("references_code")
+        or features.get("references_design")
+        or float(features.get("task_complexity_hint", 0.0) or 0.0) >= 0.45
+    )
+
+
+def _task_prefers_mid_or_higher(features: dict) -> bool:
+    return bool(_task_prefers_mid(features) or features.get("advanced_reasoning_task"))

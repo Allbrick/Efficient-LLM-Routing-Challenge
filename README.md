@@ -96,6 +96,12 @@ ollama pull qwen3:14b
 python routing_stack\app\router_server.py --ai ollama --port 4100
 ```
 
+로컬 모델이 느려서 `timeout`이 발생하면 timeout을 늘릴 수 있습니다.
+
+```powershell
+python routing_stack\app\router_server.py --ai ollama --ai_timeout 240 --port 4100
+```
+
 AI 계층의 기본 모델 매핑은 다음과 같습니다.
 
 ```text

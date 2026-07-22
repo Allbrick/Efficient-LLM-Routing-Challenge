@@ -37,3 +37,28 @@ def test_token_estimator_reports_cost_pressure_features():
     assert code_estimate.code_token_pressure > 0
     assert table_estimate.json_or_table_pressure > 0
     assert code_estimate.estimated_output_tokens >= code_estimate.estimated_input_tokens
+
+
+def test_text_feature_analyzer_detects_task_complexity_signals():
+    conversion = analyze_text_prompt("1024MB는 몇 GB인가?")
+    technical = analyze_text_prompt("Spring Boot와 Spring Framework의 차이를 비교해줘")
+    advanced = analyze_text_prompt("Python으로 LRU Cache를 구현하고 시간복잡도를 증명해줘")
+
+    assert conversion.simple_conversion is True
+    assert conversion.simple_directive is True
+    assert technical.technical_explanation is True
+    assert technical.comparison_task is True
+    assert technical.task_complexity_hint >= 0.55
+    assert advanced.advanced_reasoning_task is True
+    assert advanced.task_complexity_hint >= 0.85
+
+
+def test_task_complexity_signals_generalize_to_unseen_domain_names():
+    conceptual = analyze_text_prompt("FooDB와 BarQueue를 언제 각각 선택하는 것이 좋은가?")
+    proof_like = analyze_text_prompt("XAlgo를 구현하고 정확성과 시간복잡도를 증명해줘")
+
+    assert conceptual.technical_explanation is True
+    assert conceptual.comparison_task is True
+    assert conceptual.task_complexity_hint >= 0.55
+    assert proof_like.advanced_reasoning_task is True
+    assert proof_like.task_complexity_hint >= 0.85
