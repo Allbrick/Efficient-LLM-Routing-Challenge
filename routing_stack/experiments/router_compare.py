@@ -31,14 +31,20 @@ def compare_routers(
     router_names: Iterable[str] = ("geometric", "quality_utility"),
     router_factory: RouterFactory = create_router,
     include_orchestrator: bool = False,
+    context_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """같은 프롬프트에 대한 라우터별 모델 품질 예측을 비교합니다."""
     text = str(prompt).strip()
     if not text:
         raise ValueError("prompt_required")
 
-    normalized = normalize_input({"input_type": "text", "prompt": text})
+    base_payload = {"input_type": "text", "prompt": text, **(context_payload or {})}
+    normalized = normalize_input(base_payload)
+    from routing_stack.context import resolve_context
+
+    routing_context = resolve_context(base_payload, normalized)
     input_features = normalized.router_features
+    context_features = routing_context.router_context
     base_router_names = [name for name in router_names if name != "orchestrator"]
     routers = {name: router_factory(name) for name in base_router_names}
     rows = []
@@ -46,7 +52,14 @@ def compare_routers(
     for tier in tiers:
         tier_results: list[RouteResult] = []
         for router_name, router in routers.items():
-            request = RouteRequest(prompt=text, tier=tier, input_features=input_features)
+            request = RouteRequest(
+                prompt=text,
+                tier=tier,
+                input_features=input_features,
+                context_features=context_features,
+                executor_context=routing_context.executor_context,
+                call_history=routing_context.session_state.previous_calls,
+            )
             result = router.route(request)
             tier_results.append(result)
             rows.append(_result_to_row(tier, result))
@@ -54,9 +67,17 @@ def compare_routers(
             observations = [observation_from_result(result) for result in tier_results]
             geometric_result = next((result for result in tier_results if result.router_name == "geometric"), None)
             geometric_signals = extract_geometric_signals(geometric_result)
-            uncertainty = assess_uncertainty(observations, input_features, tier, geometric_signals)
+            combined_features = {**input_features, **context_features}
+            uncertainty = assess_uncertainty(observations, combined_features, tier, geometric_signals)
             orchestrator_decision = orchestrate_route(
-                RouteRequest(prompt=text, tier=tier, input_features=input_features),
+                RouteRequest(
+                    prompt=text,
+                    tier=tier,
+                    input_features=input_features,
+                    context_features=context_features,
+                    executor_context=routing_context.executor_context,
+                    call_history=routing_context.session_state.previous_calls,
+                ),
                 observations,
                 uncertainty,
                 geometric_signals,
@@ -74,7 +95,9 @@ def compare_routers(
     return {
         "prompt": normalized.text,
         "normalized_input": normalized.to_dict(),
+        "routing_context": routing_context.to_dict(),
         "input_features": input_features,
+        "context_features": context_features,
         "rows": rows,
         "planning": planning,
     }
@@ -114,19 +137,30 @@ def _as_float(value: Any) -> float | None:
         return None
 
 
+def _load_context_json(path: str) -> dict[str, Any]:
+    with Path(path).open("r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, dict):
+        raise ValueError("context_json은 JSON object여야 합니다.")
+    return payload
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="라우터별 model quality 예측을 비교합니다.")
     parser.add_argument("prompt")
     parser.add_argument("--tiers", default="fast,balanced,premium")
     parser.add_argument("--routers", default=",".join(available_routers()))
     parser.add_argument("--include_orchestrator", action="store_true")
+    parser.add_argument("--context_json", default="")
     args = parser.parse_args()
+    context_payload = _load_context_json(args.context_json) if args.context_json else None
 
     payload = compare_routers(
         prompt=args.prompt,
         tiers=[value.strip() for value in args.tiers.split(",") if value.strip()],
         router_names=[value.strip() for value in args.routers.split(",") if value.strip()],
         include_orchestrator=args.include_orchestrator,
+        context_payload=context_payload,
     )
     print(json.dumps(payload, ensure_ascii=False, indent=2))
 

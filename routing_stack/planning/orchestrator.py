@@ -31,6 +31,7 @@ def orchestrate_route(
             "observations": [obs.to_dict() for obs in observations],
             "uncertainty": uncertainty.to_dict(),
             "geometric_signals": geo.to_dict(),
+            "context_features": request.context_features,
             "policy": {"tier": tier, "rule": reason},
         },
     )
@@ -44,10 +45,20 @@ def _select_model(
     tier: str,
 ) -> tuple[str, str]:
     features = request.input_features or {}
-    if bool(features.get("missing_context")) or uncertainty.signals.get("missing_context"):
+    context = request.context_features or {}
+    combined = {**features, **context}
+    if bool(context.get("missing_context", features.get("missing_context"))) or uncertainty.signals.get("reference_unresolved") or uncertainty.signals.get("missing_context"):
         return "abstain", "missing_context"
-    if bool(features.get("simple_directive")):
+    if bool(features.get("simple_directive")) and not bool(context.get("requires_cross_turn_reasoning")):
         return "cheap", "simple_directive"
+    if bool(context.get("previous_cheap_failure")) and tier in {"fast", "balanced"}:
+        if tier == "fast":
+            return "mid", "previous_cheap_failure"
+        return _best_excluding(observations, "cheap"), "previous_cheap_failure"
+    if bool(context.get("references_code")) and bool(context.get("has_resolved_reference")) and tier == "fast":
+        pressure = float(context.get("context_token_pressure", 0.0) or 0.0)
+        if pressure >= 0.25:
+            return "mid", "resolved_code_context"
     if geo.signals.get("cheap_geometrically_safe"):
         return "cheap", "cheap_geometrically_safe"
 
@@ -75,6 +86,7 @@ def _select_fast(
         and cheap_quality < 0.45
         and _vote_counts(observations).get("premium", 0) > 0
         and not geo.signals.get("cheap_geometrically_safe", False)
+        and not uncertainty.signals.get("reference_unresolved", False)
     )
     if best == "premium" and not allow_premium:
         if geo.signals.get("mid_geometrically_safe"):
@@ -102,6 +114,10 @@ def _select_premium(
     uncertainty: UncertaintySignal,
     geo: GeometricSignals,
 ) -> tuple[str, str]:
+    if uncertainty.signals.get("reference_unresolved") or uncertainty.signals.get("missing_context"):
+        return "abstain", "missing_context"
+    if uncertainty.signals.get("previous_failure") and uncertainty.signals.get("high_premium_gap"):
+        return "premium", "premium_after_failure"
     if geo.signals.get("only_premium_near") and uncertainty.signals.get("high_premium_gap"):
         return "premium", "only_premium_near"
     if uncertainty.signals.get("high_premium_gap"):
@@ -155,6 +171,15 @@ def _best_by_mean_utility(observations: list[RouterObservation]) -> str:
 
 def _best_by_mean_quality(observations: list[RouterObservation]) -> str:
     scores = {model_id: _mean(_values([obs.model_quality.get(model_id) for obs in observations])) for model_id in MODEL_IDS}
+    return max(scores, key=lambda model_id: (scores[model_id] if scores[model_id] is not None else float("-inf"), -_rank(model_id)))
+
+
+def _best_excluding(observations: list[RouterObservation], excluded: str) -> str:
+    scores = {
+        model_id: _mean(_values([obs.model_utility.get(model_id) for obs in observations]))
+        for model_id in MODEL_IDS
+        if model_id != excluded
+    }
     return max(scores, key=lambda model_id: (scores[model_id] if scores[model_id] is not None else float("-inf"), -_rank(model_id)))
 
 

@@ -52,6 +52,50 @@ def test_missing_context_selects_abstain():
     assert result.action_type == "abstain"
 
 
+def test_context_missing_selects_abstain_even_in_premium():
+    request = RouteRequest(
+        prompt="다음 코드를 분석해줘",
+        tier="premium",
+        input_features={"missing_context": True},
+        context_features={"missing_context": True, "has_reference_expression": True, "has_resolved_reference": False},
+    )
+    result = orchestrate_route(request, [obs("a", "premium")], uncertainty(reference_unresolved=True))
+
+    assert result.selected_model_id == "abstain"
+
+
+def test_previous_cheap_failure_avoids_cheap():
+    request = RouteRequest(
+        prompt="다시 해줘",
+        tier="balanced",
+        context_features={"previous_cheap_failure": True},
+    )
+    result = orchestrate_route(
+        request,
+        [obs("a", "cheap", utility={"cheap": 0.9, "mid": 0.7, "premium": 0.6})],
+        uncertainty(previous_failure=True, previous_cheap_failure=True),
+    )
+
+    assert result.selected_model_id != "cheap"
+    assert result.selection_reason == "previous_cheap_failure"
+
+
+def test_fast_resolved_code_reference_prefers_mid_when_context_is_not_tiny():
+    request = RouteRequest(
+        prompt="다음 코드를 분석해줘",
+        tier="fast",
+        context_features={
+            "references_code": True,
+            "has_resolved_reference": True,
+            "context_token_pressure": 0.3,
+        },
+    )
+    result = orchestrate_route(request, [obs("a", "cheap")], uncertainty())
+
+    assert result.selected_model_id == "mid"
+    assert result.selection_reason == "resolved_code_context"
+
+
 def test_geometric_cheap_safe_blocks_fast_premium():
     request = RouteRequest(prompt="test", tier="fast")
     geo = GeometricSignals(available=True, signals={"cheap_geometrically_safe": True})

@@ -36,6 +36,7 @@ class QualityUtilityRouterAdapter:
         encoded = np.array([self.expander.model_id_mapping[mid] for mid in model_ids], dtype=np.int32)
         calibrated_quality = self.calibrator.transform(raw_quality, encoded)
         policy_quality = apply_prompt_prior(calibrated_quality, model_ids, request.prompt, tier)
+        policy_quality = self._apply_context_prior(policy_quality, model_ids, request.context_features)
         utilities = self.utility_engine.compute_utilities(policy_quality, model_ids, tier)
         selected = self.utility_engine.select(policy_quality, model_ids, tier)
 
@@ -69,6 +70,7 @@ class QualityUtilityRouterAdapter:
                 "prompt_complexity": round(float(estimate_prompt_complexity(request.prompt)), 6),
                 "lambda": self.lambda_params.get(tier),
                 "input_features": request.input_features,
+                "context_features": request.context_features,
             },
         )
 
@@ -81,5 +83,26 @@ class QualityUtilityRouterAdapter:
         if complexity < 0.62:
             return "balanced"
         return "premium"
+
+    def _apply_context_prior(self, qualities, model_ids, context_features: dict):
+        adjusted = np.array(qualities, dtype=np.float64, copy=True)
+        if not context_features:
+            return adjusted
+        for idx, model_id in enumerate(model_ids):
+            if context_features.get("missing_context"):
+                adjusted[idx] -= 0.35
+            if model_id == "cheap" and context_features.get("previous_cheap_failure"):
+                adjusted[idx] -= 0.18
+            if model_id == "mid" and context_features.get("previous_cheap_failure"):
+                adjusted[idx] += 0.08
+            if context_features.get("references_code") and float(context_features.get("context_token_pressure", 0.0) or 0.0) >= 0.40:
+                if model_id == "cheap":
+                    adjusted[idx] -= 0.12
+                if model_id == "mid":
+                    adjusted[idx] += 0.08
+            if context_features.get("references_design") and context_features.get("requires_cross_turn_reasoning"):
+                if model_id in {"mid", "premium"}:
+                    adjusted[idx] += 0.06
+        return adjusted
 
 

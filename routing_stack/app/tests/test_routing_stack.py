@@ -53,6 +53,7 @@ def test_router_server_keeps_viewer_router_ai_contract():
     assert payload["input"]["input_features"]["simple_directive"] is True
     assert payload["input"]["normalized"]["input_type"] == "text"
     assert payload["input"]["normalized"]["router_features"]["simple_directive"] is True
+    assert payload["input"]["routing_context"]["router_context"]["missing_context"] is False
 
 
 def test_router_server_uses_requested_router():
@@ -62,5 +63,23 @@ def test_router_server_uses_requested_router():
     payload = app.route_and_run({"router": "fixed", "prompt": "hello", "tier": "fast"})
 
     assert payload["router"]["router_name"] == "fixed"
+
+
+def test_router_server_resolves_code_reference_from_conversation():
+    ai = LocalAI(provider="mock")
+    app = RouterServerApp(routers={"fixed": FixedRouter()}, ai=ai, default_router="fixed")
+
+    payload = app.route_and_run(
+        {
+            "router": "fixed",
+            "prompt": "다음 코드를 분석해줘",
+            "conversation": [{"role": "user", "content": "```python\nprint(1)\n```"}],
+        }
+    )
+
+    context = payload["input"]["routing_context"]["router_context"]
+    assert payload["input"]["input_features"]["missing_context"] is True
+    assert context["has_resolved_reference"] is True
+    assert context["missing_context"] is False
 
 

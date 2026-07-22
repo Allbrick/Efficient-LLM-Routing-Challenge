@@ -1,0 +1,21 @@
+{
+  "conversation": [
+    {
+      "role": "user",
+      "content": "```python\nprint('hello')\n```"
+    }
+  ],
+  "session_state": {
+    "summary": "사용자는 Python 코드 분석을 요청 중입니다.",
+    "current_target": "example.py",
+    "artifacts": [
+      {
+        "type": "code",
+        "name": "example.py",
+        "token_estimate": 32,
+        "language": "python"
+      }
+    ]
+  },
+  "call_history": []
+}

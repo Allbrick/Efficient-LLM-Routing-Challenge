@@ -16,6 +16,7 @@ os.chdir(PROJECT_ROOT)
 from routing_stack.adapters.contract import RouteRequest, RouterAdapter
 from routing_stack.adapters.registry import available_routers, create_router
 from routing_stack.ai.local_ai import LocalAI, ModelConfig
+from routing_stack.context import resolve_context
 from routing_stack.input import normalize_input
 
 
@@ -44,6 +45,7 @@ class RouterServerApp:
         normalized = normalize_input(payload)
         prompt = normalized.text
         input_features = normalized.router_features
+        routing_context = resolve_context(payload, normalized)
         router_name = str(payload.get("router", self.default_router)).strip().lower().replace("-", "_")
         if router_name not in self.routers:
             raise ValueError(f"알 수 없는 라우터입니다: {router_name}")
@@ -55,11 +57,19 @@ class RouterServerApp:
             risk_level=str(payload.get("risk_level", "")),
             evaluation_type=str(payload.get("evaluation_type", "")),
             input_features=input_features,
+            context_features=routing_context.router_context,
+            executor_context=routing_context.executor_context,
+            call_history=routing_context.session_state.previous_calls,
         )
         route_result = self.routers[router_name].route(request)
         ai_result = self.ai.run(route_result.model_slot, prompt)
         return {
-            "input": {**request.__dict__, "router": router_name, "normalized": normalized.to_dict()},
+            "input": {
+                **request.__dict__,
+                "router": router_name,
+                "normalized": normalized.to_dict(),
+                "routing_context": routing_context.to_dict(),
+            },
             "router": route_result.to_dict(),
             "ai": ai_result.to_dict(),
         }

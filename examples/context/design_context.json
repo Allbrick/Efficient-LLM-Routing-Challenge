@@ -1,0 +1,20 @@
+{
+  "conversation": [
+    {
+      "role": "user",
+      "content": "Task Router는 현재 프롬프트뿐 아니라 최근 대화, 세션 상태, 참조 대상, 이전 실패 이력을 함께 봅니다."
+    }
+  ],
+  "session_state": {
+    "summary": "사용자는 Efficient LLM Routing Challenge에서 prompt router를 task router로 확장하는 설계를 검토 중입니다.",
+    "current_target": "Task Router 설계",
+    "artifacts": [
+      {
+        "type": "design",
+        "name": "design.md",
+        "token_estimate": 2400
+      }
+    ]
+  },
+  "call_history": []
+}

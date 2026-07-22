@@ -16,6 +16,9 @@ class RouteRequest:
     risk_level: str = ""
     evaluation_type: str = ""
     input_features: dict[str, Any] = field(default_factory=dict)
+    context_features: dict[str, Any] = field(default_factory=dict)
+    executor_context: dict[str, Any] = field(default_factory=dict)
+    call_history: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass

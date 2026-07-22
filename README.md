@@ -14,6 +14,7 @@ viewer -> router -> ai
 - `routing_stack/app/`: 공통 서버와 앱 조립 계층
 - `routing_stack/viewer/`: 공통 UI와 HTTP API 서버
 - `routing_stack/input/`: 입력 정규화와 router feature 추출 계층
+- `routing_stack/context/`: 최근 대화, 세션 상태, 참조 대상을 task feature로 해석하는 계층
 - `routing_stack/adapters/`: 교체 가능한 router adapter와 공통 router 계약
 - `routing_stack/ai/`: `cheap`, `mid`, `premium`을 실행하는 공통 로컬 AI 계층
 - `routing_stack/planning/`: 여러 라우터 결과를 종합하는 uncertainty/orchestrator 계층
@@ -26,7 +27,7 @@ viewer -> router -> ai
 
 ## 입력 정규화
 
-라우터는 원본 파일이나 이미지를 직접 보지 않고, 정규화된 입력과 feature만 받습니다.
+라우터는 원본 파일이나 이미지를 직접 보지 않고, 정규화된 입력과 feature만 받습니다. 현재 구조는 단일 프롬프트뿐 아니라 최근 대화와 세션 상태를 함께 해석하는 Task Router 구조를 지원합니다.
 
 ```text
 Text input
@@ -36,12 +37,31 @@ PDF input
         ↓
 Input Normalizer
         ↓
+Context Resolver
+        ↓
 Router Feature Vector
         ↓
 Router
 ```
 
 현재 구현된 입력은 `text`입니다. 이후 파일, 이미지, PDF를 추가할 때도 router adapter 계약은 유지하고 `routing_stack/input/` 안에서 정규화 계층만 확장합니다.
+
+## Task Router Context
+
+`routing_stack/context/`는 현재 프롬프트가 이전 대화나 artifact를 참조하는지 판단합니다.
+
+예를 들어 `다음 코드를 분석해줘`는 문장만 보면 정보가 부족하지만, 이전 대화에 코드가 있으면 `missing_context=false`로 라우팅을 계속합니다. 반대로 참조 대상이 없으면 `missing_context=true`로 보고 premium 호출 대신 `abstain` 쪽으로 보냅니다.
+
+```powershell
+python -m routing_stack.experiments.router_compare "다음 코드를 분석해줘" --context_json examples/context/code_context.json --include_orchestrator --tiers fast
+python -m routing_stack.experiments.router_compare "다음 코드를 분석해줘" --context_json examples/context/unresolved_reference.json --include_orchestrator --tiers premium
+```
+
+context payload의 핵심 필드는 다음과 같습니다.
+
+- `conversation`: 최근 대화입니다. viewer는 최근 10개 메시지만 보냅니다.
+- `session_state`: 현재 작업 대상, 요약, artifact, 이전 호출 이력입니다.
+- `call_history`: 모델 호출 실패나 재시도 이력입니다.
 
 ## 빠른 시작
 
@@ -117,6 +137,7 @@ python -m routing_stack.experiments.router_compare "이모티콘좀 그만 써�
 - `selected_model_id`: 실제 선택된 모델입니다.
 - `selection_reason`: 선택 이유입니다.
 - `planning`: orchestrator가 사용한 uncertainty와 geometric signal입니다.
+- `routing_context`: Task Router가 해석한 참조, context confidence, missing context 판단입니다.
 
 ## public set 근사 평가
 
@@ -126,10 +147,16 @@ private simulator를 대체하는 정식 평가는 아니지만, 공개 train �
 python -m routing_stack.experiments.orchestrator_eval --tiers fast
 ```
 
+context fixture를 주입해 task router 경향을 볼 수도 있습니다.
+
+```powershell
+python -m routing_stack.experiments.orchestrator_eval --tiers fast --context_fixture examples/context/design_context.json
+```
+
 ## 테스트
 
 ```powershell
-python -m pytest routing_stack\app\tests routing_stack\input\tests routing_stack\planning\tests routing_stack\adapters\tests routing_stack\experiments\tests router_impls\geometric\tests -q
+python -m pytest routing_stack\app\tests routing_stack\input\tests routing_stack\context\tests routing_stack\planning\tests routing_stack\adapters\tests routing_stack\experiments\tests router_impls\geometric\tests -q
 ```
 
 

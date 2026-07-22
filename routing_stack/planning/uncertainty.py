@@ -17,6 +17,15 @@ def assess_uncertainty(
     cost_pressure = _cost_pressure(input_features, tier_lower)
     high_premium_gap = _high_premium_gap(observations)
     missing_context = bool(input_features.get("missing_context", False))
+    has_reference = bool(input_features.get("has_reference_expression", False))
+    has_resolved_reference = bool(input_features.get("has_resolved_reference", False))
+    reference_unresolved = bool(has_reference and not has_resolved_reference)
+    cross_turn_required = bool(input_features.get("requires_cross_turn_reasoning", False))
+    context_cost_pressure = float(input_features.get("context_token_pressure", 0.0) or 0.0) >= 0.65
+    previous_failure = int(input_features.get("previous_failure_count", 0) or 0) > 0
+    previous_cheap_failure = bool(input_features.get("previous_cheap_failure", False))
+    context_confidence = float(input_features.get("context_confidence", 1.0) or 1.0)
+    low_context_confidence = context_confidence < 0.55
 
     geo = geometric_signals or GeometricSignals(available=False)
     geometric_out_of_distribution = bool(geo.signals.get("all_envelopes_far", False))
@@ -29,6 +38,13 @@ def assess_uncertainty(
         "low_selected_quality": selected_quality < 0.55,
         "high_cost_pressure": cost_pressure >= 0.65,
         "missing_context": missing_context,
+        "context_missing": missing_context,
+        "reference_unresolved": reference_unresolved,
+        "cross_turn_required": cross_turn_required,
+        "context_cost_pressure": context_cost_pressure,
+        "previous_failure": previous_failure,
+        "previous_cheap_failure": previous_cheap_failure,
+        "low_context_confidence": low_context_confidence,
         "high_premium_gap": high_premium_gap,
         "geometric_out_of_distribution": geometric_out_of_distribution,
         "geometric_cheap_safe": geometric_cheap_safe,
@@ -48,7 +64,17 @@ def assess_uncertainty(
         confidence -= 0.20
     if signals["geometric_out_of_distribution"]:
         confidence -= 0.15
+    if signals["reference_unresolved"]:
+        confidence -= 0.25
+    if signals["low_context_confidence"]:
+        confidence -= 0.15
+    if signals["context_cost_pressure"]:
+        confidence -= 0.15
+    if signals["previous_failure"]:
+        confidence -= 0.10
     if signals["geometric_cheap_safe"] and tier_lower == "fast":
+        confidence += 0.10
+    if has_resolved_reference and context_confidence >= 0.80:
         confidence += 0.10
 
     confidence = max(0.0, min(1.0, confidence))
@@ -65,6 +91,8 @@ def assess_uncertainty(
             "quality_margin": round(quality_margin, 6),
             "cost_pressure": round(cost_pressure, 6),
             "selected_quality": round(selected_quality, 6),
+            "context_confidence": round(context_confidence, 6),
+            "context_token_pressure": round(float(input_features.get("context_token_pressure", 0.0) or 0.0), 6),
         },
     )
 
@@ -122,9 +150,12 @@ def _high_premium_gap(observations: list[RouterObservation]) -> bool:
 def _primary_reason(signals: dict[str, bool]) -> str:
     for key in (
         "missing_context",
+        "reference_unresolved",
         "router_disagreement",
+        "low_context_confidence",
         "geometric_out_of_distribution",
         "small_quality_margin",
+        "context_cost_pressure",
         "high_cost_pressure",
         "low_selected_quality",
     ):

@@ -51,3 +51,25 @@ def test_geometric_signals_affect_uncertainty():
     assert far.signals["geometric_out_of_distribution"] is True
     assert safe.signals["geometric_cheap_safe"] is True
     assert safe.confidence == 1.0
+
+
+def test_context_signals_affect_uncertainty():
+    signal = assess_uncertainty(
+        [obs("a")],
+        {
+            "has_reference_expression": True,
+            "has_resolved_reference": False,
+            "missing_context": True,
+            "context_confidence": 0.4,
+            "context_token_pressure": 0.7,
+            "previous_failure_count": 1,
+            "previous_cheap_failure": True,
+        },
+        "balanced",
+    )
+
+    assert signal.signals["reference_unresolved"] is True
+    assert signal.signals["low_context_confidence"] is True
+    assert signal.signals["context_cost_pressure"] is True
+    assert signal.signals["previous_cheap_failure"] is True
+    assert signal.uncertain is True

@@ -10,6 +10,8 @@ const aiMeta = document.querySelector("#aiMeta");
 const newChat = document.querySelector("#newChat");
 const submitButton = form.querySelector('button[type="submit"]');
 let isRouting = false;
+let conversation = [];
+const MAX_CONVERSATION_MESSAGES = 10;
 
 const fmt = (value, digits = 3) => {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return "-";
@@ -34,6 +36,7 @@ function formPayload() {
     difficulty: document.querySelector("#difficulty").value,
     risk_level: document.querySelector("#riskLevel").value,
     evaluation_type: document.querySelector("#evaluationType").value,
+    conversation: conversation.slice(-MAX_CONVERSATION_MESSAGES),
   };
 }
 
@@ -109,6 +112,7 @@ function renderDecision(payload, assistantMessage) {
   const diagnostics = router.diagnostics || {};
   const uncertainty = diagnostics.uncertainty || null;
   const geometricSignals = diagnostics.geometric_signals || null;
+  const routingContext = payload.input?.routing_context?.router_context || null;
   renderSummary(router, ai);
 
   routerDecision.classList.remove("empty");
@@ -117,6 +121,7 @@ function renderDecision(payload, assistantMessage) {
     <div class="decision-row"><span>선택 모델</span><b>${router.selected_model_id}</b></div>
     <div class="decision-row"><span>동작</span><b>${router.action_type}</b></div>
     <div class="decision-row"><span>이유</span><b>${router.selection_reason}</b></div>
+    ${routingContext ? renderRoutingContext(routingContext) : ""}
     ${uncertainty ? renderUncertainty(uncertainty) : ""}
     ${geometricSignals ? renderGeometricSignals(geometricSignals) : ""}
   `;
@@ -147,16 +152,29 @@ function renderDecision(payload, assistantMessage) {
 
   if (ai.skipped) {
     updateMessage(assistantMessage, "라우터가 abstain을 선택해서 AI 호출을 건너뛰었습니다.", `${router.router_name} -> abstain`);
+    rememberTurn(payload.input?.prompt || "", "");
     return;
   }
 
   if (ai.error) {
     assistantMessage.classList.add("error");
     updateMessage(assistantMessage, `AI 오류 (${ai.model_name}): ${ai.error}`, `${router.router_name} -> ${router.selected_model_id}`);
+    rememberTurn(payload.input?.prompt || "", "");
     return;
   }
 
   updateMessage(assistantMessage, ai.output || "", `${router.router_name} -> ${router.selected_model_id}`);
+  rememberTurn(payload.input?.prompt || "", ai.output || "");
+}
+
+function renderRoutingContext(context) {
+  return `
+    <div class="decision-row"><span>컨텍스트</span><b>${fmt(context.context_confidence)}</b></div>
+    <div class="decision-row"><span>참조 감지</span><b>${displayValue(context.has_reference_expression)}</b></div>
+    <div class="decision-row"><span>참조 해결</span><b>${displayValue(context.has_resolved_reference)}</b></div>
+    <div class="decision-row"><span>정보 부족</span><b>${displayValue(context.missing_context)}</b></div>
+    <div class="decision-row"><span>작업 토큰</span><b>${displayValue(context.context_token_estimate)}</b></div>
+  `;
 }
 
 function renderUncertainty(uncertainty) {
@@ -247,6 +265,7 @@ async function loadConfig() {
 }
 
 function resetChat() {
+  conversation = [];
   transcript.innerHTML = `
     <div class="welcome-card">
       <h3>무엇을 라우팅할까요?</h3>
@@ -261,6 +280,16 @@ function resetChat() {
   aiMeta.textContent = "대기 중";
   promptInput.value = "";
   promptInput.style.height = "auto";
+}
+
+function rememberTurn(userPrompt, assistantOutput) {
+  if (userPrompt) {
+    conversation.push({ role: "user", content: userPrompt });
+  }
+  if (assistantOutput) {
+    conversation.push({ role: "assistant", content: assistantOutput });
+  }
+  conversation = conversation.slice(-MAX_CONVERSATION_MESSAGES);
 }
 
 promptInput.addEventListener("input", () => {

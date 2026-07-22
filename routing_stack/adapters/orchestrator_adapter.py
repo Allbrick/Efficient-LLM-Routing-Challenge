@@ -27,7 +27,7 @@ class OrchestratorRouterAdapter:
         geometric_signals = extract_geometric_signals(geometric_result)
         uncertainty = assess_uncertainty(
             observations=observations,
-            input_features=request.input_features or {},
+            input_features={**(request.input_features or {}), **(request.context_features or {})},
             tier=request.tier,
             geometric_signals=geometric_signals,
         )
