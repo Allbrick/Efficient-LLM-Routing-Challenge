@@ -25,7 +25,7 @@ def read_prompt_label_csv_text(csv_text: str) -> list[dict[str, str]]:
     if not csv_text.strip():
         raise ValueError("csv_text_required")
     normalized_text = csv_text.lstrip("\ufeff")
-    reader = csv.DictReader(io.StringIO(normalized_text))
+    reader = csv.DictReader(io.StringIO(normalized_text), restkey="__extra_columns__")
     if not reader.fieldnames:
         raise ValueError("CSV/TXT 헤더가 필요합니다.")
 
@@ -37,9 +37,14 @@ def read_prompt_label_csv_text(csv_text: str) -> list[dict[str, str]]:
 
     rows = []
     for row in reader:
-        cleaned = {str(key or "").strip().lstrip("\ufeff"): value for key, value in row.items()}
+        cleaned = {str(key or "").strip().lstrip("\ufeff"): value for key, value in row.items() if key != "__extra_columns__"}
         prompt = str(cleaned.get(prompt_key, "") or "").strip()
         label = str(cleaned.get(label_key, "") or "").strip().lower()
+        extra_columns = [str(value or "").strip() for value in row.get("__extra_columns__", [])]
+        if extra_columns and extra_columns[-1].lower() in LABELS:
+            prompt_parts = [prompt, str(cleaned.get(label_key, "") or "").strip(), *extra_columns[:-1]]
+            prompt = ",".join(part for part in prompt_parts if part).strip()
+            label = extra_columns[-1].lower()
         if not prompt and not label:
             continue
         if not prompt or label not in LABELS:

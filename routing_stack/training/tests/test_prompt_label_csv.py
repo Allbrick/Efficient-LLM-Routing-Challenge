@@ -35,3 +35,14 @@ def test_prompt_label_csv_file_accepts_txt_extension(tmp_path):
         {"prompt": "hello", "label": "cheap"},
         {"prompt": "compare A and B", "label": "mid"},
     ]
+
+
+def test_prompt_label_csv_repairs_unquoted_commas_in_prompt():
+    rows = read_prompt_label_csv_text(
+        "Prompt,label\n"
+        "React, Zustand, TanStack Query architecture,premium\n"
+    )
+
+    assert rows == [
+        {"prompt": "React,Zustand,TanStack Query architecture", "label": "premium"}
+    ]

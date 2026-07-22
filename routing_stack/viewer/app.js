@@ -292,6 +292,9 @@ async function trainSelectedCsv() {
     </article>
   `;
   await loadConfig();
+  if (data.loaded_router && [...routerSelect.options].some((option) => option.value === data.loaded_router)) {
+    routerSelect.value = data.loaded_router;
+  }
 }
 
 async function routePrompt(event) {
