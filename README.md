@@ -112,7 +112,7 @@ premium -> qwen3:14b
 
 ## 라우터 선택
 
-라우터 서버는 기본적으로 `geometric`, `quality_utility`, `orchestrator`를 모두 로드합니다. 뷰어에서 라우터를 선택해 같은 입력을 다른 라우터로 실행할 수 있습니다.
+라우터 서버는 기본적으로 `geometric`, `quality_utility`, `orchestrator`, `learned_label`을 모두 로드합니다. 뷰어에서 라우터를 선택해 같은 입력을 다른 라우터로 실행할 수 있습니다.
 
 `orchestrator`는 답변을 생성하는 AI가 아니라, 내부적으로 base router 결과를 비교해 최종 모델을 고르는 planning 라우터입니다.
 
@@ -126,6 +126,31 @@ orchestrator만 서버에 노출하고 싶다면 다음처럼 실행할 수 있�
 ```powershell
 python routing_stack\app\router_server.py --routers orchestrator --default_router orchestrator --ai mock --port 4100
 ```
+
+## Prompt/정답 기반 라우터 학습
+
+`data/router_labels/prompt_labels.csv`에 `Prompt,정답` 형식으로 예시를 추가하면 로컬 classifier를 다시 학습할 수 있습니다. 정답은 `cheap`, `mid`, `premium` 중 하나입니다.
+
+```csv
+Prompt,정답
+안녕,cheap
+FooDB와 BarQueue를 언제 각각 선택하는 것이 좋은가?,mid
+XAlgo를 구현하고 시간복잡도를 증명해줘,premium
+```
+
+학습 명령:
+
+```powershell
+python -m routing_stack.training.train_prompt_label_router --csv data\router_labels\prompt_labels.csv --output artifacts\prompt_label_router.joblib
+```
+
+실행:
+
+```powershell
+python routing_stack\app\router_server.py --routers learned_label,orchestrator --default_router learned_label --ai mock --port 4100
+```
+
+이 라우터는 프롬프트를 그대로 암기하는 방식이 아니라 word/char TF-IDF와 공통 text feature를 함께 사용해 유사한 작업 유형으로 일반화합니다.
 
 ## 라우터 품질 예측 비교
 
@@ -162,7 +187,7 @@ python -m routing_stack.experiments.orchestrator_eval --tiers fast --context_fix
 ## 테스트
 
 ```powershell
-python -m pytest routing_stack\app\tests routing_stack\input\tests routing_stack\context\tests routing_stack\planning\tests routing_stack\adapters\tests routing_stack\experiments\tests router_impls\geometric\tests -q
+python -m pytest routing_stack\app\tests routing_stack\input\tests routing_stack\context\tests routing_stack\planning\tests routing_stack\adapters\tests routing_stack\training\tests routing_stack\experiments\tests router_impls\geometric\tests -q
 ```
 
 
