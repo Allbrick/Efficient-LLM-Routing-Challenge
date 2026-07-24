@@ -68,7 +68,10 @@ class RouterServerApp:
             evaluation_type=str(payload.get("evaluation_type", "")),
             input_features=input_features,
             context_features=routing_context.router_context,
-            executor_context=routing_context.executor_context,
+            executor_context={
+                **routing_context.executor_context,
+                "model_metadata": payload.get("model_metadata"),
+            },
             call_history=routing_context.session_state.previous_calls,
         )
         route_result = self.routers[router_name].route(request)

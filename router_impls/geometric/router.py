@@ -3,13 +3,14 @@
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
 from router_impls.geometric.envelope import Envelope, fit_envelope
 from router_impls.geometric.evaluator import build_training_labels
-from router_impls.geometric.features import MODEL_ORDER, EvidenceExtractor
+from router_impls.geometric.features import MODEL_ORDER, TASK_HINTS, EvidenceExtractor
 from router_impls.geometric.pass_model import PassProbabilityModel, fit_pass_model
 from router_impls.geometric.pareto import best_under_budget, build_pareto_frontier
 from router_impls.geometric.risk_model import SufficiencyRiskModel, fit_risk_model
@@ -53,6 +54,7 @@ class RouteDecision:
     prompt: str
     budget_tier: str
     selected_model_id: str
+    action_type: str
     selection_reason: str
     evidence: dict
     candidates: list[dict]
@@ -186,10 +188,16 @@ class GeometricRouter:
         difficulty: str = "",
         risk_level: str = "",
         evaluation_type: str = "",
+        model_metadata: list[dict[str, Any]] | dict[str, Any] | None = None,
     ) -> RouteDecision:
         tier = budget_tier.lower()
         if tier not in BUDGET_LIMITS:
             raise ValueError(f"unknown budget_tier: {budget_tier}")
+        request_model_costs = self._model_costs_from_metadata(model_metadata)
+        explicit_task_context = any(
+            str(value or "").strip()
+            for value in (difficulty, risk_level, evaluation_type)
+        )
 
         if self.task_classifier is not None and not evaluation_type:
             inferred = self.task_classifier.predict(prompt)
@@ -201,6 +209,7 @@ class GeometricRouter:
         evidence_obj = self.extractor.transform(prompt, task_type, difficulty, risk_level, evaluation_type)
         x = evidence_obj.as_vector()
         tier_radius = self.radius_multipliers.get(tier, DEFAULT_RADIUS_MULTIPLIERS[tier])
+        active_model_costs = {**self.model_costs, **request_model_costs}
         pass_probabilities = self.pass_model.predict_all(x) if self.pass_model is not None else {}
         sufficiency_probabilities = self.risk_model.predict_all(x, prompt) if self.risk_model is not None else {}
         candidates = []
@@ -234,7 +243,7 @@ class GeometricRouter:
                 {
                     "model_id": model_id,
                     "action_type": "model_call",
-                    "cost": self.model_costs.get(model_id, 0.0),
+                    "cost": active_model_costs.get(model_id, 0.0),
                     "distance": round(distance, 6),
                     "radius": round(envelope.radius * radius_multiplier, 6),
                     "normalized_distance": round(normalized_distance, 6),
@@ -259,6 +268,8 @@ class GeometricRouter:
         for candidate in candidates[1:]:
             if selected is not None:
                 break
+            if not self._budget_allowed(candidate, tier, evidence_obj, evaluation_type, explicit_task_context):
+                continue
             if candidate["pass_probability"] >= pass_threshold:
                 selected = candidate["model_id"]
                 reason = "cheapest_passing_probability"
@@ -269,36 +280,159 @@ class GeometricRouter:
                 break
 
         if selected is None:
-            max_cost = max(self.model_costs.values()) if self.model_costs else 1.0
+            max_cost = max(active_model_costs.values()) if active_model_costs else 1.0
             cost_weight = self.fallback_cost_weight.get(tier, 0.0)
-            selected_candidate = min(
-                candidates[1:],
+            fallback_candidates = [
+                candidate
+                for candidate in candidates[1:]
+                if self._budget_allowed(candidate, tier, evidence_obj, evaluation_type, explicit_task_context)
+            ]
+            if not fallback_candidates:
+                fallback_candidates = candidates[1:]
+            selected_candidate = max(
+                fallback_candidates,
                 key=lambda item: (
-                    item["normalized_distance"] + cost_weight * (item["cost"] / max_cost),
-                    item["cost"],
+                    self._fallback_expected_quality(item) - self._tier_cost_penalty(tier) * (item["cost"] / max_cost),
+                    -item["normalized_distance"],
+                    -item["cost"],
                 ),
             )
             selected = selected_candidate["model_id"]
-            reason = "nearest_envelope_fallback"
+            reason = "nearest_envelope_fallback" if len(fallback_candidates) == len(candidates[1:]) else "nearest_budget_fallback"
 
         frontier_hint = best_under_budget(self.frontier, BUDGET_LIMITS[tier])
         evidence = self.extractor.explain(prompt, task_type, difficulty, risk_level, evaluation_type)
         evidence["simple_prompt_prior"] = 1.0 if simple_prompt_prior else 0.0
+        evidence["request_model_costs"] = request_model_costs
+        evidence["explicit_task_context"] = 1.0 if explicit_task_context else 0.0
         return RouteDecision(
             prompt=prompt,
             budget_tier=tier,
             selected_model_id=selected,
+            action_type="abstain" if selected == "abstain" else "call_model",
             selection_reason=reason,
             evidence=evidence,
             candidates=candidates,
             frontier_hint=frontier_hint,
         )
 
+    def _fallback_expected_quality(self, candidate: dict) -> float:
+        pass_probability = float(candidate.get("pass_probability", 0.0))
+        sufficiency_probability = float(candidate.get("sufficiency_probability", pass_probability))
+        feasible_bonus = 0.04 if candidate.get("feasible") else 0.0
+        distance_penalty = 0.015 * float(candidate.get("normalized_distance", 1.0))
+        return 0.52 * pass_probability + 0.48 * sufficiency_probability + feasible_bonus - distance_penalty
+
+    def _tier_cost_penalty(self, tier: str) -> float:
+        if tier == "fast":
+            return 0.14
+        if tier == "balanced":
+            return 0.08
+        return 0.03
+
+    def _budget_allowed(
+        self,
+        candidate: dict,
+        tier: str,
+        evidence: object,
+        evaluation_type: str,
+        explicit_task_context: bool,
+    ) -> bool:
+        cost = float(candidate.get("cost", 0.0))
+        if cost <= BUDGET_LIMITS[tier]:
+            return True
+        if tier == "premium":
+            return True
+
+        model_id = str(candidate.get("model_id", ""))
+        difficulty_score = float(getattr(evidence, "difficulty_score", 0.0))
+        risk_score = float(getattr(evidence, "risk_score", 0.0))
+        condition_count = float(getattr(evidence, "condition_count", 0.0))
+        code_like = float(getattr(evidence, "code_like", 0.0))
+        pass_probability = float(candidate.get("pass_probability", 0.0))
+        sufficiency_probability = float(candidate.get("sufficiency_probability", 0.0))
+        demanding_eval = evaluation_type in {"unit_test", "constraint_check", "rubric_check"}
+        hard_signal = (
+            difficulty_score >= 0.80
+            or risk_score >= 0.80
+            or (demanding_eval and condition_count >= 0.25)
+            or (code_like >= 1.0 and condition_count >= 0.50)
+        )
+
+        if tier == "fast":
+            if model_id == "mid":
+                return hard_signal or pass_probability >= 0.50 or sufficiency_probability >= 0.50
+            if model_id == "premium":
+                return (
+                    explicit_task_context
+                    and
+                    (difficulty_score >= 0.85 or risk_score >= 0.85)
+                    and demanding_eval
+                    and (pass_probability >= 0.65 or sufficiency_probability >= 0.82)
+                )
+            return False
+
+        if tier == "balanced":
+            if model_id == "mid":
+                return True
+            if model_id == "premium":
+                return hard_signal and (pass_probability >= 0.65 or sufficiency_probability >= 0.78)
+            return False
+
+        return True
+
+    def _model_costs_from_metadata(self, model_metadata: list[dict[str, Any]] | dict[str, Any] | None) -> dict[str, float]:
+        if not model_metadata:
+            return {}
+        if isinstance(model_metadata, dict):
+            if all(model_id in model_metadata for model_id in MODEL_ORDER):
+                items = [{"model_id": key, "cost": value} for key, value in model_metadata.items()]
+            else:
+                items = [model_metadata]
+        else:
+            items = model_metadata
+
+        costs = {}
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            model_id = str(
+                item.get("model_id")
+                or item.get("id")
+                or item.get("name")
+                or item.get("slot")
+                or ""
+            ).strip()
+            if model_id not in MODEL_ORDER:
+                continue
+            raw_cost = (
+                item.get("cost")
+                if "cost" in item
+                else item.get("price")
+                if "price" in item
+                else item.get("unit_cost")
+            )
+            try:
+                costs[model_id] = float(raw_cost)
+            except (TypeError, ValueError):
+                continue
+        return costs
+
     def _has_simple_prompt_prior(self, prompt: str, evidence: object, evaluation_type: str) -> bool:
         text = str(prompt).strip()
         if not text:
             return False
         if len(text) > 40 or "\n" in text:
+            return False
+        lowered = text.lower()
+        demanding_hint = (
+            self.extractor._has_hint(lowered, TASK_HINTS["legal"])
+            or self.extractor._has_hint(lowered, TASK_HINTS["architecture"])
+            or self.extractor._has_hint(lowered, TASK_HINTS["code"])
+        )
+        if demanding_hint and float(getattr(evidence, "difficulty_score", 0.0)) > 0.35:
+            return False
+        if demanding_hint and float(getattr(evidence, "risk_score", 0.0)) > 0.35:
             return False
         return (
             float(getattr(evidence, "condition_count", 0.0)) == 0.0

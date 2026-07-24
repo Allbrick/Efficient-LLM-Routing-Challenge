@@ -21,6 +21,7 @@ class GeometricRouterAdapter:
             difficulty=request.difficulty,
             risk_level=request.risk_level,
             evaluation_type=request.evaluation_type,
+            model_metadata=request.executor_context.get("model_metadata"),
         )
         candidates = []
         for item in decision.candidates:
@@ -34,7 +35,7 @@ class GeometricRouterAdapter:
                     metrics=dict(item),
                 )
             )
-        action_type = "abstain" if decision.selected_model_id == "abstain" else "call_model"
+        action_type = decision.action_type
         diagnostics = asdict(decision)
         diagnostics["input_features"] = request.input_features
         diagnostics["context_features"] = request.context_features

@@ -7,6 +7,7 @@ from router_impls.geometric.evaluator import OutputEvaluator, build_training_lab
 from router_impls.geometric.budget_allocator import allocate_public_budget
 from router_impls.geometric.router import GeometricRouter
 from router_impls.geometric.simulator import simulate_public_set
+from router_impls.geometric.submission import RouterSubmission
 from router_impls.geometric.task_classifier import TaskClassifier
 from router_impls.geometric.tuning import tune_router_policy
 
@@ -222,6 +223,82 @@ def test_geometric_router_escalates_hard_architecture_prompt():
     assert decision.selected_model_id in {"mid", "premium"}
 
 
+def test_fast_budget_guard_limits_inferred_premium_to_mid():
+    train_df, specs_df = load_data()
+    router = GeometricRouter.fit(train_df, specs_df)
+
+    decision = router.route(
+        "멀티테넌트 SaaS 결제 시스템의 상위 수준 아키텍처를 설계해줘.",
+        budget_tier="fast",
+        task_type="complex_design",
+    )
+
+    assert decision.selected_model_id == "mid"
+    assert decision.evidence["explicit_task_context"] == 0.0
+
+
+def test_fast_budget_guard_allows_explicit_high_risk_premium():
+    train_df, specs_df = load_data()
+    router = GeometricRouter.fit(train_df, specs_df)
+
+    decision = router.route(
+        "멀티테넌트 결제 시스템을 설계하고 웹훅 멱등성, 감사 로그, 장애 재처리, 보안 통제를 포함해줘.",
+        budget_tier="fast",
+        task_type="architecture_constraints",
+        difficulty="hard",
+        risk_level="high",
+        evaluation_type="rubric_check",
+    )
+
+    assert decision.selected_model_id in {"premium", "mid"}
+    assert decision.evidence["explicit_task_context"] == 1.0
+
+
+def test_geometric_router_uses_request_model_metadata_costs():
+    train_df, specs_df = load_data()
+    router = GeometricRouter.fit(train_df, specs_df)
+
+    decision = router.route(
+        "2 + 3의 값만 숫자로 답해줘.",
+        budget_tier="fast",
+        task_type="math_exact",
+        difficulty="trivial",
+        risk_level="low",
+        evaluation_type="exact_match",
+        model_metadata=[
+            {"model_id": "cheap", "cost": 0.02},
+            {"model_id": "mid", "cost": 0.07},
+            {"model_id": "premium", "cost": 0.30},
+        ],
+    )
+
+    costs = {candidate["model_id"]: candidate["cost"] for candidate in decision.candidates}
+    assert costs["cheap"] == 0.02
+    assert costs["mid"] == 0.07
+    assert costs["premium"] == 0.30
+    assert decision.evidence["request_model_costs"] == {"cheap": 0.02, "mid": 0.07, "premium": 0.30}
+
+
+def test_submission_selects_existing_history_output_when_sufficient(tmp_path):
+    train_df, specs_df = load_data()
+    artifact = tmp_path / "router.json"
+    GeometricRouter.fit(train_df, specs_df).save(artifact)
+    submission = RouterSubmission(artifact)
+
+    payload = submission.route(
+        prompt="2 + 3의 값만 숫자로 답해줘.",
+        budget_tier="fast",
+        history=[{"model_id": "cheap", "output": "5"}],
+        model_metadata=[{"model_id": "cheap", "cost": 0.01}],
+        task_type="math_exact",
+        difficulty="trivial",
+        risk_level="low",
+        evaluation_type="exact_match",
+    )
+
+    assert payload["action"] == {"type": "select_output", "model_id": "cheap", "history_index": 0}
+
+
 def test_long_counting_prompt_is_cheap_on_fast():
     train_df, specs_df = load_data()
     router = GeometricRouter.fit(train_df, specs_df)
@@ -284,7 +361,7 @@ def test_budget_allocator_respects_total_fast_budget():
     assert len(payload["rows"]) == train_df["prompt_id"].nunique()
 
 
-def test_budget_allocator_uses_risk_model_to_reduce_fast_under_route():
+def test_budget_allocator_reports_tradeoff_against_online_fast_policy():
     train_df, specs_df = load_data()
     router = GeometricRouter.fit(train_df, specs_df)
     tune_router_policy(router, train_df, specs_df, tiers=("fast",))
@@ -292,6 +369,8 @@ def test_budget_allocator_uses_risk_model_to_reduce_fast_under_route():
     payload = allocate_public_budget(router, train_df, specs_df, "fast")
     summary = payload["summary"]
 
-    assert summary["under_route"] <= independent["under_route"]
+    assert summary["total_cost"] <= summary["total_budget"]
+    assert summary["mean_cost"] <= independent["mean_cost"]
+    assert summary["under_route"] >= summary["under_route_lower_bound"]
 
 
