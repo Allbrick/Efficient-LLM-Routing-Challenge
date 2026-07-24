@@ -28,6 +28,7 @@ def main() -> None:
     parser.add_argument("--radius_quantile", type=float, default=0.90)
     parser.add_argument("--no_synthetic", action="store_true")
     parser.add_argument("--no_tune", action="store_true")
+    parser.add_argument("--semantic_features", action="store_true")
     args = parser.parse_args()
 
     train_df = pd.read_csv(args.train_path)
@@ -39,6 +40,7 @@ def main() -> None:
         fallback_threshold=args.fallback_threshold,
         radius_quantile=args.radius_quantile,
         include_synthetic=not args.no_synthetic,
+        use_semantic_features=args.semantic_features,
     )
     tuning = None
     if not args.no_tune:

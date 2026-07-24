@@ -16,6 +16,7 @@ from router_impls.geometric.pareto import best_under_budget, build_pareto_fronti
 from router_impls.geometric.risk_model import SufficiencyRiskModel, fit_risk_model
 from router_impls.geometric.synthetic_data import build_numeric_count_data
 from router_impls.geometric.task_classifier import TaskClassifier
+from routing_stack.input.semantic_features import HashPromptEncoder, SemanticFeatureIndex
 
 
 BUDGET_LIMITS = {
@@ -74,6 +75,7 @@ class GeometricRouter:
         fallback_cost_weight: dict[str, float] | None = None,
         pass_thresholds: dict[str, float] | None = None,
         abstain_thresholds: dict[str, float] | None = None,
+        semantic_index: SemanticFeatureIndex | None = None,
         metadata: dict | None = None,
     ):
         self.envelopes = envelopes
@@ -88,6 +90,7 @@ class GeometricRouter:
         self.fallback_cost_weight = fallback_cost_weight or DEFAULT_FALLBACK_COST_WEIGHT.copy()
         self.pass_thresholds = pass_thresholds or DEFAULT_PASS_THRESHOLDS.copy()
         self.abstain_thresholds = abstain_thresholds or DEFAULT_ABSTAIN_THRESHOLDS.copy()
+        self.semantic_index = semantic_index
         self.metadata = metadata or {}
         self.extractor = EvidenceExtractor()
 
@@ -99,6 +102,8 @@ class GeometricRouter:
         fallback_threshold: float = 0.85,
         radius_quantile: float = 0.90,
         include_synthetic: bool = True,
+        use_semantic_features: bool = False,
+        semantic_index: SemanticFeatureIndex | None = None,
     ) -> "GeometricRouter":
         if include_synthetic:
             synthetic_train, synthetic_specs = build_numeric_count_data()
@@ -115,19 +120,29 @@ class GeometricRouter:
             spec_map = {row.prompt_id: row._asdict() for row in specs_df.itertuples(index=False)}
 
         extractor = EvidenceExtractor()
+        if use_semantic_features and semantic_index is None and specs_df is not None and not specs_df.empty:
+            semantic_index = SemanticFeatureIndex.fit(
+                prompts=specs_df["prompt"].fillna("").astype(str).tolist(),
+                labels=specs_df["expected_min_model"].fillna("mid").astype(str).tolist(),
+                encoder=HashPromptEncoder(),
+            )
         prompt_features = {}
         prompt_texts = {}
         for prompt_id, group in train_df.groupby("prompt_id", sort=False):
             first = group.iloc[0]
             prompt_texts[prompt_id] = str(first["prompt"])
             spec = spec_map.get(prompt_id, {})
-            prompt_features[prompt_id] = extractor.transform(
+            evidence = extractor.transform(
                 first["prompt"],
                 task_type=str(spec.get("task_type", first.get("task_type", ""))),
                 difficulty=str(spec.get("difficulty", "")),
                 risk_level=str(spec.get("risk_level", "")),
                 evaluation_type=str(spec.get("evaluation_type", "")),
-            ).as_vector()
+            )
+            feature_vector = evidence.as_vector()
+            if semantic_index is not None:
+                feature_vector = np.concatenate([feature_vector, semantic_index.feature_vector(str(first["prompt"]))])
+            prompt_features[prompt_id] = feature_vector
 
         envelopes = {}
         all_features = np.array(list(prompt_features.values()), dtype=np.float64)
@@ -151,6 +166,7 @@ class GeometricRouter:
             "fallback_threshold": fallback_threshold,
             "radius_quantile": radius_quantile,
             "include_synthetic": include_synthetic,
+            "semantic_features": bool(semantic_index is not None),
             "n_prompts": int(train_df["prompt_id"].nunique()),
             "n_rows": int(len(train_df)),
         }
@@ -161,6 +177,7 @@ class GeometricRouter:
             task_classifier=task_classifier,
             pass_model=pass_model,
             risk_model=risk_model,
+            semantic_index=semantic_index,
             metadata=metadata,
         )
 
@@ -207,7 +224,7 @@ class GeometricRouter:
             evaluation_type = str(inferred["evaluation_type"])
 
         evidence_obj = self.extractor.transform(prompt, task_type, difficulty, risk_level, evaluation_type)
-        x = evidence_obj.as_vector()
+        x = self._feature_vector(prompt, evidence_obj)
         tier_radius = self.radius_multipliers.get(tier, DEFAULT_RADIUS_MULTIPLIERS[tier])
         active_model_costs = {**self.model_costs, **request_model_costs}
         pass_probabilities = self.pass_model.predict_all(x) if self.pass_model is not None else {}
@@ -310,6 +327,8 @@ class GeometricRouter:
         evidence["low_complexity_prior"] = 1.0 if low_complexity_prior else 0.0
         evidence["request_model_costs"] = request_model_costs
         evidence["explicit_task_context"] = 1.0 if explicit_task_context else 0.0
+        if self.semantic_index is not None:
+            evidence.update(self.semantic_index.explain(prompt))
         return RouteDecision(
             prompt=prompt,
             budget_tier=tier,
@@ -501,6 +520,7 @@ class GeometricRouter:
             "fallback_cost_weight": self.fallback_cost_weight,
             "pass_thresholds": self.pass_thresholds,
             "abstain_thresholds": self.abstain_thresholds,
+            "semantic_index": self.semantic_index.to_dict() if self.semantic_index is not None else None,
             "metadata": self.metadata,
         }
         output = Path(path)
@@ -531,7 +551,16 @@ class GeometricRouter:
             fallback_cost_weight=payload.get("fallback_cost_weight"),
             pass_thresholds=payload.get("pass_thresholds"),
             abstain_thresholds=payload.get("abstain_thresholds"),
+            semantic_index=SemanticFeatureIndex.from_dict(payload["semantic_index"])
+            if payload.get("semantic_index") is not None
+            else None,
             metadata=payload.get("metadata", {}),
         )
+
+    def _feature_vector(self, prompt: str, evidence_obj: object) -> np.ndarray:
+        base = evidence_obj.as_vector()
+        if self.semantic_index is None:
+            return base
+        return np.concatenate([base, self.semantic_index.feature_vector(prompt)])
 
 

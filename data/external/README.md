@@ -82,3 +82,23 @@ prompt_id,prompt,task_type,difficulty,risk_level,expected_min_model,evaluation_t
 - `label_confidence`
 
 `external_dataset_summary.json`은 source, license, expected_min_model, difficulty, risk_level, evaluation_type 분포를 기록한다. 결과보고서에는 이 요약을 이용해 외부 공개 데이터가 어떤 방식으로 라우팅 평가셋에 반영됐는지 설명한다.
+
+## Optional semantic feature index
+
+외부 prompt 라벨을 cheap/mid/premium semantic centroid로 압축해 라우터 feature로 사용할 수 있다. 기본 encoder는 deterministic hash encoder라 외부 모델 다운로드 없이 동작한다.
+
+```powershell
+python scripts\build_semantic_feature_index.py --input data\external\external_eval_specs.csv --output artifacts\semantic_feature_index.json
+```
+
+`sentence-transformers`가 설치된 환경에서는 공개 임베딩 모델을 그대로 사용할 수 있다.
+
+```powershell
+python scripts\build_semantic_feature_index.py --input data\external\external_eval_specs.csv --output artifacts\semantic_feature_index.json --encoder sentence-transformers --model intfloat/multilingual-e5-small
+```
+
+geometric router 학습에 semantic feature를 포함하려면 다음 옵션을 사용한다.
+
+```powershell
+python router_impls\geometric\scripts\train_geometric_router.py --semantic_features
+```

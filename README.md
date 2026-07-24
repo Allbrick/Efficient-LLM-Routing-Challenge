@@ -169,6 +169,28 @@ prompt,routing_score
 React Context와 Zustand를 언제 각각 사용하는 것이 좋은가?,55
 ```
 
+## Optional semantic features
+
+geometric router는 기본적으로 구조적 feature와 deterministic hash text feature만 사용합니다. 공개 임베딩 모델을 활용하고 싶을 때는 semantic feature index를 별도 생성해 cheap/mid/premium centroid 거리와 uncertainty feature를 추가할 수 있습니다.
+
+외부 모델 없이 재현 가능한 기본 index 생성:
+
+```powershell
+python scripts\build_semantic_feature_index.py --input data\public\example_eval_specs.csv --output artifacts\semantic_feature_index.json
+```
+
+geometric router 학습에 semantic feature 포함:
+
+```powershell
+python router_impls\geometric\scripts\train_geometric_router.py --semantic_features
+```
+
+`sentence-transformers`가 설치된 환경에서는 `intfloat/multilingual-e5-small` 같은 공개 임베딩 모델을 그대로 사용할 수 있습니다.
+
+```powershell
+python scripts\build_semantic_feature_index.py --input data\public\example_eval_specs.csv --output artifacts\semantic_feature_index.json --encoder sentence-transformers --model intfloat/multilingual-e5-small
+```
+
 ## 라우터 품질 예측 비교
 
 난이도 하나를 예측하는 대신 `quality(prompt, model)`을 모델별로 비교합니다.

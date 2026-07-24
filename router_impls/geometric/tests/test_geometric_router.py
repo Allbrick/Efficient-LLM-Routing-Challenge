@@ -327,6 +327,24 @@ def test_geometric_router_save_and_load(tmp_path):
     assert set(loaded.envelopes) == {"cheap", "mid", "premium"}
 
 
+def test_geometric_router_can_use_optional_semantic_features(tmp_path):
+    train_df, specs_df = load_data()
+    router = GeometricRouter.fit(train_df, specs_df, use_semantic_features=True)
+
+    decision = router.route("결제 시스템의 장애 복구 설계를 해줘.", budget_tier="balanced")
+
+    assert router.semantic_index is not None
+    assert "semantic_uncertainty" in decision.evidence
+    artifact = tmp_path / "semantic_router.json"
+    router.save(artifact)
+    loaded = GeometricRouter.load(artifact)
+
+    loaded_decision = loaded.route("결제 시스템의 장애 복구 설계를 해줘.", budget_tier="balanced")
+
+    assert loaded.semantic_index is not None
+    assert "nearest_premium_distance" in loaded_decision.evidence
+
+
 def test_simulator_reports_all_budget_tiers():
     train_df, specs_df = load_data()
     router = GeometricRouter.fit(train_df, specs_df)
