@@ -1,18 +1,68 @@
-﻿# 제출 구조 정리
+# 제출 체크리스트
 
 ## 제출 후보
 
-현재 제출 후보는 `router_impls/geometric/`입니다.
+현재 제출 후보는 `router_impls/geometric/`이다.
 
-`router_impls/quality_utility/`은 비교와 회귀 검증용 이전 baseline이며, 제출 로직에서 직접 사용하지 않습니다.
+`router_impls/quality_utility/`는 비교와 회귀 검증용 baseline이며, 최종 제출 라우터의 핵심 로직은 `router_impls/geometric`에 둔다.
+
+## 필수 제출 파일
+
+대회 결과보고서 제출 시 다음 2개 파일이 필요하다.
+
+- `2026 오픈소스 개발자대회 결과보고서_접수번호(팀명).docx` 또는 `.hwpx`
+- 위 문서를 변환한 `.pdf`
+
+작성 제약:
+
+- 결과보고서 본문 5페이지 이내
+- 맑은고딕 10pt
+- 양식 여백 임의 변경 금지
+- 안내용 회색 문구 삭제
+- 붙임1 SBOM 필수
+- 붙임2 AI 모델 활용 정보는 해당 시 작성
+
+## 저장소 제출 근거 문서
+
+- 결과보고서 초안: `docs/REPORT_OUTLINE.md`
+- SBOM 원본: `docs/SBOM.md`
+- AI 모델 활용 명세 원본: `docs/AI_MODEL_USAGE.md`
+- 시연 영상 스크립트: `docs/DEMO_SCRIPT.md`
+- 보고서용 수치/표: `docs/report_assets/`
+- 라이선스: `LICENSE`
 
 ## 재현 명령
 
+의존성 설치:
+
 ```powershell
 pip install -r requirements.txt
-python router_impls\geometric\scripts\train_geometric_router.py --no_tune
-python -m pytest router_impls\geometric\tests -q
-python router_impls\geometric\scripts\allocate_geometric_budget.py --tier fast
+```
+
+geometric router 학습과 정책 리포트 생성:
+
+```powershell
+python router_impls\geometric\scripts\train_geometric_router.py --policy_report artifacts\geometric_policy_report.json
+```
+
+보고서 자산 생성:
+
+```powershell
+python scripts\generate_report_assets.py --output_dir docs\report_assets
+python scripts\measure_router_latency.py --output_dir docs\report_assets --repeat 3
+```
+
+테스트:
+
+```powershell
+python -m pytest routing_stack\app\tests routing_stack\adapters\tests routing_stack\input\tests routing_stack\training\tests router_impls\geometric\tests -q
+```
+
+서버/뷰어:
+
+```powershell
+python routing_stack\app\router_server.py --ai mock --port 4100
+python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4100 --port 4010
 ```
 
 ## 주요 진입점
@@ -22,7 +72,8 @@ python router_impls\geometric\scripts\allocate_geometric_budget.py --tier fast
 - 통합 CLI: `router_impls/geometric/scripts/run_geometric_router.py`
 - public simulation: `router_impls/geometric/scripts/simulate_geometric_router.py`
 - batch allocation: `router_impls/geometric/scripts/allocate_geometric_budget.py`
-- viewer: `router_impls/geometric/scripts/serve_geometric_viewer.py`
+- report assets: `scripts/generate_report_assets.py`
+- latency report: `scripts/measure_router_latency.py`
 - private adapter: `router_impls/geometric/submission.py`
 
 ## Private Simulator 인터페이스
@@ -39,15 +90,35 @@ decision = router.route(
 )
 ```
 
-`decision["action"]`은 다음 중 하나입니다.
+`decision["action"]`은 다음 중 하나다.
 
 - `{"type": "call_model", "model_id": "cheap|mid|premium"}`
+- `{"type": "select_output", "model_id": "cheap|mid|premium", "history_index": 0}`
 - `{"type": "abstain", "model_id": None}`
 
-## 남은 정리 항목
+## AI 모델 활용 정보 기재 기준
 
-- `tune_geometric_policy.py`의 loss를 allocator objective와 일치시키기
-- private simulator가 요구하는 정확한 함수명과 파일명이 공개되면 `submission.py` adapter 이름 맞추기
-- public 데이터가 더 커지면 task classifier calibration 별도 검증 추가
+기본 제출 경로:
 
+- 외부 생성형 LLM 가중치를 파인튜닝하지 않음
+- 라우터는 코드 기반 정책 artifact로 모델 선택 action만 반환
+- 기본 semantic feature는 `hash-char-token-v1` deterministic encoder 사용
+- 붙임2의 유형 1~3에는 해당 없음
 
+선택 경로:
+
+- `sentence-transformers --model intfloat/multilingual-e5-small` 옵션을 사용해 semantic feature index를 생성하면 유형 1로 기재
+- 추가 학습 없음
+- 가중치 재배포 없음
+- artifact에는 centroid distance feature만 저장
+
+## 제출 전 최종 확인
+
+- GitHub 저장소 URL을 `docs/REPORT_OUTLINE.md`와 `docs/AI_MODEL_USAGE.md`에 실제 URL로 교체
+- YouTube 시연 영상 URL 추가
+- `docs/report_assets/`를 최신 결과로 재생성
+- `latency_summary.csv`와 `latency_report.json` 재생성
+- `docs/SBOM.md`의 라이브러리 버전과 `requirements.txt` 일치 확인
+- `python -m pytest ...` 전체 통과 확인
+- DOCX/HWPX와 PDF 파일명 규칙 확인
+- 결과보고서 안내 문구와 회색 placeholder 삭제

@@ -214,6 +214,12 @@ overall_score = 0.5 * fast + 0.3 * balanced + 0.2 * premium
 python scripts\generate_report_assets.py --output_dir docs\report_assets
 ```
 
+라우터 decision latency 리포트는 아래 명령으로 재생성합니다.
+
+```powershell
+python scripts\measure_router_latency.py --output_dir docs\report_assets --repeat 3
+```
+
 주요 산출물:
 
 - `docs/report_assets/tier_summary.csv`: tier별 품질, 비용, 오류, weighted score
@@ -222,6 +228,8 @@ python scripts\generate_report_assets.py --output_dir docs\report_assets
 - `docs/report_assets/error_summary.csv`: under-route, over-route, should_abstain 분포
 - `docs/report_assets/demo_prompts.csv`: 시연 영상용 대표 프롬프트
 - `docs/report_assets/report_assets_summary.json`: 위 내용을 묶은 보고서용 JSON
+- `docs/report_assets/latency_summary.csv`: tier별 로컬 라우팅 decision latency 요약
+- `docs/report_assets/latency_report.json`: latency 측정 JSON 리포트
 
 ## 라우터 품질 예측 비교
 

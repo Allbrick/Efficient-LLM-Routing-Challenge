@@ -1,0 +1,35 @@
+{
+  "output_dir": "docs\\report_assets",
+  "n_prompts": 37,
+  "repeat": 3,
+  "summary": [
+    {
+      "budget_tier": "fast",
+      "count": 37,
+      "latency_ms_mean": 7.25642973368333,
+      "latency_ms_p50": 5.986966697188715,
+      "latency_ms_p95": 10.917519995321827,
+      "latency_ms_max": 12.391000015971562
+    },
+    {
+      "budget_tier": "balanced",
+      "count": 37,
+      "latency_ms_mean": 7.181451353873755,
+      "latency_ms_p50": 6.054066664849718,
+      "latency_ms_p95": 10.826106672175227,
+      "latency_ms_max": 11.457600009938082
+    },
+    {
+      "budget_tier": "premium",
+      "count": 37,
+      "latency_ms_mean": 7.186973875447235,
+      "latency_ms_p50": 6.072600022889674,
+      "latency_ms_p95": 10.837733334240813,
+      "latency_ms_max": 12.326233321800828
+    }
+  ],
+  "files": [
+    "latency_summary.csv",
+    "latency_detail.csv"
+  ]
+}
