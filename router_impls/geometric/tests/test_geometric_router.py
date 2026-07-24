@@ -9,7 +9,7 @@ from router_impls.geometric.router import GeometricRouter
 from router_impls.geometric.simulator import simulate_public_set
 from router_impls.geometric.submission import RouterSubmission
 from router_impls.geometric.task_classifier import TaskClassifier
-from router_impls.geometric.tuning import tune_router_policy
+from router_impls.geometric.tuning import score_tier_summary, tune_router_policy
 
 
 DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "public"
@@ -367,6 +367,39 @@ def test_policy_tuning_reduces_fast_budget_excess():
 
     assert after["mean_excess_cost"] <= before["mean_excess_cost"]
     assert "fast" in router.radius_multipliers
+
+
+def test_policy_tuning_records_weighted_objective():
+    train_df, specs_df = load_data()
+    router = GeometricRouter.fit(train_df, specs_df)
+
+    results = tune_router_policy(router, train_df, specs_df, tiers=("fast", "balanced"))
+
+    assert "weighted_score" in results["fast"]
+    assert "objective" in results["fast"]
+    assert "under_route" in results["fast"]["objective"]["penalties"]
+    assert "policy_objective" in router.metadata
+    assert isinstance(router.metadata["policy_objective"]["overall_score"], float)
+
+
+def test_score_tier_summary_penalizes_cost_overflow_and_under_route():
+    good = {
+        "count": 10,
+        "mean_quality": 0.90,
+        "mean_cost": 0.02,
+        "mean_excess_cost": 0.0,
+        "under_route": 0,
+        "over_route": 1,
+        "should_abstain": 0,
+    }
+    bad = {
+        **good,
+        "mean_cost": 0.08,
+        "mean_excess_cost": 0.05,
+        "under_route": 3,
+    }
+
+    assert score_tier_summary(good, "fast")["weighted_score"] > score_tier_summary(bad, "fast")["weighted_score"]
 
 
 def test_budget_allocator_respects_total_fast_budget():

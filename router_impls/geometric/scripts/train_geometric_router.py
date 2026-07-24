@@ -24,6 +24,7 @@ def main() -> None:
     parser.add_argument("--specs_path", default="data/public/example_eval_specs.csv")
     parser.add_argument("--output", default="artifacts/geometric_router.json")
     parser.add_argument("--labels_output", default="artifacts/geometric_labels.csv")
+    parser.add_argument("--policy_report", default="artifacts/geometric_policy_report.json")
     parser.add_argument("--fallback_threshold", type=float, default=0.85)
     parser.add_argument("--radius_quantile", type=float, default=0.90)
     parser.add_argument("--no_synthetic", action="store_true")
@@ -55,6 +56,7 @@ def main() -> None:
     summary = {
         "artifact": args.output,
         "labels": args.labels_output,
+        "policy_report": args.policy_report,
         "metadata": router.metadata,
         "envelopes": {
             model: {
@@ -72,6 +74,9 @@ def main() -> None:
             "tuning": tuning,
         },
     }
+    report_path = Path(args.policy_report)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 

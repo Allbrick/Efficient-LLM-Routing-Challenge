@@ -191,6 +191,21 @@ python router_impls\geometric\scripts\train_geometric_router.py --semantic_featu
 python scripts\build_semantic_feature_index.py --input data\public\example_eval_specs.csv --output artifacts\semantic_feature_index.json --encoder sentence-transformers --model intfloat/multilingual-e5-small
 ```
 
+## Geometric policy tuning report
+
+geometric router 학습 스크립트는 튜닝된 정책과 평가 지표를 `artifacts/geometric_policy_report.json`에 저장합니다.
+
+```powershell
+python router_impls\geometric\scripts\train_geometric_router.py --policy_report artifacts\geometric_policy_report.json
+```
+
+리포트에는 tier별 `mean_quality`, `mean_cost`, `under_route`, `over_route`, `cost_over_limit`와 함께 다음 weighted objective가 포함됩니다.
+
+```text
+score_tier = quality - cost penalty - overflow penalty - under-route penalty - over-route penalty - abstain penalty
+overall_score = 0.5 * fast + 0.3 * balanced + 0.2 * premium
+```
+
 ## 라우터 품질 예측 비교
 
 난이도 하나를 예측하는 대신 `quality(prompt, model)`을 모델별로 비교합니다.
