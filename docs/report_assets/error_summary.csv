@@ -1,0 +1,11 @@
+budget_tier,error_type,count,ratio
+fast,ok,57,0.7808219178082192
+balanced,ok,56,0.7671232876712328
+premium,ok,55,0.7534246575342466
+premium,over_route,15,0.2054794520547945
+balanced,over_route,14,0.1917808219178082
+fast,under_route,11,0.1506849315068493
+fast,over_route,2,0.0273972602739726
+fast,should_abstain,3,0.0410958904109589
+balanced,should_abstain,3,0.0410958904109589
+premium,should_abstain,3,0.0410958904109589

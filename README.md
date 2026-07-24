@@ -206,6 +206,23 @@ score_tier = quality - cost penalty - overflow penalty - under-route penalty - o
 overall_score = 0.5 * fast + 0.3 * balanced + 0.2 * premium
 ```
 
+## Report assets
+
+결과보고서와 시연 영상에 넣을 표는 아래 명령으로 재생성합니다.
+
+```powershell
+python scripts\generate_report_assets.py --output_dir docs\report_assets
+```
+
+주요 산출물:
+
+- `docs/report_assets/tier_summary.csv`: tier별 품질, 비용, 오류, weighted score
+- `docs/report_assets/before_after.csv`: 튜닝 전후 비용/품질 비교
+- `docs/report_assets/selection_distribution.csv`: tier별 cheap/mid/premium/abstain 선택 분포
+- `docs/report_assets/error_summary.csv`: under-route, over-route, should_abstain 분포
+- `docs/report_assets/demo_prompts.csv`: 시연 영상용 대표 프롬프트
+- `docs/report_assets/report_assets_summary.json`: 위 내용을 묶은 보고서용 JSON
+
 ## 라우터 품질 예측 비교
 
 난이도 하나를 예측하는 대신 `quality(prompt, model)`을 모델별로 비교합니다.
