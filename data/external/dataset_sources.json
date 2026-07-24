@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "updated": "2026-07-24",
+  "policy": {
+    "redistribute_raw_data": false,
+    "store_transformed_samples_only": true,
+    "require_source_url": true,
+    "require_license": true,
+    "pii_filter_required": true
+  },
+  "sources": [
+    {
+      "id": "routellm",
+      "name": "RouteLLM",
+      "kind": "router_framework",
+      "license": "Apache-2.0",
+      "source_url": "https://github.com/lm-sys/RouteLLM",
+      "intended_use": "Compare router framing, strong/weak routing baselines, threshold calibration ideas, and cost-quality evaluation approach.",
+      "storage_policy": "Do not vendor RouteLLM source or raw generated data into this repository. Use as a cited baseline and optional comparison target.",
+      "risk_notes": "RouteLLM examples may depend on external model providers. This project must keep runtime routing local-only."
+    },
+    {
+      "id": "lmsys_mt_bench_human_judgments",
+      "name": "LMSYS MT-Bench Human Judgments",
+      "kind": "preference_dataset",
+      "license": "CC-BY-4.0",
+      "source_url": "https://huggingface.co/datasets/lmsys/mt_bench_human_judgments",
+      "intended_use": "Convert prompt and human preference judgments into weak-sufficient, strong-needed, or uncertain routing labels.",
+      "storage_policy": "Store transformed routing labels and minimal prompt snippets only after filtering. Preserve attribution and source URL.",
+      "risk_notes": "Filter unsafe, personally identifying, or license-sensitive content. Avoid redistributing full model outputs when not necessary."
+    },
+    {
+      "id": "prm800k",
+      "name": "PRM800K",
+      "kind": "reasoning_dataset",
+      "license": "MIT",
+      "source_url": "https://github.com/openai/prm800k",
+      "intended_use": "Use math/reasoning step correctness metadata to expand exact, numeric, and reasoning difficulty routing labels.",
+      "storage_policy": "Store derived difficulty and routing labels, not the full original corpus.",
+      "risk_notes": "Dataset is tied to MATH-style problems. Avoid overfitting router behavior to math-only prompts."
+    },
+    {
+      "id": "carrotai_ko_instruction_dataset",
+      "name": "CarrotAI ko-instruction-dataset",
+      "kind": "korean_instruction_dataset",
+      "license": "MIT",
+      "source_url": "https://huggingface.co/datasets/CarrotAI/ko-instruction-dataset",
+      "intended_use": "Increase Korean instruction prompt diversity for summary, QA, transformation, code request, and writing tasks.",
+      "storage_policy": "Use instruction text after PII and unsafe-content filtering. Store source and license in transformed rows.",
+      "risk_notes": "Recheck dataset card before final submission. Remove samples with personal data or copyrighted long-form content."
+    },
+    {
+      "id": "intfloat_multilingual_e5_small",
+      "name": "intfloat/multilingual-e5-small",
+      "kind": "embedding_model",
+      "license": "MIT",
+      "source_url": "https://huggingface.co/intfloat/multilingual-e5-small",
+      "intended_use": "Optional prompt embedding feature extraction for semantic similarity and task clustering.",
+      "storage_policy": "Do not redistribute model weights. Users download from the public Hugging Face repository when optional embedding features are enabled.",
+      "risk_notes": "Keep embedding features optional so the router can run without network access or model downloads."
+    }
+  ]
+}

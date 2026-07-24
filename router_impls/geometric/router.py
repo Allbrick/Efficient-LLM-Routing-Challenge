@@ -214,6 +214,7 @@ class GeometricRouter:
         sufficiency_probabilities = self.risk_model.predict_all(x, prompt) if self.risk_model is not None else {}
         candidates = []
         simple_prompt_prior = self._has_simple_prompt_prior(prompt, evidence_obj, evaluation_type)
+        low_complexity_prior = self._has_low_complexity_prior(prompt, evidence_obj, evaluation_type, explicit_task_context)
 
         abstain_probability = float(sufficiency_probabilities.get("abstain", 0.0))
         if evaluation_type in {"required_clarification", "refusal_check"}:
@@ -260,6 +261,9 @@ class GeometricRouter:
         if simple_prompt_prior:
             selected = "cheap"
             reason = "simple_prompt_prior"
+        elif low_complexity_prior:
+            selected = "cheap"
+            reason = "low_complexity_prior"
         elif abstain_candidate["feasible"]:
             selected = "abstain"
             reason = "abstain_probability"
@@ -303,6 +307,7 @@ class GeometricRouter:
         frontier_hint = best_under_budget(self.frontier, BUDGET_LIMITS[tier])
         evidence = self.extractor.explain(prompt, task_type, difficulty, risk_level, evaluation_type)
         evidence["simple_prompt_prior"] = 1.0 if simple_prompt_prior else 0.0
+        evidence["low_complexity_prior"] = 1.0 if low_complexity_prior else 0.0
         evidence["request_model_costs"] = request_model_costs
         evidence["explicit_task_context"] = 1.0 if explicit_task_context else 0.0
         return RouteDecision(
@@ -430,6 +435,8 @@ class GeometricRouter:
             or self.extractor._has_hint(lowered, TASK_HINTS["architecture"])
             or self.extractor._has_hint(lowered, TASK_HINTS["code"])
         )
+        if any(term in text for term in ("작성", "홍보", "문구", "카피", "카피라이팅")):
+            return False
         if demanding_hint and float(getattr(evidence, "difficulty_score", 0.0)) > 0.35:
             return False
         if demanding_hint and float(getattr(evidence, "risk_score", 0.0)) > 0.35:
@@ -439,6 +446,48 @@ class GeometricRouter:
             and float(getattr(evidence, "missing_context", 0.0)) == 0.0
             and float(getattr(evidence, "code_like", 0.0)) == 0.0
         )
+
+    def _has_low_complexity_prior(
+        self,
+        prompt: str,
+        evidence: object,
+        evaluation_type: str,
+        explicit_task_context: bool,
+    ) -> bool:
+        if explicit_task_context:
+            return False
+        text = str(prompt).strip()
+        if not text:
+            return False
+        lowered = text.lower()
+        if float(getattr(evidence, "missing_context", 0.0)) >= 1.0:
+            return False
+        if evaluation_type in {"required_clarification", "refusal_check"}:
+            return False
+        if float(getattr(evidence, "exact_answer", 0.0)) >= 1.0:
+            return True
+        if any(term in text for term in ("비교", "설계", "아키텍처", "법적", "법률", "계약", "이용약관", "응급", "환자", "심정지")):
+            return False
+        if any(term in lowered for term in ("compare", "architecture", "legal", "contract", "emergency")):
+            return False
+        low_complexity_markers = (
+            "요약",
+            "번역",
+            "한 줄",
+            "숫자",
+            "평균 속도",
+            "알림 문구",
+            "회의록",
+            "고객 피드백",
+            "개념",
+            "정의",
+            "중복 요소",
+            "문자열을 뒤집",
+            "간결한",
+        )
+        if any(marker in text for marker in low_complexity_markers):
+            return True
+        return False
 
     def save(self, path: str | Path) -> None:
         payload = {

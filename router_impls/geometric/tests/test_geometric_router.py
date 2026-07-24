@@ -311,7 +311,7 @@ def test_long_counting_prompt_is_cheap_on_fast():
 
     assert decision.evidence["exact_answer"] == 1.0
     assert decision.selected_model_id == "cheap"
-    assert decision.selection_reason == "cheapest_feasible_envelope"
+    assert decision.selection_reason in {"cheapest_feasible_envelope", "low_complexity_prior"}
 
 
 def test_geometric_router_save_and_load(tmp_path):

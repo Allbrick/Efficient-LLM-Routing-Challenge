@@ -98,6 +98,7 @@ def allocate_public_budget(
 
     budget_units = int(round(BUDGET_LIMITS[tier] * len(prompt_ids) * cost_scale))
     choices = _dynamic_program(prompt_options, budget_units)
+    choices = _improve_under_route_with_budget(prompt_options, choices, budget_units)
 
     allocated = []
     for prompt_id, option in zip(prompt_ids, choices):
@@ -183,7 +184,14 @@ def _score_prompt_options(
             failure_penalty = 1.85 * priority * under_route_risk
             cost_penalty = _cost_penalty(priority, evidence) * cost
             gain_bonus = 0.035 * priority * gain_per_cost
-            score = expected_quality + gain_bonus + feasible_bonus - failure_penalty - cost_penalty - distance_penalty
+            score = (
+                expected_quality
+                + gain_bonus
+                + feasible_bonus
+                - failure_penalty
+                - cost_penalty
+                - distance_penalty
+            )
 
         enriched = option.copy()
         enriched.update(
@@ -268,6 +276,42 @@ def _dynamic_program(prompt_options: list[list[dict]], budget_units: int) -> lis
     best_cost, (_best_score, best_path) = max(states.items(), key=lambda item: (item[1][0], item[0]))
     _ = best_cost
     return [options[idx] for options, idx in zip(prompt_options, best_path)]
+
+
+def _improve_under_route_with_budget(
+    prompt_options: list[list[dict]],
+    choices: list[dict],
+    budget_units: int,
+) -> list[dict]:
+    """Local search that spends remaining budget on the largest risk reductions."""
+    current = list(choices)
+    used_units = sum(int(option["cost_units"]) for option in current)
+    improved = True
+    while improved:
+        improved = False
+        best_move = None
+        for prompt_index, (options, selected) in enumerate(zip(prompt_options, current)):
+            selected_risk = float(selected.get("under_route_risk", 1.0))
+            selected_quality = float(selected.get("expected_quality", 0.0))
+            selected_cost = int(selected["cost_units"])
+            for candidate in options:
+                candidate_cost = int(candidate["cost_units"])
+                extra_cost = candidate_cost - selected_cost
+                if extra_cost <= 0 or used_units + extra_cost > budget_units:
+                    continue
+                risk_reduction = selected_risk - float(candidate.get("under_route_risk", 1.0))
+                quality_gain = float(candidate.get("expected_quality", 0.0)) - selected_quality
+                if risk_reduction <= 0.03 and quality_gain <= 0.03:
+                    continue
+                move_score = (1.8 * risk_reduction + quality_gain) / max(extra_cost, 1)
+                if best_move is None or move_score > best_move[0]:
+                    best_move = (move_score, prompt_index, candidate, extra_cost)
+        if best_move is not None:
+            _score, prompt_index, candidate, extra_cost = best_move
+            current[prompt_index] = candidate
+            used_units += extra_cost
+            improved = True
+    return current
 
 
 def _minimum_under_route(
