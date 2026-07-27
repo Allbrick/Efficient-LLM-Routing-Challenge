@@ -17,6 +17,7 @@ from router_impls.geometric.evaluator import build_training_labels
 from router_impls.geometric.router import GeometricRouter
 from router_impls.geometric.tuning import tune_router_policy
 from routing_stack.training.external_training import load_training_with_external
+from routing_stack.training.feedback_training import merge_feedback_training
 
 
 def main() -> None:
@@ -25,6 +26,8 @@ def main() -> None:
     parser.add_argument("--specs_path", default="data/public/example_eval_specs.csv")
     parser.add_argument("--external_specs_path", default="")
     parser.add_argument("--include_external", action="store_true")
+    parser.add_argument("--include_feedback", action="store_true")
+    parser.add_argument("--feedback_path", default="data/router_feedback/online_feedback.csv")
     parser.add_argument("--output", default="artifacts/geometric_router.json")
     parser.add_argument("--labels_output", default="artifacts/geometric_labels.csv")
     parser.add_argument("--policy_report", default="artifacts/geometric_policy_report.json")
@@ -40,6 +43,9 @@ def main() -> None:
         args.specs_path,
         args.external_specs_path if args.include_external else None,
     )
+    if args.include_feedback:
+        train_df, specs_df, feedback_summary = merge_feedback_training(train_df, specs_df, args.feedback_path)
+        data_summary.update(feedback_summary)
 
     router = GeometricRouter.fit(
         train_df,
