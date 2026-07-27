@@ -16,12 +16,15 @@ os.chdir(PROJECT_ROOT)
 from router_impls.geometric.evaluator import build_training_labels
 from router_impls.geometric.router import GeometricRouter
 from router_impls.geometric.tuning import tune_router_policy
+from routing_stack.training.external_training import load_training_with_external
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the geometric LLM router MVP.")
     parser.add_argument("--train_path", default="data/public/example_train.csv")
     parser.add_argument("--specs_path", default="data/public/example_eval_specs.csv")
+    parser.add_argument("--external_specs_path", default="")
+    parser.add_argument("--include_external", action="store_true")
     parser.add_argument("--output", default="artifacts/geometric_router.json")
     parser.add_argument("--labels_output", default="artifacts/geometric_labels.csv")
     parser.add_argument("--policy_report", default="artifacts/geometric_policy_report.json")
@@ -32,8 +35,11 @@ def main() -> None:
     parser.add_argument("--semantic_features", action="store_true")
     args = parser.parse_args()
 
-    train_df = pd.read_csv(args.train_path)
-    specs_df = pd.read_csv(args.specs_path) if Path(args.specs_path).exists() else pd.DataFrame()
+    train_df, specs_df, data_summary = load_training_with_external(
+        args.train_path,
+        args.specs_path,
+        args.external_specs_path if args.include_external else None,
+    )
 
     router = GeometricRouter.fit(
         train_df,
@@ -58,6 +64,7 @@ def main() -> None:
         "labels": args.labels_output,
         "policy_report": args.policy_report,
         "metadata": router.metadata,
+        "data": data_summary,
         "envelopes": {
             model: {
                 "sample_count": envelope.sample_count,

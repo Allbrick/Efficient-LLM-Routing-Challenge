@@ -191,6 +191,35 @@ python router_impls\geometric\scripts\train_geometric_router.py --semantic_featu
 python scripts\build_semantic_feature_index.py --input data\public\example_eval_specs.csv --output artifacts\semantic_feature_index.json --encoder sentence-transformers --model intfloat/multilingual-e5-small
 ```
 
+## Free public dataset training path
+
+기본 제출용 geometric artifact는 `data/public/example_train.csv`와 synthetic data로 재현성을 유지합니다. 무료 공개 데이터셋까지 포함한 약지도 학습 artifact를 만들려면 Hugging Face dataset viewer API에서 작은 샘플을 내려받아 라우팅 schema로 변환합니다.
+
+현재 지원하는 공개 소스:
+
+- `CarrotAI/ko-instruction-dataset`: 한국어 instruction prompt 샘플
+- `lmsys/mt_bench_human_judgments`: MT-Bench human preference prompt 샘플
+
+다운로드와 필터링:
+
+```powershell
+python scripts\download_public_dataset_samples.py --ko_limit 320 --mt_bench_limit 180
+```
+
+평가 명세 변환:
+
+```powershell
+python scripts\build_external_routing_dataset.py --input data\external\routing_prompts.csv --output data\external\external_eval_specs.csv --summary data\external\external_dataset_summary.json
+```
+
+외부 데이터 포함 학습:
+
+```powershell
+python router_impls\geometric\scripts\train_geometric_router.py --include_external --external_specs_path data\external\external_eval_specs.csv --no_tune --output artifacts\geometric_router_external.json --labels_output artifacts\geometric_labels_external.csv --policy_report artifacts\geometric_policy_report_external.json
+```
+
+이 경로는 외부 데이터셋의 prompt와 weak expected_min_model label을 학습 feature로 쓰며, 원본 대용량 데이터셋 전체를 저장소에 재배포하지 않습니다. 기본 tuned artifact와 분리해 `artifacts/geometric_router_external.json`으로 저장합니다.
+
 ## Geometric policy tuning report
 
 geometric router 학습 스크립트는 튜닝된 정책과 평가 지표를 `artifacts/geometric_policy_report.json`에 저장합니다.

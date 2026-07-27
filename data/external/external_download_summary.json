@@ -1,0 +1,26 @@
+{
+  "downloaded_rows": 338,
+  "output": "data/external/routing_prompts.csv",
+  "filter_report": {
+    "input_rows": 338,
+    "kept_rows": 329,
+    "dropped_rows": 9,
+    "drop_reasons": {
+      "prompt_too_long": 9
+    }
+  },
+  "source_counts": {
+    "carrotai_ko_instruction_dataset": 311,
+    "lmsys_mt_bench_human_judgments": 18
+  },
+  "language_counts": {
+    "en": 18,
+    "ko": 311
+  },
+  "expected_min_model_counts": {
+    "abstain": 2,
+    "cheap": 5,
+    "mid": 111,
+    "premium": 211
+  }
+}

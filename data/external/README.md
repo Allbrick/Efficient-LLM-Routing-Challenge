@@ -25,7 +25,27 @@ source,prompt_id,prompt,language,task_type,difficulty,risk_level,evaluation_type
 - `filter_report.json`: 필터링 결과 통계
 - `external_dataset_summary.json`: source/license/expected_min_model 분포 요약
 
-현재는 manifest, 필터링 도구, 한국어 instruction importer, 평가 명세 builder를 제공한다. 실제 외부 데이터 다운로드는 대회 제출 전 라이선스를 재확인한 뒤 별도 절차로 수행한다.
+현재는 manifest, 필터링 도구, 한국어 instruction importer, Hugging Face dataset viewer API 기반 샘플 downloader, 평가 명세 builder를 제공한다. 원본 데이터셋 전체는 저장소에 재배포하지 않고 필터링된 prompt 샘플과 출처 metadata만 보존한다.
+
+## Download public samples
+
+아래 명령은 무료 공개 데이터셋에서 작은 샘플을 내려받아 바로 routing schema로 변환하고 PII/길이 필터를 적용한다.
+
+```powershell
+python scripts\download_public_dataset_samples.py --ko_limit 320 --mt_bench_limit 180
+```
+
+현재 생성된 샘플 요약:
+
+```text
+routing_prompts.csv: 329 rows
+CarrotAI ko-instruction: 311 rows
+LMSYS MT-Bench human judgments: 18 rows
+Korean prompts: 311 rows
+English prompts: 18 rows
+```
+
+다운로드 요약은 `external_download_summary.json`에 저장된다.
 
 ## Korean instruction import
 
