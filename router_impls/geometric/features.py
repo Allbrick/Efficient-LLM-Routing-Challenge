@@ -238,9 +238,12 @@ class EvidenceExtractor:
         return 1.0 if short and has_pointer and has_task else 0.0
 
     def _exact_answer(self, text: str, evaluation_type: str) -> float:
-        if evaluation_type in {"exact_match", "numeric_check", "numeric_count"}:
-            return 1.0
         has_simple_math = bool(re.search(r"\d+\s*[+\-*/]\s*\d+", text))
+        has_numeric_directive = any(term in text for term in ("숫자", "값만", "정답만", "몇 번", "몇개", "몇 개"))
+        if evaluation_type in {"numeric_check", "numeric_count"}:
+            return 1.0 if has_simple_math or has_numeric_directive or bool(re.search(r"\d", text)) else 0.0
+        if evaluation_type == "exact_match":
+            return 1.0 if has_simple_math or has_numeric_directive else 0.0
         return 1.0 if has_simple_math else 0.0
 
     def _has_hint(self, lowered: str, hints: tuple[str, ...]) -> float:

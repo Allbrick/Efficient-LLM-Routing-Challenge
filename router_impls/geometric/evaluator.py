@@ -18,6 +18,14 @@ class EvaluationResult:
     reason: str
 
 
+@dataclass(frozen=True)
+class OutputSufficiency:
+    sufficient: bool
+    score: float
+    failure_reasons: list[str]
+    suggested_action: str
+
+
 class OutputEvaluator:
     """Deterministic evaluator driven by structured JSON specs.
 

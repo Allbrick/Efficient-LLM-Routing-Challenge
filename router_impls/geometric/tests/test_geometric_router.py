@@ -166,7 +166,28 @@ def test_geometric_router_can_abstain_for_impossible_request():
     decision = router.route("이 세상 모든 코드를 가져와줘.", budget_tier="fast")
 
     assert decision.selected_model_id == "abstain"
-    assert decision.selection_reason == "abstain_probability"
+    assert decision.selection_reason in {"abstain_probability", "missing_context_prior"}
+
+
+def test_missing_context_lane_abstains_without_premium_call():
+    router = make_router()
+
+    decision = router.route("다음 코드를 고쳐줘", budget_tier="premium")
+
+    assert decision.selected_model_id == "abstain"
+    assert decision.selection_reason == "missing_context_prior"
+    assert decision.evidence["pre_route_lane"] == "missing_context"
+    assert decision.evidence["missing_context_lane"] == 1.0
+
+
+def test_short_high_stakes_prompt_is_not_cheap_direct():
+    router = make_router()
+
+    decision = router.route("이 계약이 법적으로 유효한지 판단해줘", budget_tier="fast")
+
+    assert decision.evidence["pre_route_lane"] in {"missing_context", "hard_task", "ambiguous"}
+    assert decision.evidence["cheap_direct_lane"] == 0.0
+    assert decision.evidence["high_stakes_domain"] == 1.0
 
 
 def test_task_classifier_predicts_independent_heads():
@@ -225,6 +246,7 @@ def test_geometric_router_keeps_short_directive_on_cheap():
         assert decision.selected_model_id == "cheap"
         assert decision.selection_reason == "simple_prompt_prior"
         assert decision.evidence["simple_prompt_prior"] == 1.0
+        assert decision.evidence["pre_route_lane"] == "cheap_direct"
 
 
 def test_loaded_geometric_artifact_keeps_short_directive_on_cheap():
@@ -394,7 +416,26 @@ def test_submission_calls_model_when_structured_history_fails(tmp_path):
         reference_answer="5",
     )
 
-    assert payload["action"] == {"type": "call_model", "model_id": "cheap"}
+    assert payload["action"] == {"type": "call_model", "model_id": "mid"}
+
+
+def test_submission_selects_lower_rank_history_when_output_is_sufficient(tmp_path):
+    artifact = tmp_path / "router.json"
+    make_router().save(artifact)
+    submission = RouterSubmission(artifact)
+
+    payload = submission.route(
+        prompt="2 + 3의 값만 숫자로 답해줘.",
+        budget_tier="premium",
+        history=[{"model_id": "cheap", "output": "5"}],
+        task_type="math_exact",
+        difficulty="hard",
+        risk_level="high",
+        evaluation_type="exact_match",
+        reference_answer="5",
+    )
+
+    assert payload["action"] == {"type": "select_output", "model_id": "cheap", "history_index": 0}
 
 
 def test_long_counting_prompt_is_cheap_on_fast():

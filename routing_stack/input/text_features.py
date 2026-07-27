@@ -42,6 +42,51 @@ _ADVANCED_TERMS = (
     "paper",
     "research",
 )
+_HIGH_STAKES_TERMS = (
+    "법률",
+    "법적",
+    "계약",
+    "소송",
+    "의료",
+    "응급",
+    "환자",
+    "진단",
+    "투자",
+    "주식",
+    "세금",
+    "보안",
+    "취약점",
+    "legal",
+    "medical",
+    "diagnosis",
+    "investment",
+    "security",
+    "vulnerability",
+)
+_NEGATIVE_EASY_TERMS = (
+    "분석",
+    "설계",
+    "비교",
+    "최적화",
+    "고쳐",
+    "수정",
+    "검토",
+    "증명",
+    "근거",
+    "단계별",
+    "정확",
+    "위 내용",
+    "다음 코드",
+    "첨부",
+    "analyze",
+    "design",
+    "compare",
+    "optimize",
+    "fix",
+    "review",
+    "prove",
+    "step by step",
+)
 _SIMPLE_CONVERSION_PATTERN = re.compile(
     r"(\d+(?:\.\d+)?)\s*(mb|gb|kb|달러|usd|원|만원|cm|mm|km|m)|몇\s*(gb|mb|원|달러)",
     re.IGNORECASE,
@@ -76,6 +121,8 @@ class TextFeatures:
     comparison_task: bool
     design_task: bool
     advanced_reasoning_task: bool
+    high_stakes_domain: bool
+    negative_easy_signal: bool
     task_complexity_hint: float
 
     def to_dict(self) -> dict:
@@ -103,6 +150,8 @@ def analyze_text_prompt(prompt: str) -> TextFeatures:
     explanation_task = _has_any(stripped, _EXPLANATION_TERMS)
     design_task = _has_any(stripped, _DESIGN_TERMS)
     advanced_reasoning_task = _is_advanced_reasoning_task(stripped)
+    high_stakes_domain = _has_any(stripped, _HIGH_STAKES_TERMS)
+    negative_easy_signal = _has_any(stripped, _NEGATIVE_EASY_TERMS) or high_stakes_domain
     technical_explanation = _is_domain_explanation_task(
         latin_token_count=latin_token_count,
         acronym_count=acronym_count,
@@ -130,6 +179,8 @@ def analyze_text_prompt(prompt: str) -> TextFeatures:
         and not comparison_task
         and not design_task
         and not advanced_reasoning_task
+        and not high_stakes_domain
+        and not negative_easy_signal
         and punctuation <= 2
     ) or simple_conversion
 
@@ -160,6 +211,8 @@ def analyze_text_prompt(prompt: str) -> TextFeatures:
         comparison_task=comparison_task,
         design_task=design_task,
         advanced_reasoning_task=advanced_reasoning_task,
+        high_stakes_domain=high_stakes_domain,
+        negative_easy_signal=negative_easy_signal,
         task_complexity_hint=complexity_hint,
     )
 

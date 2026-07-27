@@ -63,6 +63,18 @@ class RouteDecision:
     frontier_hint: dict | None
 
 
+@dataclass(frozen=True)
+class PreRouteAssessment:
+    lane: str
+    reason: str
+    cheap_direct: bool
+    missing_context: bool
+    hard_task: bool
+    ambiguous: bool
+    high_stakes_domain: bool
+    negative_easy_signal: bool
+
+
 class GeometricRouter:
     def __init__(
         self,
@@ -286,10 +298,24 @@ class GeometricRouter:
                 }
             )
 
+        pre_route = self._classify_pre_route_lane(
+            text_features=text_features,
+            evidence=evidence_obj,
+            evaluation_type=evaluation_type,
+            explicit_task_context=explicit_task_context,
+            candidates=candidates,
+            simple_prompt_prior=simple_prompt_prior,
+            low_complexity_prior=low_complexity_prior,
+            repetition_simple_prior=repetition_simple_prior,
+        )
+
         selected = None
         reason = ""
         abstain_candidate = candidates[0]
-        if self._has_exact_answer_prior(evidence_obj, evaluation_type):
+        if pre_route.lane == "missing_context":
+            selected = "abstain"
+            reason = "missing_context_prior"
+        elif self._has_exact_answer_prior(evidence_obj, evaluation_type):
             selected = "cheap"
             reason = "exact_answer_prior"
         elif repetition_simple_prior:
@@ -346,6 +372,14 @@ class GeometricRouter:
         evidence["simple_prompt_prior"] = 1.0 if simple_prompt_prior else 0.0
         evidence["low_complexity_prior"] = 1.0 if low_complexity_prior else 0.0
         evidence["repetition_normalized_prior"] = 1.0 if repetition_simple_prior else 0.0
+        evidence["pre_route_lane"] = pre_route.lane
+        evidence["pre_route_reason"] = pre_route.reason
+        evidence["cheap_direct_lane"] = 1.0 if pre_route.cheap_direct else 0.0
+        evidence["missing_context_lane"] = 1.0 if pre_route.missing_context else 0.0
+        evidence["hard_task_lane"] = 1.0 if pre_route.hard_task else 0.0
+        evidence["ambiguous_lane"] = 1.0 if pre_route.ambiguous else 0.0
+        evidence["high_stakes_domain"] = 1.0 if pre_route.high_stakes_domain else 0.0
+        evidence["negative_easy_signal"] = 1.0 if pre_route.negative_easy_signal else 0.0
         evidence["request_model_costs"] = request_model_costs
         evidence["explicit_task_context"] = 1.0 if explicit_task_context else 0.0
         if self.semantic_index is not None:
@@ -607,6 +641,98 @@ class GeometricRouter:
             if payload.get("semantic_index") is not None
             else None,
             metadata=payload.get("metadata", {}),
+        )
+
+    def _classify_pre_route_lane(
+        self,
+        *,
+        text_features: object,
+        evidence: object,
+        evaluation_type: str,
+        explicit_task_context: bool,
+        candidates: list[dict],
+        simple_prompt_prior: bool,
+        low_complexity_prior: bool,
+        repetition_simple_prior: bool,
+    ) -> PreRouteAssessment:
+        missing_context = (
+            bool(getattr(text_features, "missing_context", False))
+            or float(getattr(evidence, "missing_context", 0.0)) >= 1.0
+            or evaluation_type in {"required_clarification", "refusal_check"}
+        )
+        high_stakes = bool(getattr(text_features, "high_stakes_domain", False)) or (
+            explicit_task_context and float(getattr(evidence, "risk_score", 0.0)) >= 0.80
+        )
+        negative_easy = bool(getattr(text_features, "negative_easy_signal", False))
+        cheap_candidate = next((item for item in candidates if item.get("model_id") == "cheap"), {})
+        cheap_pass = float(cheap_candidate.get("pass_probability", 0.0))
+        cheap_distance = float(cheap_candidate.get("normalized_distance", 99.0))
+        cheap_evidence = (
+            simple_prompt_prior
+            or low_complexity_prior
+            or repetition_simple_prior
+            or self._has_exact_answer_prior(evidence, evaluation_type)
+        )
+        hard_task = (
+            high_stakes
+            or bool(getattr(text_features, "advanced_reasoning_task", False))
+            or bool(getattr(text_features, "design_task", False))
+            or (explicit_task_context and float(getattr(evidence, "difficulty_score", 0.0)) >= 0.75)
+            or float(getattr(evidence, "condition_count", 0.0)) >= 0.50
+            or (not cheap_evidence and evaluation_type in {"unit_test", "rubric_check", "constraint_check"})
+        )
+        cheap_direct = (
+            cheap_evidence
+            and not missing_context
+            and not high_stakes
+            and not negative_easy
+            and not bool(getattr(text_features, "code_like", False))
+            and not hard_task
+            and (cheap_pass >= 0.55 or cheap_distance <= 1.50 or cheap_evidence)
+        )
+
+        if missing_context:
+            return PreRouteAssessment(
+                lane="missing_context",
+                reason="missing_required_context",
+                cheap_direct=False,
+                missing_context=True,
+                hard_task=False,
+                ambiguous=False,
+                high_stakes_domain=high_stakes,
+                negative_easy_signal=negative_easy,
+            )
+        if cheap_direct:
+            return PreRouteAssessment(
+                lane="cheap_direct",
+                reason="obvious_low_risk_prompt",
+                cheap_direct=True,
+                missing_context=False,
+                hard_task=False,
+                ambiguous=False,
+                high_stakes_domain=False,
+                negative_easy_signal=False,
+            )
+        if hard_task:
+            return PreRouteAssessment(
+                lane="hard_task",
+                reason="hard_or_high_risk_signal",
+                cheap_direct=False,
+                missing_context=False,
+                hard_task=True,
+                ambiguous=False,
+                high_stakes_domain=high_stakes,
+                negative_easy_signal=negative_easy,
+            )
+        return PreRouteAssessment(
+            lane="ambiguous",
+            reason="requires_budgeted_model_choice",
+            cheap_direct=False,
+            missing_context=False,
+            hard_task=False,
+            ambiguous=True,
+            high_stakes_domain=high_stakes,
+            negative_easy_signal=negative_easy,
         )
 
     def _feature_vector(self, prompt: str, evidence_obj: object) -> np.ndarray:

@@ -1,19 +1,19 @@
 demo_case,tier,selected_model_id,selection_reason,cheap_distance,mid_distance,premium_distance,cheap_pass_probability,mid_pass_probability,premium_pass_probability
-trivial cheap,fast,cheap,exact_answer_prior,0.895487,1.251514,12.886047,0.558061,0.75282,0.585811
-trivial cheap,balanced,cheap,exact_answer_prior,0.93619,1.001211,5.522592,0.558061,0.75282,0.585811
-trivial cheap,premium,cheap,exact_answer_prior,0.93619,0.953535,2.761296,0.558061,0.75282,0.585811
-simple numeric,fast,cheap,exact_answer_prior,1.049301,1.609673,29.404295,0.537206,0.711713,0.527364
-simple numeric,balanced,cheap,exact_answer_prior,1.096996,1.287738,12.601841,0.537206,0.711713,0.527364
-simple numeric,premium,cheap,exact_answer_prior,1.096996,1.226417,6.30092,0.537206,0.711713,0.527364
-medium code,fast,mid,nearest_budget_fallback,2.157877,1.168038,5.527083,0.421781,0.654676,0.708229
-medium code,balanced,mid,cheapest_feasible_envelope,2.255962,0.93443,2.36875,0.421781,0.654676,0.708229
-medium code,premium,mid,cheapest_feasible_envelope,2.255962,0.889934,1.184375,0.421781,0.654676,0.708229
-hard architecture,fast,premium,nearest_envelope_fallback,5.716175,3.845641,5.74827,0.342359,0.538836,0.675267
-hard architecture,balanced,premium,nearest_envelope_fallback,5.976001,3.076513,2.463544,0.342359,0.538836,0.675267
-hard architecture,premium,premium,nearest_envelope_fallback,5.976001,2.930012,1.231772,0.342359,0.538836,0.675267
-missing context abstain,fast,abstain,abstain_probability,7.940979,5.555215,5.792593,0.346086,0.546984,0.723718
-missing context abstain,balanced,abstain,abstain_probability,8.301933,4.444172,2.48254,0.346086,0.546984,0.723718
-missing context abstain,premium,abstain,abstain_probability,8.301933,4.232545,1.24127,0.346086,0.546984,0.723718
-tier-dependent selection,fast,mid,nearest_envelope_fallback,5.087326,4.46613,23.333595,0.374606,0.593144,0.693187
-tier-dependent selection,balanced,premium,nearest_envelope_fallback,5.318568,3.572904,10.000112,0.374606,0.593144,0.693187
-tier-dependent selection,premium,premium,nearest_envelope_fallback,5.318568,3.402765,5.000056,0.374606,0.593144,0.693187
+trivial cheap,fast,cheap,simple_prompt_prior,0.884947,1.210266,8.027954,0.484669,0.711771,0.67716
+trivial cheap,balanced,cheap,simple_prompt_prior,0.925172,1.29095,3.440552,0.484669,0.711771,0.67716
+trivial cheap,premium,cheap,simple_prompt_prior,0.925172,0.922107,1.720276,0.484669,0.711771,0.67716
+simple numeric,fast,cheap,exact_answer_prior,1.053609,1.639716,49.05523,0.511308,0.695581,0.552399
+simple numeric,balanced,cheap,exact_answer_prior,1.1015,1.74903,21.02367,0.511308,0.695581,0.552399
+simple numeric,premium,cheap,exact_answer_prior,1.1015,1.249307,10.511835,0.511308,0.695581,0.552399
+medium code,fast,mid,nearest_budget_fallback,1.841348,1.148013,5.602235,0.443869,0.667868,0.684672
+medium code,balanced,mid,nearest_budget_fallback,1.925046,1.224547,2.400958,0.443869,0.667868,0.684672
+medium code,premium,mid,cheapest_feasible_envelope,1.925046,0.874676,1.200479,0.443869,0.667868,0.684672
+hard architecture,fast,premium,nearest_envelope_fallback,5.420982,3.776374,5.876534,0.364576,0.554416,0.655361
+hard architecture,balanced,premium,nearest_envelope_fallback,5.66739,4.028133,2.518515,0.364576,0.554416,0.655361
+hard architecture,premium,premium,nearest_envelope_fallback,5.66739,2.877238,1.259257,0.364576,0.554416,0.655361
+missing context abstain,fast,abstain,missing_context_prior,7.964713,5.284066,5.935615,0.367862,0.56207,0.702665
+missing context abstain,balanced,abstain,missing_context_prior,8.326745,5.636337,2.543835,0.367862,0.56207,0.702665
+missing context abstain,premium,abstain,missing_context_prior,8.326745,4.025955,1.271918,0.367862,0.56207,0.702665
+tier-dependent selection,fast,mid,nearest_envelope_fallback,4.452907,4.51446,23.885318,0.3958,0.606932,0.672746
+tier-dependent selection,balanced,premium,nearest_envelope_fallback,4.655312,4.815424,10.236565,0.3958,0.606932,0.672746
+tier-dependent selection,premium,premium,nearest_envelope_fallback,4.655312,3.439588,5.118283,0.3958,0.606932,0.672746
