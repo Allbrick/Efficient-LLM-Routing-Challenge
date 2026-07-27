@@ -129,16 +129,16 @@ python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4
 
 | Tier | Mean Quality | Mean Cost | Under-route | Weighted Score |
 | --- | ---: | ---: | ---: | ---: |
-| Fast | 0.889 | 0.048 | 11/73 | 0.131 |
-| Balanced | 0.926 | 0.098 | 0/73 | 0.216 |
-| Premium | 0.926 | 0.100 | 0/73 | 0.179 |
+| Fast | 0.889 | 0.048 | 11/73 | 0.133 |
+| Balanced | 0.926 | 0.097 | 0/73 | 0.217 |
+| Premium | 0.926 | 0.099 | 0/73 | 0.179 |
 
 추가 근거:
 
-- Overall weighted score: 0.526
+- Overall weighted score: 0.529
 - Fast batch allocation: total budget 2.19, total cost 2.18, mean cost 0.030
-- 로컬 라우팅 decision latency: Fast 평균 7.26ms, Balanced 평균 7.18ms, Premium 평균 7.19ms
-- 테스트 결과: 관련 테스트 70개 이상 통과
+- 로컬 라우팅 decision latency: Fast 평균 5.97ms, Balanced 평균 5.93ms, Premium 평균 5.99ms
+- 테스트 결과: 전체 테스트 147개 통과
 
 ## 8. 기대효과 및 활용분야
 

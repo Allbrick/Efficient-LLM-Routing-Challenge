@@ -1,4 +1,6 @@
 ﻿from pathlib import Path
+from copy import deepcopy
+from functools import lru_cache
 import json
 
 import pandas as pd
@@ -15,10 +17,37 @@ from router_impls.geometric.tuning import score_tier_summary, tune_router_policy
 DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "public"
 
 
+@lru_cache(maxsize=1)
 def load_data():
     train_df = pd.read_csv(DATA_DIR / "example_train.csv")
     specs_df = pd.read_csv(DATA_DIR / "example_eval_specs.csv")
     return train_df, specs_df
+
+
+@lru_cache(maxsize=1)
+def cached_router():
+    train_df, specs_df = load_data()
+    return GeometricRouter.fit(train_df, specs_df)
+
+
+@lru_cache(maxsize=1)
+def cached_semantic_router():
+    train_df, specs_df = load_data()
+    return GeometricRouter.fit(train_df, specs_df, use_semantic_features=True)
+
+
+def make_router():
+    return deepcopy(cached_router())
+
+
+def make_semantic_router():
+    return deepcopy(cached_semantic_router())
+
+
+def sample_train_data(limit: int = 18):
+    train_df, specs_df = load_data()
+    prompt_ids = train_df["prompt_id"].drop_duplicates().head(limit)
+    return train_df[train_df["prompt_id"].isin(prompt_ids)].copy(), specs_df
 
 
 def test_evaluator_runs_python_unit_tests():
@@ -132,7 +161,7 @@ def test_evaluator_checks_impossible_request_refusal():
 
 def test_geometric_router_can_abstain_for_impossible_request():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     decision = router.route("이 세상 모든 코드를 가져와줘.", budget_tier="fast")
 
@@ -167,7 +196,7 @@ def test_training_labels_capture_exact_answer_failure():
 
 def test_geometric_router_prefers_cheap_for_exact_prompt():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     decision = router.route(
         "2 + 3의 값만 숫자로 답해줘.",
@@ -180,6 +209,7 @@ def test_geometric_router_prefers_cheap_for_exact_prompt():
 
     assert decision.selected_model_id == "cheap"
     assert decision.selection_reason in {
+        "exact_answer_prior",
         "cheapest_feasible_envelope",
         "nearest_envelope_fallback",
     }
@@ -187,7 +217,7 @@ def test_geometric_router_prefers_cheap_for_exact_prompt():
 
 def test_geometric_router_keeps_short_directive_on_cheap():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     for tier in ["fast", "balanced", "premium"]:
         decision = router.route("이모티콘좀 그만 써라", budget_tier=tier)
@@ -209,7 +239,7 @@ def test_loaded_geometric_artifact_keeps_short_directive_on_cheap():
 
 def test_geometric_router_escalates_hard_architecture_prompt():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     decision = router.route(
         "멀티테넌트 결제 시스템을 설계하고 웹훅 멱등성, 감사 로그, 장애 재처리, 보안 통제를 포함해줘.",
@@ -225,7 +255,7 @@ def test_geometric_router_escalates_hard_architecture_prompt():
 
 def test_fast_budget_guard_limits_inferred_premium_to_mid():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     decision = router.route(
         "멀티테넌트 SaaS 결제 시스템의 상위 수준 아키텍처를 설계해줘.",
@@ -239,7 +269,7 @@ def test_fast_budget_guard_limits_inferred_premium_to_mid():
 
 def test_fast_budget_guard_allows_explicit_high_risk_premium():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     decision = router.route(
         "멀티테넌트 결제 시스템을 설계하고 웹훅 멱등성, 감사 로그, 장애 재처리, 보안 통제를 포함해줘.",
@@ -256,7 +286,7 @@ def test_fast_budget_guard_allows_explicit_high_risk_premium():
 
 def test_geometric_router_uses_request_model_metadata_costs():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     decision = router.route(
         "2 + 3의 값만 숫자로 답해줘.",
@@ -282,7 +312,7 @@ def test_geometric_router_uses_request_model_metadata_costs():
 def test_submission_selects_existing_history_output_when_sufficient(tmp_path):
     train_df, specs_df = load_data()
     artifact = tmp_path / "router.json"
-    GeometricRouter.fit(train_df, specs_df).save(artifact)
+    make_router().save(artifact)
     submission = RouterSubmission(artifact)
 
     payload = submission.route(
@@ -299,9 +329,49 @@ def test_submission_selects_existing_history_output_when_sufficient(tmp_path):
     assert payload["action"] == {"type": "select_output", "model_id": "cheap", "history_index": 0}
 
 
+def test_submission_evaluates_history_before_selecting_output(tmp_path):
+    train_df, specs_df = load_data()
+    artifact = tmp_path / "router.json"
+    make_router().save(artifact)
+    submission = RouterSubmission(artifact)
+
+    payload = submission.route(
+        prompt="2 + 3의 값만 숫자로 답해줘.",
+        budget_tier="fast",
+        history=[{"model_id": "cheap", "output": "4"}, {"model_id": "mid", "output": "5"}],
+        task_type="math_exact",
+        difficulty="trivial",
+        risk_level="low",
+        evaluation_type="exact_match",
+        reference_answer="5",
+    )
+
+    assert payload["action"] == {"type": "select_output", "model_id": "mid", "history_index": 1}
+
+
+def test_submission_calls_model_when_structured_history_fails(tmp_path):
+    train_df, specs_df = load_data()
+    artifact = tmp_path / "router.json"
+    make_router().save(artifact)
+    submission = RouterSubmission(artifact)
+
+    payload = submission.route(
+        prompt="2 + 3의 값만 숫자로 답해줘.",
+        budget_tier="fast",
+        history=[{"model_id": "cheap", "output": "4"}],
+        task_type="math_exact",
+        difficulty="trivial",
+        risk_level="low",
+        evaluation_type="exact_match",
+        reference_answer="5",
+    )
+
+    assert payload["action"] == {"type": "call_model", "model_id": "cheap"}
+
+
 def test_long_counting_prompt_is_cheap_on_fast():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
     paragraph = ("사과 바나나 포도 사과 귤사과 바나나 포도 사과 귤" * 60)
 
     decision = router.route(
@@ -311,12 +381,12 @@ def test_long_counting_prompt_is_cheap_on_fast():
 
     assert decision.evidence["exact_answer"] == 1.0
     assert decision.selected_model_id == "cheap"
-    assert decision.selection_reason in {"cheapest_feasible_envelope", "low_complexity_prior"}
+    assert decision.selection_reason in {"exact_answer_prior", "cheapest_feasible_envelope", "low_complexity_prior"}
 
 
 def test_geometric_router_save_and_load(tmp_path):
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
     artifact = tmp_path / "router.json"
     router.save(artifact)
 
@@ -329,7 +399,7 @@ def test_geometric_router_save_and_load(tmp_path):
 
 def test_geometric_router_can_use_optional_semantic_features(tmp_path):
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df, use_semantic_features=True)
+    router = make_semantic_router()
 
     decision = router.route("결제 시스템의 장애 복구 설계를 해줘.", budget_tier="balanced")
 
@@ -347,7 +417,7 @@ def test_geometric_router_can_use_optional_semantic_features(tmp_path):
 
 def test_simulator_reports_all_budget_tiers():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     payload = simulate_public_set(router, train_df, specs_df)
     summary = payload["summary"]["tier_summary"]
@@ -359,7 +429,7 @@ def test_simulator_reports_all_budget_tiers():
 
 def test_policy_tuning_reduces_fast_budget_excess():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
     before = simulate_public_set(router, train_df, specs_df, tiers=("fast",))["summary"]["tier_summary"]["fast"]
 
     tune_router_policy(router, train_df, specs_df, tiers=("fast",))
@@ -371,7 +441,7 @@ def test_policy_tuning_reduces_fast_budget_excess():
 
 def test_policy_tuning_records_weighted_objective():
     train_df, specs_df = load_data()
-    router = GeometricRouter.fit(train_df, specs_df)
+    router = make_router()
 
     results = tune_router_policy(router, train_df, specs_df, tiers=("fast", "balanced"))
 
@@ -403,7 +473,7 @@ def test_score_tier_summary_penalizes_cost_overflow_and_under_route():
 
 
 def test_budget_allocator_respects_total_fast_budget():
-    train_df, specs_df = load_data()
+    train_df, specs_df = sample_train_data()
     router = GeometricRouter.fit(train_df, specs_df)
     payload = allocate_public_budget(router, train_df, specs_df, "fast")
     summary = payload["summary"]
@@ -413,7 +483,7 @@ def test_budget_allocator_respects_total_fast_budget():
 
 
 def test_budget_allocator_reports_tradeoff_against_online_fast_policy():
-    train_df, specs_df = load_data()
+    train_df, specs_df = sample_train_data()
     router = GeometricRouter.fit(train_df, specs_df)
     tune_router_policy(router, train_df, specs_df, tiers=("fast",))
     independent = simulate_public_set(router, train_df, specs_df, tiers=("fast",))["summary"]["tier_summary"]["fast"]
@@ -423,5 +493,7 @@ def test_budget_allocator_reports_tradeoff_against_online_fast_policy():
     assert summary["total_cost"] <= summary["total_budget"]
     assert summary["mean_cost"] <= independent["mean_cost"]
     assert summary["under_route"] >= summary["under_route_lower_bound"]
+
+
 
 

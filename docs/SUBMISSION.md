@@ -50,6 +50,8 @@ python router_impls\geometric\scripts\train_geometric_router.py --policy_report 
 ```powershell
 python scripts\generate_report_assets.py --output_dir docs\report_assets
 python scripts\measure_router_latency.py --output_dir docs\report_assets --repeat 3
+python scripts\verify_submission_readiness.py --output docs\report_assets\submission_readiness.json
+python scripts\run_submission_checks.py --output docs\report_assets\submission_check_run.json
 ```
 
 테스트:
@@ -74,6 +76,8 @@ python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4
 - batch allocation: `router_impls/geometric/scripts/allocate_geometric_budget.py`
 - report assets: `scripts/generate_report_assets.py`
 - latency report: `scripts/measure_router_latency.py`
+- readiness check: `scripts/verify_submission_readiness.py`
+- reproducibility runner: `scripts/run_submission_checks.py`
 - private adapter: `router_impls/geometric/submission.py`
 
 ## Private Simulator 인터페이스
@@ -118,6 +122,8 @@ decision = router.route(
 - YouTube 시연 영상 URL 추가
 - `docs/report_assets/`를 최신 결과로 재생성
 - `latency_summary.csv`와 `latency_report.json` 재생성
+- `submission_readiness.json`에서 blocker가 0개인지 확인
+- `submission_check_run.json`에서 `status`가 `passed`인지 확인
 - `docs/SBOM.md`의 라이브러리 버전과 `requirements.txt` 일치 확인
 - `python -m pytest ...` 전체 통과 확인
 - DOCX/HWPX와 PDF 파일명 규칙 확인

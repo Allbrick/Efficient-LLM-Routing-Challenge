@@ -275,7 +275,10 @@ class GeometricRouter:
         selected = None
         reason = ""
         abstain_candidate = candidates[0]
-        if simple_prompt_prior:
+        if self._has_exact_answer_prior(evidence_obj, evaluation_type):
+            selected = "cheap"
+            reason = "exact_answer_prior"
+        elif simple_prompt_prior:
             selected = "cheap"
             reason = "simple_prompt_prior"
         elif low_complexity_prior:
@@ -464,6 +467,17 @@ class GeometricRouter:
             float(getattr(evidence, "condition_count", 0.0)) == 0.0
             and float(getattr(evidence, "missing_context", 0.0)) == 0.0
             and float(getattr(evidence, "code_like", 0.0)) == 0.0
+        )
+
+    def _has_exact_answer_prior(self, evidence: object, evaluation_type: str) -> bool:
+        if evaluation_type not in {"exact_match", "numeric_check", "numeric_count"}:
+            return False
+        return (
+            float(getattr(evidence, "exact_answer", 0.0)) >= 1.0
+            and float(getattr(evidence, "difficulty_score", 1.0)) <= 0.25
+            and float(getattr(evidence, "risk_score", 1.0)) <= 0.25
+            and float(getattr(evidence, "code_like", 0.0)) == 0.0
+            and float(getattr(evidence, "missing_context", 0.0)) == 0.0
         )
 
     def _has_low_complexity_prior(

@@ -4,6 +4,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from router_impls.geometric.evaluator import OutputEvaluator
 from router_impls.geometric.features import MODEL_RANK
 from router_impls.geometric.router import GeometricRouter
 
@@ -18,6 +19,7 @@ class RouterSubmission:
 
     def __init__(self, artifact_path: str | Path = "artifacts/geometric_router.json"):
         self.router = GeometricRouter.load(artifact_path)
+        self.evaluator = OutputEvaluator()
 
     def route(
         self,
@@ -29,6 +31,8 @@ class RouterSubmission:
         difficulty: str = "",
         risk_level: str = "",
         evaluation_type: str = "",
+        reference_answer: str = "",
+        test_spec: str = "",
     ) -> dict[str, Any]:
         decision = self.router.route(
             prompt=prompt,
@@ -42,7 +46,15 @@ class RouterSubmission:
         if decision.selected_model_id == "abstain":
             action = {"type": "abstain", "model_id": None}
         else:
-            reusable = self._select_reusable_history(decision.selected_model_id, history or [])
+            reusable = self._select_reusable_history(
+                decision.selected_model_id,
+                history or [],
+                {
+                    "evaluation_type": evaluation_type,
+                    "reference_answer": reference_answer,
+                    "test_spec": test_spec,
+                },
+            )
             if reusable is None:
                 action = {"type": "call_model", "model_id": decision.selected_model_id}
             else:
@@ -58,10 +70,24 @@ class RouterSubmission:
             "diagnostics": asdict(decision),
         }
 
-    def _select_reusable_history(self, selected_model_id: str, history: list[dict[str, Any]]) -> dict[str, Any] | None:
+    def _select_reusable_history(
+        self,
+        selected_model_id: str,
+        history: list[dict[str, Any]],
+        spec: dict[str, Any] | None = None,
+    ) -> dict[str, Any] | None:
         if selected_model_id not in MODEL_RANK:
             return None
         selected_rank = MODEL_RANK[selected_model_id]
+        has_structured_spec = bool(
+            spec
+            and str(spec.get("evaluation_type") or "").strip()
+            and (
+                str(spec.get("reference_answer") or "").strip()
+                or str(spec.get("test_spec") or "").strip()
+                or str(spec.get("evaluation_type") or "").strip() in {"required_clarification", "refusal_check"}
+            )
+        )
         reusable = []
         for index, item in enumerate(history):
             if not isinstance(item, dict):
@@ -81,17 +107,31 @@ class RouterSubmission:
                 output = item.get("model_output")
             if output in {None, ""} and not bool(item.get("success") or item.get("sufficient")):
                 continue
+            explicit_success = bool(item.get("success") or item.get("sufficient"))
+            evaluated_success = False
+            evaluated_score = 0.0
+            if output not in {None, ""} and has_structured_spec:
+                result = self.evaluator.evaluate(
+                    str(output),
+                    spec,
+                    item.get("quality_score") if "quality_score" in item else item.get("success_score"),
+                )
+                evaluated_success = bool(result.success)
+                evaluated_score = float(result.score)
+            if has_structured_spec and not explicit_success and not evaluated_success:
+                continue
             reusable.append(
                 {
                     "model_id": model_id,
                     "history_index": int(item.get("history_index", index)),
                     "rank": MODEL_RANK[model_id],
-                    "success": bool(item.get("success") or item.get("sufficient")),
+                    "success": explicit_success or evaluated_success,
+                    "score": evaluated_score,
                 }
             )
         if not reusable:
             return None
-        reusable.sort(key=lambda item: (not item["success"], item["rank"], item["history_index"]))
+        reusable.sort(key=lambda item: (not item["success"], item["rank"], -item["score"], item["history_index"]))
         return reusable[0]
 
 

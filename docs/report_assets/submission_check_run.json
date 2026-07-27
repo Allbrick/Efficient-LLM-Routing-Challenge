@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "failed": [],
+  "results": [
+    {
+      "name": "train_geometric_router",
+      "command": [
+        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "router_impls/geometric/scripts/train_geometric_router.py",
+        "--policy_report",
+        "artifacts/geometric_policy_report.json"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 49.266,
+      "stdout_tail": "          \"budget_limit\": 0.2,\n          \"mean_quality\": 0.9263013698630138,\n          \"mean_cost\": 0.09917808219178081,\n          \"mean_excess_cost\": 0.0,\n          \"cost_over_limit\": 0,\n          \"under_route\": 0,\n          \"over_route\": 14,\n          \"should_abstain\": 3,\n          \"ok\": 56,\n          \"selection_counts\": {\n            \"premium\": 34,\n            \"cheap\": 29,\n            \"abstain\": 7,\n            \"mid\": 3\n          }\n        }\n      }\n    }\n  }\n}",
+      "stderr_tail": ""
+    },
+    {
+      "name": "generate_report_assets",
+      "command": [
+        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "scripts/generate_report_assets.py",
+        "--output_dir",
+        "docs/report_assets"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 57.41,
+      "stdout_tail": "        \"ok\": 56,\n        \"selection_counts\": {\n          \"premium\": 34,\n          \"cheap\": 29,\n          \"abstain\": 7,\n          \"mid\": 3\n        }\n      }\n    }\n  },\n  \"files\": [\n    \"tier_summary.csv\",\n    \"selection_distribution.csv\",\n    \"error_summary.csv\",\n    \"before_after.csv\",\n    \"demo_prompts.csv\",\n    \"fast_allocation_summary.csv\",\n    \"report_assets_summary.json\"\n  ]\n}",
+      "stderr_tail": ""
+    },
+    {
+      "name": "measure_router_latency",
+      "command": [
+        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "scripts/measure_router_latency.py",
+        "--output_dir",
+        "docs/report_assets",
+        "--repeat",
+        "3"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 2.819,
+      "stdout_tail": "      \"count\": 37,\n      \"latency_ms_mean\": 5.927827932897049,\n      \"latency_ms_p50\": 5.066200004269679,\n      \"latency_ms_p95\": 9.237213347417612,\n      \"latency_ms_max\": 9.398200005913774\n    },\n    {\n      \"budget_tier\": \"premium\",\n      \"count\": 37,\n      \"latency_ms_mean\": 5.990790995047638,\n      \"latency_ms_p50\": 5.02663334676375,\n      \"latency_ms_p95\": 9.26194666729619,\n      \"latency_ms_max\": 9.80429999375095\n    }\n  ],\n  \"files\": [\n    \"latency_summary.csv\",\n    \"latency_detail.csv\"\n  ]\n}",
+      "stderr_tail": ""
+    },
+    {
+      "name": "verify_submission_readiness",
+      "command": [
+        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "scripts/verify_submission_readiness.py",
+        "--output",
+        "docs/report_assets/submission_readiness.json"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.197,
+      "stdout_tail": "    },\n    {\n      \"type\": \"placeholder\",\n      \"path\": \"docs/REPORT_OUTLINE.md\",\n      \"message\": \"youtube_url placeholder remains\"\n    },\n    {\n      \"type\": \"placeholder\",\n      \"path\": \"docs/AI_MODEL_USAGE.md\",\n      \"message\": \"github_url placeholder remains\"\n    }\n  ],\n  \"warnings\": [\n    {\n      \"type\": \"placeholder\",\n      \"path\": \"docs/SUBMISSION.md\",\n      \"message\": \"contest_filename placeholder remains\"\n    }\n  ]\n}",
+      "stderr_tail": ""
+    }
+  ]
+}

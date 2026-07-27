@@ -1,0 +1,29 @@
+{
+  "status": "blocked",
+  "blocker_count": 3,
+  "warning_count": 1,
+  "blockers": [
+    {
+      "type": "placeholder",
+      "path": "docs/REPORT_OUTLINE.md",
+      "message": "github_url placeholder remains"
+    },
+    {
+      "type": "placeholder",
+      "path": "docs/REPORT_OUTLINE.md",
+      "message": "youtube_url placeholder remains"
+    },
+    {
+      "type": "placeholder",
+      "path": "docs/AI_MODEL_USAGE.md",
+      "message": "github_url placeholder remains"
+    }
+  ],
+  "warnings": [
+    {
+      "type": "placeholder",
+      "path": "docs/SUBMISSION.md",
+      "message": "contest_filename placeholder remains"
+    }
+  ]
+}
