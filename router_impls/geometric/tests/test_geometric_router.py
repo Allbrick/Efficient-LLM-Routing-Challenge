@@ -5,7 +5,7 @@ import json
 
 import pandas as pd
 
-from router_impls.geometric.evaluator import OutputEvaluator, build_training_labels
+from router_impls.geometric.evaluator import HeuristicRubricJudge, OutputEvaluator, build_training_labels
 from router_impls.geometric.budget_allocator import allocate_public_budget
 from router_impls.geometric.router import GeometricRouter
 from router_impls.geometric.simulator import simulate_public_set
@@ -50,6 +50,14 @@ def sample_train_data(limit: int = 18):
     return train_df[train_df["prompt_id"].isin(prompt_ids)].copy(), specs_df
 
 
+def test_geometric_router_stores_ood_reference_metadata():
+    router = make_router()
+    reference = router.metadata["ood_reference"]
+
+    assert reference["score_high_threshold"] == 0.90
+    assert reference["min_normalized_distance_p50"] <= reference["min_normalized_distance_p95"]
+
+
 def test_evaluator_runs_python_unit_tests():
     evaluator = OutputEvaluator()
     spec = {
@@ -81,6 +89,23 @@ def test_evaluator_assesses_sufficiency_with_suggested_action():
     assert insufficient.sufficient is False
     assert insufficient.failure_reasons == ["exact_match"]
     assert insufficient.suggested_action == "escalate"
+
+
+def test_optional_rubric_judge_can_assess_unstructured_rubric():
+    evaluator = OutputEvaluator(rubric_judge=HeuristicRubricJudge())
+    spec = {
+        "evaluation_type": "rubric_check",
+        "test_spec": json.dumps({"required_concepts": ["audit log", "idempotency"], "pass_threshold": 0.7}),
+    }
+
+    result = evaluator.assess_sufficiency(
+        "The design includes an audit log and idempotency for retries.",
+        spec,
+        prompt="설계를 평가해줘",
+    )
+
+    assert result.sufficient is True
+    assert result.suggested_action == "select_output"
 
 
 def test_evaluator_compares_json_semantically_and_preserves_types():
@@ -192,6 +217,17 @@ def test_missing_context_lane_abstains_without_premium_call():
     assert decision.selection_reason == "missing_context_prior"
     assert decision.evidence["pre_route_lane"] == "missing_context"
     assert decision.evidence["missing_context_lane"] == 1.0
+
+
+def test_router_records_ood_and_uncertainty_scores():
+    router = make_router()
+
+    decision = router.route("🚀🚀🚀 unknown Ω≈ç√∫˜µ≤≥÷ prompt with rare symbols", budget_tier="fast")
+
+    assert "ood_score" in decision.evidence
+    assert "uncertainty_score" in decision.evidence
+    assert 0.0 <= decision.evidence["ood_score"] <= 1.0
+    assert 0.0 <= decision.evidence["uncertainty_score"] <= 1.0
 
 
 def test_short_high_stakes_prompt_is_not_cheap_direct():

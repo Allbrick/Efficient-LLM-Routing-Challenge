@@ -248,6 +248,7 @@ geometric routing이 왜 선택됐는지 보여주는 prompt별 설명표와 bas
 ```powershell
 python scripts\generate_geometric_explanations.py --output_dir docs\report_assets
 python scripts\generate_router_comparison.py --output_dir docs\report_assets
+python scripts\generate_policy_preset_comparison.py --output_dir docs\report_assets
 ```
 
 라우터 decision latency 리포트는 아래 명령으로 재생성합니다.
@@ -280,6 +281,8 @@ python scripts\run_submission_checks.py --full --output docs\report_assets\submi
 - `docs/report_assets/geometric_explanations_summary.json`: 설명표 요약 JSON
 - `docs/report_assets/router_comparison.csv`: always cheap/mid/premium baseline과 geometric router 비교표
 - `docs/report_assets/router_comparison_summary.json`: baseline 비교 요약 JSON
+- `docs/report_assets/policy_preset_comparison.csv`: Fast/Balanced/Premium 운영 preset별 비용-품질 비교표
+- `docs/report_assets/policy_preset_comparison_summary.json`: policy preset 비교 요약 JSON
 - `docs/report_assets/latency_summary.csv`: tier별 로컬 라우팅 decision latency 요약
 - `docs/report_assets/latency_report.json`: latency 측정 JSON 리포트
 - `docs/report_assets/submission_readiness.json`: 제출 전 필수 파일과 URL placeholder 점검 결과

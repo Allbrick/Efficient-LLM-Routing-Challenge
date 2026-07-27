@@ -371,6 +371,32 @@ input {
   margin-top: 12px;
 }
 
+.feedback-tool {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.feedback-tool button {
+  border: 1px solid #d6d2ca;
+  border-radius: 9px;
+  background: #202124;
+  color: #fff;
+  padding: 8px 9px;
+  cursor: pointer;
+}
+
+.feedback-tool button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.feedback-status {
+  color: #55514b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .csv-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

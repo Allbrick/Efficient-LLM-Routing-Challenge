@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
 import os
 import sys
@@ -20,6 +21,7 @@ from routing_stack.context import resolve_context
 from routing_stack.input import normalize_input
 from routing_stack.training.prompt_label_csv import model_slot_to_score, read_prompt_label_csv_text, score_to_model_slot
 from routing_stack.training.train_prompt_label_router import train_from_csv
+from scripts.append_router_feedback import RouterFeedback, append_feedback
 
 
 def _read_label_rows(csv_text: str) -> list[dict[str, str]]:
@@ -152,6 +154,31 @@ class RouterServerApp:
         summary["validated_rows"] = len(rows)
         return summary
 
+    def record_feedback(self, payload: dict) -> dict:
+        prompt = str(payload.get("prompt", "") or "").strip()
+        if not prompt:
+            raise ValueError("prompt is required")
+        output_path = str(payload.get("output_path", "data/router_feedback/online_feedback.csv") or "")
+        feedback = RouterFeedback(
+            timestamp=str(payload.get("timestamp", "") or datetime.now(timezone.utc).isoformat()),
+            prompt=prompt,
+            budget_tier=str(payload.get("budget_tier", payload.get("tier", "balanced")) or "balanced"),
+            selected_model_id=str(payload.get("selected_model_id", payload.get("selected", "")) or ""),
+            selection_reason=str(payload.get("selection_reason", "") or ""),
+            action_type=str(payload.get("action_type", "") or ""),
+            was_wrong=str(payload.get("was_wrong", "true") or "true").lower(),
+            expected_model_id=str(payload.get("expected_model_id", payload.get("expected", "")) or ""),
+            user_note=str(payload.get("user_note", payload.get("note", "")) or ""),
+            history_model_id=str(payload.get("history_model_id", "") or ""),
+            history_output=str(payload.get("history_output", "") or ""),
+            evaluator_score=str(payload.get("evaluator_score", "") or ""),
+            evaluator_sufficient=str(payload.get("evaluator_sufficient", "") or ""),
+            escalated_to=str(payload.get("escalated_to", "") or ""),
+            final_selected_model_id=str(payload.get("final_selected_model_id", "") or ""),
+        )
+        path = append_feedback(output_path, feedback)
+        return {"status": "appended", "path": str(path)}
+
     def _route_only(self, router_name: str, prompt: str, tier: str):
         payload = {"prompt": prompt, "tier": tier, "router": router_name}
         normalized = normalize_input(payload)
@@ -199,7 +226,7 @@ def make_handler(app: RouterServerApp):
 
         def do_POST(self) -> None:
             path = urlparse(self.path).path
-            if path not in {"/api/route", "/api/evaluate_csv", "/api/train_csv"}:
+            if path not in {"/api/route", "/api/evaluate_csv", "/api/train_csv", "/api/feedback"}:
                 self._send_json(404, {"error": "not_found"})
                 return
             try:
@@ -209,8 +236,10 @@ def make_handler(app: RouterServerApp):
                     self._send_json(200, app.route_and_run(payload))
                 elif path == "/api/evaluate_csv":
                     self._send_json(200, app.evaluate_csv(payload))
-                else:
+                elif path == "/api/train_csv":
                     self._send_json(200, app.train_csv(payload))
+                else:
+                    self._send_json(200, app.record_feedback(payload))
             except Exception as exc:
                 self._send_json(400, {"error": type(exc).__name__, "message": str(exc)})
 

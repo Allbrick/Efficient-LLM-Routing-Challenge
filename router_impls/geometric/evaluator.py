@@ -4,7 +4,7 @@ import json
 import math
 import re
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Protocol
 
 import pandas as pd
 
@@ -26,6 +26,53 @@ class OutputSufficiency:
     suggested_action: str
 
 
+class RubricJudge(Protocol):
+    def judge(
+        self,
+        *,
+        prompt: str,
+        candidate_output: str,
+        rubric: dict[str, Any],
+        budget_tier: str = "",
+    ) -> OutputSufficiency:
+        ...
+
+
+class HeuristicRubricJudge:
+    """Optional no-network judge fallback for rubric-like outputs."""
+
+    def judge(
+        self,
+        *,
+        prompt: str,
+        candidate_output: str,
+        rubric: dict[str, Any],
+        budget_tier: str = "",
+    ) -> OutputSufficiency:
+        required = _as_list_static(rubric.get("required_concepts")) + _as_list_static(rubric.get("required_terms"))
+        forbidden = _as_list_static(rubric.get("forbidden_claims")) + _as_list_static(rubric.get("critical_failures"))
+        text = str(candidate_output or "").lower()
+        if forbidden and any(str(item).lower() in text for item in forbidden):
+            return OutputSufficiency(False, 0.0, ["judge_forbidden_claim"], "escalate")
+        if not required:
+            enough_length = len(str(candidate_output or "").split()) >= int(rubric.get("min_words", 12))
+            return OutputSufficiency(
+                sufficient=enough_length,
+                score=0.65 if enough_length else 0.25,
+                failure_reasons=[] if enough_length else ["judge_output_too_short"],
+                suggested_action="select_output" if enough_length else "escalate",
+            )
+        matched = sum(1 for item in required if str(item).lower() in text)
+        score = matched / max(len(required), 1)
+        threshold = float(rubric.get("pass_threshold", 0.7))
+        return OutputSufficiency(
+            sufficient=score >= threshold,
+            score=score,
+            failure_reasons=[] if score >= threshold else ["judge_missing_required_concepts"],
+            suggested_action="select_output" if score >= threshold else "escalate",
+        )
+
+
 class OutputEvaluator:
     """Deterministic evaluator driven by structured JSON specs.
 
@@ -35,14 +82,17 @@ class OutputEvaluator:
     evaluator.
     """
 
-    def __init__(self, fallback_threshold: float = 0.85):
+    def __init__(self, fallback_threshold: float = 0.85, rubric_judge: RubricJudge | None = None):
         self.fallback_threshold = fallback_threshold
+        self.rubric_judge = rubric_judge
 
     def assess_sufficiency(
         self,
         output: str,
         spec: dict | None,
         quality_score: float | None = None,
+        prompt: str = "",
+        budget_tier: str = "",
     ) -> OutputSufficiency:
         result = self.evaluate(output, spec, quality_score)
         if result.success:
@@ -54,6 +104,17 @@ class OutputEvaluator:
             )
 
         evaluation_type = str((spec or {}).get("evaluation_type", "")).strip()
+        raw_test_spec = "" if not spec or pd.isna(spec.get("test_spec", "")) else str(spec.get("test_spec", ""))
+        rubric = self._parse_test_spec(raw_test_spec)
+        if evaluation_type == "rubric_check" and self.rubric_judge is not None:
+            judged = self.rubric_judge.judge(
+                prompt=prompt,
+                candidate_output=str(output),
+                rubric=rubric,
+                budget_tier=budget_tier,
+            )
+            if judged.sufficient or judged.score > result.score:
+                return judged
         if evaluation_type in {"required_clarification", "refusal_check"}:
             suggested_action = "abstain"
         else:
@@ -349,11 +410,7 @@ class OutputEvaluator:
         return max(positions) - min(positions) <= window
 
     def _as_list(self, value: Any) -> list[Any]:
-        if value is None:
-            return []
-        if isinstance(value, list):
-            return value
-        return [value]
+        return _as_list_static(value)
 
     def _count_bullets(self, output: str) -> int:
         normalized = self._normalize_code(str(output))
@@ -462,5 +519,13 @@ def build_training_labels(
         min_models.append({"prompt_id": prompt_id, "expected_min_model": expected})
 
     return labels.merge(pd.DataFrame(min_models), on="prompt_id", how="left")
+
+
+def _as_list_static(value: Any) -> list[Any]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    return [value]
 
 

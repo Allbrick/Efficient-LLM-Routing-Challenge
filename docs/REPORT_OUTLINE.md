@@ -44,6 +44,7 @@ Prompt / Budget Tier / History / Model Metadata
 - `scripts/generate_report_assets.py`: 제출 보고서용 기본 수치 생성
 - `scripts/generate_geometric_explanations.py`: prompt별 geometric decision 근거 생성
 - `scripts/generate_router_comparison.py`: always cheap/mid/premium baseline 비교
+- `scripts/generate_policy_preset_comparison.py`: 운영 preset별 비용-품질 비교
 
 ## 4. 핵심 기술
 
@@ -109,6 +110,7 @@ python router_impls\geometric\scripts\train_geometric_router.py --policy_report 
 python scripts\generate_report_assets.py --output_dir docs\report_assets
 python scripts\generate_geometric_explanations.py --output_dir docs\report_assets
 python scripts\generate_router_comparison.py --output_dir docs\report_assets
+python scripts\generate_policy_preset_comparison.py --output_dir docs\report_assets
 python scripts\measure_router_latency.py --output_dir docs\report_assets --repeat 3
 python -m pytest routing_stack\app\tests routing_stack\adapters\tests routing_stack\input\tests routing_stack\training\tests router_impls\geometric\tests -q
 ```

@@ -31,6 +31,7 @@ def populate_required_files(root: Path) -> None:
         "error_summary.csv",
         "fast_allocation_summary.csv",
         "latency_detail.csv",
+        "policy_preset_comparison.csv",
     ):
         write(root / "docs" / "report_assets" / filename, "header\nrow\n")
     write(root / "docs" / "report_assets" / "tier_summary.csv", "h\n1\n2\n3\n")
@@ -39,6 +40,7 @@ def populate_required_files(root: Path) -> None:
     write(root / "docs" / "report_assets" / "latency_summary.csv", "h\n1\n2\n3\n")
     write(root / "docs" / "report_assets" / "report_assets_summary.json", json.dumps({"ok": True}))
     write(root / "docs" / "report_assets" / "latency_report.json", json.dumps({"ok": True}))
+    write(root / "docs" / "report_assets" / "policy_preset_comparison_summary.json", json.dumps({"ok": True}))
 
 
 def test_verify_submission_readiness_detects_required_url_placeholders(tmp_path):

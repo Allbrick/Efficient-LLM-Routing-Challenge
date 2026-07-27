@@ -121,3 +121,26 @@ def test_router_server_trains_prompt_label_csv(tmp_path):
     assert "learned_label" in app.routers
 
 
+def test_router_server_records_feedback(tmp_path):
+    ai = LocalAI(provider="mock")
+    app = RouterServerApp(routers={"fixed": FixedRouter()}, ai=ai, default_router="fixed")
+    output = tmp_path / "online_feedback.csv"
+
+    payload = app.record_feedback(
+        {
+            "prompt": "라우팅이 틀렸어",
+            "budget_tier": "fast",
+            "selected_model_id": "cheap",
+            "expected_model_id": "mid",
+            "selection_reason": "simple_prompt_prior",
+            "action_type": "call_model",
+            "note": "더 깊은 답 필요",
+            "output_path": str(output),
+        }
+    )
+
+    assert payload["status"] == "appended"
+    assert output.exists()
+    assert "라우팅이 틀렸어" in output.read_text(encoding="utf-8")
+
+

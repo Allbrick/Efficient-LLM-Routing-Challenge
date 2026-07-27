@@ -165,7 +165,7 @@
       "over_route": 1,
       "should_abstain": 0,
       "ok": 58,
-      "latency_ms_mean": 9.464426028338096,
+      "latency_ms_mean": 8.032208224056824,
       "selection_counts": "{\"mid\": 29, \"cheap\": 26, \"abstain\": 11, \"premium\": 7}"
     },
     {
@@ -180,7 +180,7 @@
       "over_route": 13,
       "should_abstain": 0,
       "ok": 59,
-      "latency_ms_mean": 9.596221912843621,
+      "latency_ms_mean": 7.831510974489765,
       "selection_counts": "{\"premium\": 33, \"cheap\": 26, \"abstain\": 11, \"mid\": 3}"
     },
     {
@@ -195,7 +195,7 @@
       "over_route": 13,
       "should_abstain": 0,
       "ok": 59,
-      "latency_ms_mean": 9.428836977785478,
+      "latency_ms_mean": 8.004120536697135,
       "selection_counts": "{\"premium\": 33, \"cheap\": 26, \"abstain\": 11, \"mid\": 3}"
     },
     {
@@ -210,7 +210,7 @@
       "over_route": 2,
       "should_abstain": 0,
       "ok": 60,
-      "latency_ms_mean": 31.659910964065116,
+      "latency_ms_mean": 26.49980822055001,
       "selection_counts": "{\"mid\": 27, \"cheap\": 25, \"abstain\": 11, \"premium\": 10}"
     },
     {
@@ -225,7 +225,7 @@
       "over_route": 6,
       "should_abstain": 0,
       "ok": 65,
-      "latency_ms_mean": 31.535072604589775,
+      "latency_ms_mean": 26.61372739694094,
       "selection_counts": "{\"cheap\": 24, \"premium\": 23, \"mid\": 15, \"abstain\": 11}"
     },
     {
@@ -240,7 +240,7 @@
       "over_route": 12,
       "should_abstain": 0,
       "ok": 59,
-      "latency_ms_mean": 31.81699725595137,
+      "latency_ms_mean": 26.294853431427825,
       "selection_counts": "{\"premium\": 31, \"cheap\": 24, \"abstain\": 11, \"mid\": 7}"
     }
   ]

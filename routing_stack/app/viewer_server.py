@@ -60,7 +60,7 @@ def make_handler(viewer_dir: Path, router_server_url: str):
 
         def do_POST(self) -> None:
             path = urlparse(self.path).path
-            if path not in {"/api/route", "/api/evaluate_csv", "/api/train_csv"}:
+            if path not in {"/api/route", "/api/evaluate_csv", "/api/train_csv", "/api/feedback"}:
                 self._send_json(404, {"error": "not_found"})
                 return
             try:

@@ -1,0 +1,191 @@
+{
+  "files": [
+    "policy_preset_comparison.csv"
+  ],
+  "presets": [
+    "balanced_mid_first",
+    "fast_conservative",
+    "premium_quality_first"
+  ],
+  "rows": [
+    {
+      "preset": "fast_conservative",
+      "tier": "fast",
+      "count": 73,
+      "budget_limit": 0.03,
+      "mean_quality": 0.8638356164383562,
+      "mean_cost": 0.02821917808219179,
+      "mean_excess_cost": 0.009863013698630138,
+      "cost_over_limit": 36,
+      "under_route": 21,
+      "over_route": 1,
+      "should_abstain": 0,
+      "ok": 51,
+      "selection_counts": {
+        "mid": 36,
+        "cheap": 26,
+        "abstain": 11
+      }
+    },
+    {
+      "preset": "fast_conservative",
+      "tier": "balanced",
+      "count": 73,
+      "budget_limit": 0.08,
+      "mean_quality": 0.9468493150684932,
+      "mean_cost": 0.09397260273972603,
+      "mean_excess_cost": 0.05260273972602741,
+      "cost_over_limit": 32,
+      "under_route": 2,
+      "over_route": 13,
+      "should_abstain": 0,
+      "ok": 58,
+      "selection_counts": {
+        "premium": 32,
+        "cheap": 26,
+        "abstain": 11,
+        "mid": 4
+      }
+    },
+    {
+      "preset": "fast_conservative",
+      "tier": "premium",
+      "count": 73,
+      "budget_limit": 0.2,
+      "mean_quality": 0.9383561643835616,
+      "mean_cost": 0.10123287671232878,
+      "mean_excess_cost": 0.0,
+      "cost_over_limit": 0,
+      "under_route": 1,
+      "over_route": 16,
+      "should_abstain": 0,
+      "ok": 56,
+      "selection_counts": {
+        "premium": 35,
+        "cheap": 24,
+        "abstain": 11,
+        "mid": 3
+      }
+    },
+    {
+      "preset": "balanced_mid_first",
+      "tier": "fast",
+      "count": 73,
+      "budget_limit": 0.03,
+      "mean_quality": 0.9056164383561642,
+      "mean_cost": 0.0426027397260274,
+      "mean_excess_cost": 0.024246575342465753,
+      "cost_over_limit": 36,
+      "under_route": 14,
+      "over_route": 1,
+      "should_abstain": 0,
+      "ok": 58,
+      "selection_counts": {
+        "mid": 29,
+        "cheap": 26,
+        "abstain": 11,
+        "premium": 7
+      }
+    },
+    {
+      "preset": "balanced_mid_first",
+      "tier": "balanced",
+      "count": 73,
+      "budget_limit": 0.08,
+      "mean_quality": 0.9468493150684932,
+      "mean_cost": 0.093013698630137,
+      "mean_excess_cost": 0.05095890410958905,
+      "cost_over_limit": 31,
+      "under_route": 2,
+      "over_route": 14,
+      "should_abstain": 0,
+      "ok": 57,
+      "selection_counts": {
+        "premium": 31,
+        "cheap": 24,
+        "abstain": 11,
+        "mid": 7
+      }
+    },
+    {
+      "preset": "balanced_mid_first",
+      "tier": "premium",
+      "count": 73,
+      "budget_limit": 0.2,
+      "mean_quality": 0.952054794520548,
+      "mean_cost": 0.09602739726027397,
+      "mean_excess_cost": 0.0,
+      "cost_over_limit": 0,
+      "under_route": 1,
+      "over_route": 13,
+      "should_abstain": 0,
+      "ok": 59,
+      "selection_counts": {
+        "premium": 33,
+        "cheap": 26,
+        "abstain": 11,
+        "mid": 3
+      }
+    },
+    {
+      "preset": "premium_quality_first",
+      "tier": "fast",
+      "count": 73,
+      "budget_limit": 0.03,
+      "mean_quality": 0.9117808219178083,
+      "mean_cost": 0.04465753424657535,
+      "mean_excess_cost": 0.0263013698630137,
+      "cost_over_limit": 36,
+      "under_route": 13,
+      "over_route": 1,
+      "should_abstain": 0,
+      "ok": 59,
+      "selection_counts": {
+        "mid": 28,
+        "cheap": 26,
+        "abstain": 11,
+        "premium": 8
+      }
+    },
+    {
+      "preset": "premium_quality_first",
+      "tier": "balanced",
+      "count": 73,
+      "budget_limit": 0.08,
+      "mean_quality": 0.9516438356164384,
+      "mean_cost": 0.09712328767123289,
+      "mean_excess_cost": 0.05424657534246576,
+      "cost_over_limit": 33,
+      "under_route": 1,
+      "over_route": 15,
+      "should_abstain": 0,
+      "ok": 57,
+      "selection_counts": {
+        "premium": 33,
+        "cheap": 24,
+        "abstain": 11,
+        "mid": 5
+      }
+    },
+    {
+      "preset": "premium_quality_first",
+      "tier": "premium",
+      "count": 73,
+      "budget_limit": 0.2,
+      "mean_quality": 0.9383561643835616,
+      "mean_cost": 0.10123287671232878,
+      "mean_excess_cost": 0.0,
+      "cost_over_limit": 0,
+      "under_route": 1,
+      "over_route": 16,
+      "should_abstain": 0,
+      "ok": 56,
+      "selection_counts": {
+        "premium": 35,
+        "cheap": 24,
+        "abstain": 11,
+        "mid": 3
+      }
+    }
+  ]
+}

@@ -168,6 +168,25 @@ class GeometricRouter:
                 features = all_features
             envelopes[model_id] = fit_envelope(model_id, features, quantile=radius_quantile)
 
+        training_min_distances = []
+        for feature_vector in prompt_features.values():
+            distances = []
+            for model_id in MODEL_ORDER:
+                envelope = envelopes[model_id]
+                distances.append(envelope.distance(feature_vector) / max(envelope.radius, 1e-9))
+            training_min_distances.append(min(distances))
+        if training_min_distances:
+            training_distance_array = np.array(training_min_distances, dtype=np.float64)
+            ood_reference = {
+                "min_normalized_distance_p50": round(float(np.percentile(training_distance_array, 50)), 6),
+                "min_normalized_distance_p90": round(float(np.percentile(training_distance_array, 90)), 6),
+                "min_normalized_distance_p95": round(float(np.percentile(training_distance_array, 95)), 6),
+                "min_normalized_distance_p99": round(float(np.percentile(training_distance_array, 99)), 6),
+                "score_high_threshold": 0.90,
+            }
+        else:
+            ood_reference = {"score_high_threshold": 0.90}
+
         model_costs = (
             train_df.groupby("model_id")["cost"].mean().astype(float).to_dict()
         )
@@ -182,6 +201,7 @@ class GeometricRouter:
             "semantic_features": bool(semantic_index is not None),
             "n_prompts": int(train_df["prompt_id"].nunique()),
             "n_rows": int(len(train_df)),
+            "ood_reference": ood_reference,
         }
         return cls(
             envelopes=envelopes,
@@ -304,10 +324,13 @@ class GeometricRouter:
             evaluation_type=evaluation_type,
             explicit_task_context=explicit_task_context,
             candidates=candidates,
+            ood_score=self._ood_score(candidates),
             simple_prompt_prior=simple_prompt_prior,
             low_complexity_prior=low_complexity_prior,
             repetition_simple_prior=repetition_simple_prior,
         )
+        ood_score = self._ood_score(candidates)
+        uncertainty_score = self._uncertainty_score(candidates, ood_score)
 
         selected = None
         reason = ""
@@ -380,6 +403,9 @@ class GeometricRouter:
         evidence["ambiguous_lane"] = 1.0 if pre_route.ambiguous else 0.0
         evidence["high_stakes_domain"] = 1.0 if pre_route.high_stakes_domain else 0.0
         evidence["negative_easy_signal"] = 1.0 if pre_route.negative_easy_signal else 0.0
+        evidence["ood_score"] = round(ood_score, 6)
+        evidence["uncertainty_score"] = round(uncertainty_score, 6)
+        evidence["ood_high"] = 1.0 if ood_score >= 0.90 else 0.0
         evidence["request_model_costs"] = request_model_costs
         evidence["explicit_task_context"] = 1.0 if explicit_task_context else 0.0
         if self.semantic_index is not None:
@@ -651,6 +677,7 @@ class GeometricRouter:
         evaluation_type: str,
         explicit_task_context: bool,
         candidates: list[dict],
+        ood_score: float,
         simple_prompt_prior: bool,
         low_complexity_prior: bool,
         repetition_simple_prior: bool,
@@ -688,6 +715,7 @@ class GeometricRouter:
             and not negative_easy
             and not bool(getattr(text_features, "code_like", False))
             and not hard_task
+            and ood_score < 0.90
             and (cheap_pass >= 0.55 or cheap_distance <= 1.50 or cheap_evidence)
         )
 
@@ -734,6 +762,26 @@ class GeometricRouter:
             high_stakes_domain=high_stakes,
             negative_easy_signal=negative_easy,
         )
+
+    def _ood_score(self, candidates: list[dict]) -> float:
+        model_candidates = [item for item in candidates if item.get("model_id") in MODEL_ORDER]
+        if not model_candidates:
+            return 1.0
+        min_distance = min(float(item.get("normalized_distance", 9.0)) for item in model_candidates)
+        max_pass = max(float(item.get("pass_probability", 0.0)) for item in model_candidates)
+        distance_component = min(max((min_distance - 1.0) / 3.0, 0.0), 1.0)
+        pass_component = min(max((0.65 - max_pass) / 0.65, 0.0), 1.0)
+        return 0.65 * distance_component + 0.35 * pass_component
+
+    def _uncertainty_score(self, candidates: list[dict], ood_score: float) -> float:
+        model_candidates = [item for item in candidates if item.get("model_id") in MODEL_ORDER]
+        if len(model_candidates) < 2:
+            return ood_score
+        passes = sorted((float(item.get("pass_probability", 0.0)) for item in model_candidates), reverse=True)
+        margin_component = 1.0 - min(max(passes[0] - passes[1], 0.0), 1.0)
+        feasible_count = sum(1 for item in model_candidates if bool(item.get("feasible", False)))
+        feasible_component = 1.0 if feasible_count == 0 else 0.35 if feasible_count > 1 else 0.0
+        return min(1.0, 0.55 * ood_score + 0.35 * margin_component + 0.10 * feasible_component)
 
     def _feature_vector(self, prompt: str, evidence_obj: object) -> np.ndarray:
         base = evidence_obj.as_vector()

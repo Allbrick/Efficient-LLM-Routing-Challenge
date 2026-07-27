@@ -32,6 +32,8 @@ REQUIRED_REPORT_ASSETS = (
     "latency_summary.csv",
     "latency_detail.csv",
     "latency_report.json",
+    "policy_preset_comparison.csv",
+    "policy_preset_comparison_summary.json",
 )
 
 PLACEHOLDER_PATTERNS = {

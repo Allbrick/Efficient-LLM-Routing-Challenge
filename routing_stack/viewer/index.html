@@ -125,6 +125,27 @@
         </details>
 
         <details class="inspector-panel">
+          <summary>라우팅 피드백</summary>
+          <div class="feedback-tool">
+            <label>
+              기대 모델
+              <select id="feedbackExpected">
+                <option value="cheap">cheap</option>
+                <option value="mid" selected>mid</option>
+                <option value="premium">premium</option>
+                <option value="abstain">abstain</option>
+              </select>
+            </label>
+            <label>
+              메모
+              <input id="feedbackNote" placeholder="왜 라우팅이 틀렸는지 기록" />
+            </label>
+            <button id="sendFeedback" type="button">라우팅 틀림 기록</button>
+            <div id="feedbackStatus" class="feedback-status empty">아직 기록할 라우팅 결과가 없습니다.</div>
+          </div>
+        </details>
+
+        <details class="inspector-panel">
           <summary>CSV/TXT 평가·학습</summary>
           <div class="csv-tool">
             <label>

@@ -9,6 +9,7 @@ def test_build_check_commands_default_skips_pytest_and_strict():
     commands = build_check_commands(full=False, strict_readiness=False)
 
     names = [item.name for item in commands]
+    training_command = commands[0].command
     readiness = commands[-1].command
     assert names == [
         "train_geometric_router",
@@ -16,8 +17,10 @@ def test_build_check_commands_default_skips_pytest_and_strict():
         "measure_router_latency",
         "generate_geometric_explanations",
         "generate_router_comparison",
+        "generate_policy_preset_comparison",
         "verify_submission_readiness",
     ]
+    assert "--include_feedback" in training_command
     assert readiness[0] == sys.executable
     assert "--strict" not in readiness
 

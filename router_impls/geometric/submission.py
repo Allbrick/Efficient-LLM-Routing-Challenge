@@ -123,6 +123,7 @@ class RouterSubmission:
                     str(output),
                     spec,
                     item.get("quality_score") if "quality_score" in item else item.get("success_score"),
+                    prompt="",
                 )
                 evaluated_success = bool(sufficiency.sufficient)
                 evaluated_score = float(sufficiency.score)
@@ -213,6 +214,7 @@ class RouterSubmission:
                 str(output),
                 spec,
                 item.get("quality_score") if "quality_score" in item else item.get("success_score"),
+                prompt="",
             )
             if sufficiency.sufficient:
                 return False

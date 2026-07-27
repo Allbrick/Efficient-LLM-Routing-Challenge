@@ -57,6 +57,7 @@ def build_check_commands(full: bool = False, strict_readiness: bool = False) -> 
             [
                 sys.executable,
                 "router_impls/geometric/scripts/train_geometric_router.py",
+                "--include_feedback",
                 "--policy_report",
                 "artifacts/geometric_policy_report.json",
             ],
@@ -76,6 +77,10 @@ def build_check_commands(full: bool = False, strict_readiness: bool = False) -> 
         CheckCommand(
             "generate_router_comparison",
             [sys.executable, "scripts/generate_router_comparison.py", "--output_dir", "docs/report_assets"],
+        ),
+        CheckCommand(
+            "generate_policy_preset_comparison",
+            [sys.executable, "scripts/generate_policy_preset_comparison.py", "--output_dir", "docs/report_assets"],
         ),
         CheckCommand("verify_submission_readiness", readiness_command),
     ]

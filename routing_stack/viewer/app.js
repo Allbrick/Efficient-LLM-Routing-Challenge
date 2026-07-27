@@ -13,10 +13,15 @@ const evaluateCsv = document.querySelector("#evaluateCsv");
 const trainCsv = document.querySelector("#trainCsv");
 const csvStatus = document.querySelector("#csvStatus");
 const csvResult = document.querySelector("#csvResult");
+const feedbackExpected = document.querySelector("#feedbackExpected");
+const feedbackNote = document.querySelector("#feedbackNote");
+const sendFeedback = document.querySelector("#sendFeedback");
+const feedbackStatus = document.querySelector("#feedbackStatus");
 const submitButton = form.querySelector('button[type="submit"]');
 let isRouting = false;
 let conversation = [];
 let csvText = "";
+let lastRoutePayload = null;
 const MAX_CONVERSATION_MESSAGES = 10;
 
 const fmt = (value, digits = 3) => {
@@ -113,6 +118,7 @@ function renderSummary(router, ai) {
 }
 
 function renderDecision(payload, assistantMessage) {
+  lastRoutePayload = payload;
   const router = payload.router;
   const ai = payload.ai;
   const diagnostics = router.diagnostics || {};
@@ -171,6 +177,47 @@ function renderDecision(payload, assistantMessage) {
 
   updateMessage(assistantMessage, ai.output || "", `${router.router_name} -> ${router.selected_model_id}`);
   rememberTurn(payload.input?.prompt || "", ai.output || "");
+}
+
+async function submitRoutingFeedback() {
+  if (!lastRoutePayload) {
+    feedbackStatus.textContent = "기록할 라우팅 결과가 없습니다.";
+    feedbackStatus.classList.add("empty");
+    return;
+  }
+  const router = lastRoutePayload.router || {};
+  const input = lastRoutePayload.input || {};
+  const payload = {
+    prompt: input.prompt || input.normalized?.text || "",
+    budget_tier: input.tier || document.querySelector("#tier").value,
+    selected_model_id: router.selected_model_id || "",
+    selection_reason: router.selection_reason || "",
+    action_type: router.action_type || "",
+    was_wrong: "true",
+    expected_model_id: feedbackExpected.value,
+    user_note: feedbackNote.value,
+    final_selected_model_id: router.selected_model_id || "",
+  };
+  try {
+    sendFeedback.disabled = true;
+    const response = await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || data.error || "feedback failed");
+    }
+    feedbackStatus.textContent = `기록 완료: ${data.path}`;
+    feedbackStatus.classList.remove("empty");
+    feedbackNote.value = "";
+  } catch (error) {
+    feedbackStatus.textContent = `기록 실패: ${error.message}`;
+    feedbackStatus.classList.remove("empty");
+  } finally {
+    sendFeedback.disabled = false;
+  }
 }
 
 function renderRoutingContext(context) {
@@ -409,5 +456,6 @@ csvFile.addEventListener("change", () => {
 });
 evaluateCsv.addEventListener("click", evaluateSelectedCsv);
 trainCsv.addEventListener("click", trainSelectedCsv);
+sendFeedback.addEventListener("click", submitRoutingFeedback);
 setCsvBusy(false);
 loadConfig();
