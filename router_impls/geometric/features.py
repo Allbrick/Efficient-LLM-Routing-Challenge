@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from routing_stack.input.token_estimator import estimate_prompt_tokens
+from routing_stack.input.text_features import analyze_text_prompt
 from router_impls.geometric.task_classifier import hashed_char_ngrams
 
 
@@ -117,32 +118,34 @@ class EvidenceExtractor:
         evaluation_type: str = "",
     ) -> PromptEvidence:
         text = str(prompt)
-        lowered = text.lower()
+        text_features = analyze_text_prompt(text)
+        semantic_text = text_features.compressed_prompt or text
+        lowered = semantic_text.lower()
         code_like = self._has_hint(lowered, TASK_HINTS["code"])
         eval_type = str(evaluation_type or "unknown")
-        exact_answer = self._exact_answer(text, eval_type)
-        length_norm = min(len(text) / 500.0, 1.0)
-        line_norm = min((text.count("\n") + 1) / 12.0, 1.0)
-        whitespace_tokens = len(text.split())
-        token_estimate = estimate_prompt_tokens(text)
+        exact_answer = self._exact_answer(semantic_text, eval_type)
+        length_norm = min(len(semantic_text) / 500.0, 1.0)
+        line_norm = min((semantic_text.count("\n") + 1) / 12.0, 1.0)
+        whitespace_tokens = len(semantic_text.split())
+        token_estimate = estimate_prompt_tokens(semantic_text)
 
-        inferred_difficulty = self._infer_difficulty(text, lowered, task_type, eval_type)
-        inferred_risk = self._infer_risk(text, lowered, task_type)
+        inferred_difficulty = self._infer_difficulty(semantic_text, lowered, task_type, eval_type)
+        inferred_risk = self._infer_risk(semantic_text, lowered, task_type)
         difficulty_score = DIFFICULTY_SCORE.get(str(difficulty).lower(), inferred_difficulty)
         risk_score = RISK_SCORE.get(str(risk_level).lower(), inferred_risk)
 
         return PromptEvidence(
             difficulty_score=float(difficulty_score),
             risk_score=float(risk_score),
-            condition_count=float(self._condition_count(text, lowered)),
-            missing_context=float(self._missing_context(text)),
+            condition_count=float(self._condition_count(semantic_text, lowered)),
+            missing_context=float(self._missing_context(semantic_text)),
             exact_answer=float(exact_answer),
             code_like=float(code_like),
             length_norm=float(length_norm),
             line_norm=float(line_norm),
             eval_type_id=float(self._eval_type_id(eval_type)),
             char_ngram_vector=tuple(
-                float(value) for value in hashed_char_ngrams(text, n_features=CHAR_NGRAM_FEATURES)
+                float(value) for value in hashed_char_ngrams(semantic_text, n_features=CHAR_NGRAM_FEATURES)
             ),
             token_count_norm=float(min(whitespace_tokens / 120.0, 1.0)),
             estimated_input_tokens_norm=float(min(token_estimate.estimated_input_tokens / 800.0, 1.0)),
@@ -170,6 +173,7 @@ class EvidenceExtractor:
         evaluation_type: str = "",
     ) -> dict[str, float]:
         evidence = self.transform(prompt, task_type, difficulty, risk_level, evaluation_type)
+        text_features = analyze_text_prompt(prompt)
         return {
             "difficulty_score": evidence.difficulty_score,
             "risk_score": evidence.risk_score,
@@ -188,6 +192,9 @@ class EvidenceExtractor:
             "cost_estimate_norm": evidence.cost_estimate_norm,
             "code_token_pressure": evidence.code_token_pressure,
             "json_or_table_pressure": evidence.json_or_table_pressure,
+            "repetition_ratio": text_features.repetition_ratio,
+            "unique_char_ratio": text_features.unique_char_ratio,
+            "compressed_length_norm": text_features.compressed_length_norm,
         }
 
     def _infer_difficulty(self, text: str, lowered: str, task_type: str, evaluation_type: str) -> float:

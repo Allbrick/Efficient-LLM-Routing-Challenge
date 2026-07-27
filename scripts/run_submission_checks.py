@@ -69,6 +69,14 @@ def build_check_commands(full: bool = False, strict_readiness: bool = False) -> 
             "measure_router_latency",
             [sys.executable, "scripts/measure_router_latency.py", "--output_dir", "docs/report_assets", "--repeat", "3"],
         ),
+        CheckCommand(
+            "generate_geometric_explanations",
+            [sys.executable, "scripts/generate_geometric_explanations.py", "--output_dir", "docs/report_assets"],
+        ),
+        CheckCommand(
+            "generate_router_comparison",
+            [sys.executable, "scripts/generate_router_comparison.py", "--output_dir", "docs/report_assets"],
+        ),
         CheckCommand("verify_submission_readiness", readiness_command),
     ]
     if full:

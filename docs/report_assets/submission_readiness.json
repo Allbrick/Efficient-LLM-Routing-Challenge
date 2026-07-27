@@ -1,7 +1,7 @@
 {
   "status": "blocked",
   "blocker_count": 3,
-  "warning_count": 1,
+  "warning_count": 0,
   "blockers": [
     {
       "type": "placeholder",
@@ -15,15 +15,9 @@
     },
     {
       "type": "placeholder",
-      "path": "docs/AI_MODEL_USAGE.md",
+      "path": "docs/SUBMISSION.md",
       "message": "github_url placeholder remains"
     }
   ],
-  "warnings": [
-    {
-      "type": "placeholder",
-      "path": "docs/SUBMISSION.md",
-      "message": "contest_filename placeholder remains"
-    }
-  ]
+  "warnings": []
 }

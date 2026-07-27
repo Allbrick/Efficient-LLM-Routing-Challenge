@@ -1,4 +1,5 @@
 from routing_stack.input import analyze_text_prompt, estimate_prompt_tokens, estimate_text_tokens
+from routing_stack.input.text_features import compress_repeated_spans
 
 
 def test_text_feature_analyzer_marks_short_directive_as_simple():
@@ -62,3 +63,15 @@ def test_task_complexity_signals_generalize_to_unseen_domain_names():
     assert conceptual.task_complexity_hint >= 0.55
     assert proof_like.advanced_reasoning_task is True
     assert proof_like.task_complexity_hint >= 0.85
+
+
+def test_repeated_prompt_is_compressed_without_changing_semantic_unit():
+    unit = "원피스 세계관에 대해 철학적 물음을 던져줘"
+    repeated = unit * 15
+    compressed = compress_repeated_spans(repeated)
+    features = analyze_text_prompt(repeated)
+
+    assert compressed == unit
+    assert features.compressed_prompt == unit
+    assert features.repetition_ratio > 0.8
+    assert features.compressed_prompt_length == len(unit)

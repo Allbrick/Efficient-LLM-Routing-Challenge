@@ -243,6 +243,13 @@ overall_score = 0.5 * fast + 0.3 * balanced + 0.2 * premium
 python scripts\generate_report_assets.py --output_dir docs\report_assets
 ```
 
+geometric routing이 왜 선택됐는지 보여주는 prompt별 설명표와 baseline 비교표는 아래 명령으로 재생성합니다.
+
+```powershell
+python scripts\generate_geometric_explanations.py --output_dir docs\report_assets
+python scripts\generate_router_comparison.py --output_dir docs\report_assets
+```
+
 라우터 decision latency 리포트는 아래 명령으로 재생성합니다.
 
 ```powershell
@@ -255,10 +262,10 @@ python scripts\measure_router_latency.py --output_dir docs\report_assets --repea
 python scripts\verify_submission_readiness.py --output docs\report_assets\submission_readiness.json
 ```
 
-학습, 보고서 자산 생성, latency 측정, readiness 확인을 한 번에 실행하려면 다음 명령을 사용합니다.
+학습, 보고서 자산 생성, geometric 설명표, baseline 비교표, latency 측정, readiness 확인을 한 번에 실행하려면 다음 명령을 사용합니다.
 
 ```powershell
-python scripts\run_submission_checks.py --output docs\report_assets\submission_check_run.json
+python scripts\run_submission_checks.py --full --output docs\report_assets\submission_check_run.json
 ```
 
 주요 산출물:
@@ -269,10 +276,24 @@ python scripts\run_submission_checks.py --output docs\report_assets\submission_c
 - `docs/report_assets/error_summary.csv`: under-route, over-route, should_abstain 분포
 - `docs/report_assets/demo_prompts.csv`: 시연 영상용 대표 프롬프트
 - `docs/report_assets/report_assets_summary.json`: 위 내용을 묶은 보고서용 JSON
+- `docs/report_assets/geometric_explanations.csv`: prompt별 geometric distance, pass probability, repetition feature 설명표
+- `docs/report_assets/geometric_explanations_summary.json`: 설명표 요약 JSON
+- `docs/report_assets/router_comparison.csv`: always cheap/mid/premium baseline과 geometric router 비교표
+- `docs/report_assets/router_comparison_summary.json`: baseline 비교 요약 JSON
 - `docs/report_assets/latency_summary.csv`: tier별 로컬 라우팅 decision latency 요약
 - `docs/report_assets/latency_report.json`: latency 측정 JSON 리포트
 - `docs/report_assets/submission_readiness.json`: 제출 전 필수 파일과 URL placeholder 점검 결과
 - `docs/report_assets/submission_check_run.json`: 제출 전 재현 명령 실행 결과
+
+현재 public evaluation 기준 핵심 수치는 다음과 같습니다.
+
+```text
+Overall weighted score: 0.532
+Fast: mean_quality 0.885, mean_cost 0.046, under_route 12/73, weighted_score 0.136
+Balanced: mean_quality 0.926, mean_cost 0.097, under_route 0/73, weighted_score 0.217
+Premium: mean_quality 0.926, mean_cost 0.099, under_route 0/73, weighted_score 0.179
+Local decision latency: Fast 7.94ms, Balanced 7.90ms, Premium 7.95ms
+```
 
 ## 라우터 품질 예측 비교
 

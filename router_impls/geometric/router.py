@@ -17,6 +17,7 @@ from router_impls.geometric.risk_model import SufficiencyRiskModel, fit_risk_mod
 from router_impls.geometric.synthetic_data import build_numeric_count_data
 from router_impls.geometric.task_classifier import TaskClassifier
 from routing_stack.input.semantic_features import HashPromptEncoder, SemanticFeatureIndex
+from routing_stack.input.text_features import analyze_text_prompt
 
 
 BUDGET_LIMITS = {
@@ -224,14 +225,27 @@ class GeometricRouter:
             evaluation_type = str(inferred["evaluation_type"])
 
         evidence_obj = self.extractor.transform(prompt, task_type, difficulty, risk_level, evaluation_type)
+        text_features = analyze_text_prompt(prompt)
+        semantic_prompt = text_features.compressed_prompt or prompt
         x = self._feature_vector(prompt, evidence_obj)
         tier_radius = self.radius_multipliers.get(tier, DEFAULT_RADIUS_MULTIPLIERS[tier])
         active_model_costs = {**self.model_costs, **request_model_costs}
         pass_probabilities = self.pass_model.predict_all(x) if self.pass_model is not None else {}
         sufficiency_probabilities = self.risk_model.predict_all(x, prompt) if self.risk_model is not None else {}
         candidates = []
-        simple_prompt_prior = self._has_simple_prompt_prior(prompt, evidence_obj, evaluation_type)
-        low_complexity_prior = self._has_low_complexity_prior(prompt, evidence_obj, evaluation_type, explicit_task_context)
+        simple_prompt_prior = self._has_simple_prompt_prior(semantic_prompt, evidence_obj, evaluation_type)
+        low_complexity_prior = self._has_low_complexity_prior(
+            semantic_prompt,
+            evidence_obj,
+            evaluation_type,
+            explicit_task_context,
+        )
+        repetition_simple_prior = self._has_repetition_simple_prior(
+            text_features,
+            evidence_obj,
+            evaluation_type,
+            explicit_task_context,
+        )
 
         abstain_probability = float(sufficiency_probabilities.get("abstain", 0.0))
         if evaluation_type in {"required_clarification", "refusal_check"}:
@@ -278,6 +292,9 @@ class GeometricRouter:
         if self._has_exact_answer_prior(evidence_obj, evaluation_type):
             selected = "cheap"
             reason = "exact_answer_prior"
+        elif repetition_simple_prior:
+            selected = "cheap"
+            reason = "repetition_normalized_prior"
         elif simple_prompt_prior:
             selected = "cheap"
             reason = "simple_prompt_prior"
@@ -328,6 +345,7 @@ class GeometricRouter:
         evidence = self.extractor.explain(prompt, task_type, difficulty, risk_level, evaluation_type)
         evidence["simple_prompt_prior"] = 1.0 if simple_prompt_prior else 0.0
         evidence["low_complexity_prior"] = 1.0 if low_complexity_prior else 0.0
+        evidence["repetition_normalized_prior"] = 1.0 if repetition_simple_prior else 0.0
         evidence["request_model_costs"] = request_model_costs
         evidence["explicit_task_context"] = 1.0 if explicit_task_context else 0.0
         if self.semantic_index is not None:
@@ -478,6 +496,26 @@ class GeometricRouter:
             and float(getattr(evidence, "risk_score", 1.0)) <= 0.25
             and float(getattr(evidence, "code_like", 0.0)) == 0.0
             and float(getattr(evidence, "missing_context", 0.0)) == 0.0
+        )
+
+    def _has_repetition_simple_prior(
+        self,
+        text_features: object,
+        evidence: object,
+        evaluation_type: str,
+        explicit_task_context: bool,
+    ) -> bool:
+        if float(getattr(text_features, "repetition_ratio", 0.0)) < 0.45:
+            return False
+        compressed = str(getattr(text_features, "compressed_prompt", "") or "").strip()
+        if not compressed or len(compressed) > 80:
+            return False
+        if explicit_task_context and evaluation_type in {"unit_test", "exact_json", "rubric_check", "required_clarification", "refusal_check"}:
+            return False
+        return (
+            float(getattr(evidence, "condition_count", 0.0)) == 0.0
+            and float(getattr(evidence, "missing_context", 0.0)) == 0.0
+            and float(getattr(evidence, "code_like", 0.0)) == 0.0
         )
 
     def _has_low_complexity_prior(

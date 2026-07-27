@@ -237,6 +237,34 @@ def test_loaded_geometric_artifact_keeps_short_directive_on_cheap():
     assert decision.selection_reason == "simple_prompt_prior"
 
 
+def test_repeated_simple_prompt_stays_on_cheap():
+    router = make_router()
+    unit = "원피스 세계관에 대해 철학적 물음을 던져줘"
+    repeated = unit * 15
+
+    short_decision = router.route(unit, budget_tier="fast")
+    repeated_decision = router.route(repeated, budget_tier="fast")
+
+    assert short_decision.selected_model_id == "cheap"
+    assert repeated_decision.selected_model_id == "cheap"
+    assert repeated_decision.selection_reason == "repetition_normalized_prior"
+    assert repeated_decision.evidence["repetition_ratio"] > 0.8
+    assert repeated_decision.evidence["compressed_length_norm"] < repeated_decision.evidence["length_norm"] or repeated_decision.evidence["compressed_length_norm"] < 0.2
+
+
+def test_long_non_repetitive_architecture_prompt_still_escalates():
+    router = make_router()
+    prompt = (
+        "멀티테넌트 결제 시스템을 설계하고 웹훅 멱등성, 감사 로그, 장애 재처리, "
+        "보안 통제, 데이터 격리, 장애 복구, 월말 정산, 권한 관리, 모니터링까지 포함해줘."
+    )
+
+    decision = router.route(prompt, budget_tier="fast")
+
+    assert decision.selected_model_id in {"mid", "premium"}
+    assert decision.evidence["repetition_ratio"] < 0.2
+
+
 def test_geometric_router_escalates_hard_architecture_prompt():
     train_df, specs_df = load_data()
     router = make_router()

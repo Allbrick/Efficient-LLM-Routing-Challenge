@@ -14,6 +14,8 @@ def test_build_check_commands_default_skips_pytest_and_strict():
         "train_geometric_router",
         "generate_report_assets",
         "measure_router_latency",
+        "generate_geometric_explanations",
+        "generate_router_comparison",
         "verify_submission_readiness",
     ]
     assert readiness[0] == sys.executable

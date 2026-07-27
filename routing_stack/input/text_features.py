@@ -67,6 +67,11 @@ class TextFeatures:
     missing_context: bool
     simple_directive: bool
     simple_conversion: bool
+    compressed_prompt: str
+    compressed_prompt_length: int
+    repetition_ratio: float
+    unique_char_ratio: float
+    compressed_length_norm: float
     technical_explanation: bool
     comparison_task: bool
     design_task: bool
@@ -81,6 +86,7 @@ def analyze_text_prompt(prompt: str) -> TextFeatures:
     """라우터들이 공통으로 참조할 수 있는 텍스트 입력 특징을 추출합니다."""
     text = str(prompt)
     stripped = text.strip()
+    compressed = compress_repeated_spans(stripped)
     length = len(stripped)
     whitespace_tokens = len(stripped.split())
     line_count = max(1, stripped.count("\n") + 1) if stripped else 0
@@ -145,12 +151,53 @@ def analyze_text_prompt(prompt: str) -> TextFeatures:
         missing_context=missing_context,
         simple_directive=simple_directive,
         simple_conversion=simple_conversion,
+        compressed_prompt=compressed,
+        compressed_prompt_length=len(compressed),
+        repetition_ratio=_repetition_ratio(stripped, compressed),
+        unique_char_ratio=round(unique_chars / max(length, 1), 6),
+        compressed_length_norm=round(min(len(compressed) / 500.0, 1.0), 6),
         technical_explanation=technical_explanation,
         comparison_task=comparison_task,
         design_task=design_task,
         advanced_reasoning_task=advanced_reasoning_task,
         task_complexity_hint=complexity_hint,
     )
+
+
+def compress_repeated_spans(text: str, min_unit_chars: int = 6, max_unit_chars: int = 120) -> str:
+    stripped = str(text or "").strip()
+    if not stripped:
+        return ""
+    compact = re.sub(r"\s+", " ", stripped)
+    collapsed = _collapse_adjacent_repeats(compact, min_unit_chars, max_unit_chars)
+    if len(collapsed) < len(compact):
+        return collapsed.strip()
+    return compact
+
+
+def _collapse_adjacent_repeats(text: str, min_unit_chars: int, max_unit_chars: int) -> str:
+    current = text
+    max_unit = min(max_unit_chars, max(len(current) // 2, min_unit_chars))
+    for unit_len in range(max_unit, min_unit_chars - 1, -1):
+        pattern = re.compile(rf"(.{{{unit_len}}})\1+", re.DOTALL)
+
+        def replace(match: re.Match) -> str:
+            unit = match.group(1)
+            if len(set(unit.strip())) < 2:
+                return match.group(0)
+            return unit
+
+        updated = pattern.sub(replace, current)
+        if updated != current:
+            current = updated
+    return current
+
+
+def _repetition_ratio(original: str, compressed: str) -> float:
+    original_len = len(original)
+    if original_len <= 0:
+        return 0.0
+    return round(max(0.0, 1.0 - (len(compressed) / original_len)), 6)
 
 
 def _has_missing_context(text: str) -> bool:
