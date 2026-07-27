@@ -38,6 +38,33 @@ class OutputEvaluator:
     def __init__(self, fallback_threshold: float = 0.85):
         self.fallback_threshold = fallback_threshold
 
+    def assess_sufficiency(
+        self,
+        output: str,
+        spec: dict | None,
+        quality_score: float | None = None,
+    ) -> OutputSufficiency:
+        result = self.evaluate(output, spec, quality_score)
+        if result.success:
+            return OutputSufficiency(
+                sufficient=True,
+                score=float(result.score),
+                failure_reasons=[],
+                suggested_action="select_output",
+            )
+
+        evaluation_type = str((spec or {}).get("evaluation_type", "")).strip()
+        if evaluation_type in {"required_clarification", "refusal_check"}:
+            suggested_action = "abstain"
+        else:
+            suggested_action = "escalate"
+        return OutputSufficiency(
+            sufficient=False,
+            score=float(result.score),
+            failure_reasons=[result.reason],
+            suggested_action=suggested_action,
+        )
+
     def evaluate(self, output: str, spec: dict | None, quality_score: float | None = None) -> EvaluationResult:
         if not spec:
             return self._quality_fallback(quality_score, "quality_fallback_no_spec")

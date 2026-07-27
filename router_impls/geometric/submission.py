@@ -119,13 +119,13 @@ class RouterSubmission:
             evaluated_success = False
             evaluated_score = 0.0
             if output not in {None, ""} and has_structured_spec:
-                result = self.evaluator.evaluate(
+                sufficiency = self.evaluator.assess_sufficiency(
                     str(output),
                     spec,
                     item.get("quality_score") if "quality_score" in item else item.get("success_score"),
                 )
-                evaluated_success = bool(result.success)
-                evaluated_score = float(result.score)
+                evaluated_success = bool(sufficiency.sufficient)
+                evaluated_score = float(sufficiency.score)
             if has_structured_spec and not explicit_success and not evaluated_success:
                 continue
             if MODEL_RANK[model_id] < selected_rank and not (explicit_success or evaluated_success):
@@ -209,12 +209,12 @@ class RouterSubmission:
                 output = item.get("model_output")
             if output in {None, ""}:
                 continue
-            result = self.evaluator.evaluate(
+            sufficiency = self.evaluator.assess_sufficiency(
                 str(output),
                 spec,
                 item.get("quality_score") if "quality_score" in item else item.get("success_score"),
             )
-            if result.success:
+            if sufficiency.sufficient:
                 return False
             return True
         return False

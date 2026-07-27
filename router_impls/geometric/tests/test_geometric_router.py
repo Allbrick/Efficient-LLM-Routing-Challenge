@@ -69,6 +69,20 @@ def test_evaluator_runs_python_unit_tests():
     assert result.reason == "unit_test_python"
 
 
+def test_evaluator_assesses_sufficiency_with_suggested_action():
+    evaluator = OutputEvaluator()
+    spec = {"evaluation_type": "exact_match", "reference_answer": "5"}
+
+    sufficient = evaluator.assess_sufficiency("5", spec)
+    insufficient = evaluator.assess_sufficiency("4", spec)
+
+    assert sufficient.sufficient is True
+    assert sufficient.suggested_action == "select_output"
+    assert insufficient.sufficient is False
+    assert insufficient.failure_reasons == ["exact_match"]
+    assert insufficient.suggested_action == "escalate"
+
+
 def test_evaluator_compares_json_semantically_and_preserves_types():
     evaluator = OutputEvaluator()
     spec = {

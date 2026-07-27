@@ -313,6 +313,16 @@ python -m routing_stack.experiments.router_compare "이모티콘좀 그만 써�
 - `planning`: orchestrator가 사용한 uncertainty와 geometric signal입니다.
 - `routing_context`: Task Router가 해석한 참조, context confidence, missing context 판단입니다.
 
+## 라우팅 피드백 기록
+
+수동 테스트 중 잘못된 라우팅을 발견하면 feedback CSV에 저장할 수 있습니다.
+
+```powershell
+python scripts\append_router_feedback.py --prompt "이 라우팅은 틀렸어" --budget_tier fast --selected cheap --expected mid --selection_reason simple_prompt_prior --note "cheap 답변이 너무 얕음"
+```
+
+기본 출력은 `data/router_feedback/online_feedback.csv`입니다. 이 파일은 이후 재학습 데이터로 병합할 수 있는 online feedback source로 사용합니다.
+
 ## public set 근사 평가
 
 private simulator를 대체하는 정식 평가는 아니지만, 공개 train 샘플에서 선택 모델의 공개 quality/cost를 lookup해 라우터별 경향을 볼 수 있습니다.
