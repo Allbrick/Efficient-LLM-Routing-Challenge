@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Outcome Matrix Labeler</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>Outcome Matrix Labeler</h1>
+          <p id="configText">loading...</p>
+        </div>
+      </header>
+
+      <section class="prompt-panel">
+        <label for="promptInput">Prompt</label>
+        <textarea id="promptInput" rows="5" placeholder="평가할 프롬프트를 입력하세요"></textarea>
+        <div class="toolbar">
+          <label>
+            Tier
+            <select id="budgetTier">
+              <option value="balanced">balanced</option>
+              <option value="fast">fast</option>
+              <option value="premium">premium</option>
+            </select>
+          </label>
+          <label>
+            Task
+            <input id="taskType" value="manual_review" />
+          </label>
+          <label>
+            Difficulty
+            <select id="difficulty">
+              <option value=""></option>
+              <option value="easy">easy</option>
+              <option value="medium">medium</option>
+              <option value="hard">hard</option>
+            </select>
+          </label>
+          <label>
+            Risk
+            <select id="riskLevel">
+              <option value=""></option>
+              <option value="low">low</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+            </select>
+          </label>
+          <button id="runBtn" type="button">Run 3 Models</button>
+        </div>
+      </section>
+
+      <section class="review-panel">
+        <div class="review-controls">
+          <label>
+            Min sufficient
+            <select id="minSufficient">
+              <option value="cheap">cheap</option>
+              <option value="mid">mid</option>
+              <option value="premium">premium</option>
+            </select>
+          </label>
+          <label>
+            Evaluation
+            <input id="evaluationType" value="human_preference" />
+          </label>
+          <label>
+            Failure reason
+            <input id="failureReason" />
+          </label>
+        </div>
+        <div id="outputs" class="outputs"></div>
+      </section>
+
+      <div id="status" class="status">Ready</div>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
