@@ -241,14 +241,17 @@ overall_score = 0.5 * fast + 0.3 * balanced + 0.2 * premium
 
 ```powershell
 python scripts\generate_report_assets.py --output_dir docs\report_assets
+python scripts\generate_outcome_matrix.py --output data\router_outcomes\public_outcome_matrix.csv
 ```
 
-geometric routing이 왜 선택됐는지 보여주는 prompt별 설명표와 baseline 비교표는 아래 명령으로 재생성합니다.
+geometric routing이 왜 선택됐는지 보여주는 prompt별 설명표, baseline 비교표, calibration 리포트는 아래 명령으로 재생성합니다.
 
 ```powershell
 python scripts\generate_geometric_explanations.py --output_dir docs\report_assets
 python scripts\generate_router_comparison.py --output_dir docs\report_assets
 python scripts\generate_policy_preset_comparison.py --output_dir docs\report_assets
+python scripts\generate_sufficiency_calibration.py --output_dir docs\report_assets
+python scripts\generate_ood_calibration.py --output_dir docs\report_assets
 ```
 
 라우터 decision latency 리포트는 아래 명령으로 재생성합니다.
@@ -283,6 +286,10 @@ python scripts\run_submission_checks.py --full --output docs\report_assets\submi
 - `docs/report_assets/router_comparison_summary.json`: baseline 비교 요약 JSON
 - `docs/report_assets/policy_preset_comparison.csv`: Fast/Balanced/Premium 운영 preset별 비용-품질 비교표
 - `docs/report_assets/policy_preset_comparison_summary.json`: policy preset 비교 요약 JSON
+- `docs/report_assets/sufficiency_calibration.csv`: 모델별 sufficiency probability calibration bin 리포트
+- `docs/report_assets/sufficiency_calibration_summary.json`: 모델별 Brier/ECE 요약
+- `docs/report_assets/ood_calibration.csv`: OOD score bin별 cheap success, under-route, premium 선택률
+- `docs/report_assets/ood_calibration_summary.json`: OOD high/low 핵심 지표 요약
 - `docs/report_assets/latency_summary.csv`: tier별 로컬 라우팅 decision latency 요약
 - `docs/report_assets/latency_report.json`: latency 측정 JSON 리포트
 - `docs/report_assets/submission_readiness.json`: 제출 전 필수 파일과 URL placeholder 점검 결과
@@ -330,6 +337,22 @@ feedback을 geometric router 학습에 반영하려면 다음 옵션을 사용�
 
 ```powershell
 python router_impls\geometric\scripts\train_geometric_router.py --include_feedback --feedback_path data\router_feedback\online_feedback.csv --policy_report artifacts\geometric_policy_report.json
+```
+
+## 학습용 reviewed outcome viewer
+
+기존 라우터 실행 viewer와 별도로, `reviewed_outcome_matrix.csv`를 사람이 직접 채우기 위한 학습 데이터 viewer를 실행할 수 있습니다. 이 도구는 제출용 라우터가 아니라, 로컬 Ollama로 cheap/mid/premium 3개 모델을 모두 실행하고 사람이 가장 좋은 답변을 고르면 `data/router_outcomes/reviewed_outcome_matrix.csv`에 한 줄을 append하는 데이터 구축 도구입니다.
+
+```powershell
+python routing_stack\app\training_labeler_server.py --ai ollama --port 4120
+```
+
+브라우저에서 `http://127.0.0.1:4120/`에 접속한 뒤 프롬프트를 입력하고 `Run 3 Models`를 누릅니다. 세 결과를 비교한 뒤 가장 좋은 카드의 `Best & Save`를 누르면 자동 저장됩니다.
+
+Ollama 없이 동작만 확인하려면 mock provider를 사용할 수 있습니다.
+
+```powershell
+python routing_stack\app\training_labeler_server.py --ai mock --port 4120
 ```
 
 ## public set 근사 평가

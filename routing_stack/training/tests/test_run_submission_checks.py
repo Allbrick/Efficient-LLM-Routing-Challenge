@@ -14,13 +14,18 @@ def test_build_check_commands_default_skips_pytest_and_strict():
     assert names == [
         "train_geometric_router",
         "generate_report_assets",
+        "generate_outcome_matrix",
         "measure_router_latency",
         "generate_geometric_explanations",
         "generate_router_comparison",
         "generate_policy_preset_comparison",
+        "generate_sufficiency_calibration",
+        "generate_ood_calibration",
         "verify_submission_readiness",
     ]
     assert "--include_feedback" in training_command
+    assert "--outcome_matrix_path" in training_command
+    assert "data/router_outcomes/reviewed_outcome_matrix.csv" in training_command
     assert readiness[0] == sys.executable
     assert "--strict" not in readiness
 

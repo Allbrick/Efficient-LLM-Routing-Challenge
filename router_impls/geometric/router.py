@@ -265,7 +265,10 @@ class GeometricRouter:
         pass_probabilities = self.pass_model.predict_all(x) if self.pass_model is not None else {}
         sufficiency_probabilities = self.risk_model.predict_all(x, prompt) if self.risk_model is not None else {}
         candidates = []
-        simple_prompt_prior = self._has_simple_prompt_prior(semantic_prompt, evidence_obj, evaluation_type)
+        simple_prompt_prior = self._has_simple_prompt_prior(semantic_prompt, evidence_obj, evaluation_type) or (
+            bool(getattr(text_features, "simple_directive", False))
+            and not explicit_task_context
+        )
         low_complexity_prior = self._has_low_complexity_prior(
             semantic_prompt,
             evidence_obj,
@@ -526,6 +529,8 @@ class GeometricRouter:
     def _has_simple_prompt_prior(self, prompt: str, evidence: object, evaluation_type: str) -> bool:
         text = str(prompt).strip()
         if not text:
+            return False
+        if evaluation_type in {"rubric_check", "constraint_check", "unit_test"}:
             return False
         if len(text) > 40 or "\n" in text:
             return False

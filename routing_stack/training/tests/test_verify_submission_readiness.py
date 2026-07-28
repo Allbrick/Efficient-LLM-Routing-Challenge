@@ -22,6 +22,9 @@ def populate_required_files(root: Path) -> None:
         "docs/AI_MODEL_USAGE.md",
         "docs/DEMO_SCRIPT.md",
         "data/external/dataset_sources.json",
+        "data/router_outcomes/README.md",
+        "data/router_outcomes/public_outcome_matrix.csv",
+        "data/router_outcomes/reviewed_outcome_matrix.csv",
         "router_impls/geometric/submission.py",
         "router_impls/geometric/router.py",
     ):
@@ -32,6 +35,9 @@ def populate_required_files(root: Path) -> None:
         "fast_allocation_summary.csv",
         "latency_detail.csv",
         "policy_preset_comparison.csv",
+        "sufficiency_calibration.csv",
+        "sufficiency_calibration_summary.csv",
+        "ood_calibration.csv",
     ):
         write(root / "docs" / "report_assets" / filename, "header\nrow\n")
     write(root / "docs" / "report_assets" / "tier_summary.csv", "h\n1\n2\n3\n")
@@ -41,6 +47,8 @@ def populate_required_files(root: Path) -> None:
     write(root / "docs" / "report_assets" / "report_assets_summary.json", json.dumps({"ok": True}))
     write(root / "docs" / "report_assets" / "latency_report.json", json.dumps({"ok": True}))
     write(root / "docs" / "report_assets" / "policy_preset_comparison_summary.json", json.dumps({"ok": True}))
+    write(root / "docs" / "report_assets" / "sufficiency_calibration_summary.json", json.dumps({"ok": True}))
+    write(root / "docs" / "report_assets" / "ood_calibration_summary.json", json.dumps({"ok": True}))
 
 
 def test_verify_submission_readiness_detects_required_url_placeholders(tmp_path):

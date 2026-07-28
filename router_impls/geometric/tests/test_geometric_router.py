@@ -91,6 +91,71 @@ def test_evaluator_assesses_sufficiency_with_suggested_action():
     assert insufficient.suggested_action == "escalate"
 
 
+def test_build_training_labels_prefers_reviewed_pass_column():
+    train_df = pd.DataFrame(
+        [
+            {
+                "prompt_id": "reviewed_1",
+                "prompt": "2+2?",
+                "domain": "reviewed",
+                "task_type": "math",
+                "benchmark_id": "reviewed",
+                "model_id": "cheap",
+                "model_output": "not exact",
+                "quality_score": 0.9,
+                "reviewed_pass": True,
+                "cost": 0.01,
+            },
+            {
+                "prompt_id": "reviewed_1",
+                "prompt": "2+2?",
+                "domain": "reviewed",
+                "task_type": "math",
+                "benchmark_id": "reviewed",
+                "model_id": "mid",
+                "model_output": "4",
+                "quality_score": 0.95,
+                "reviewed_pass": True,
+                "cost": 0.05,
+            },
+            {
+                "prompt_id": "reviewed_1",
+                "prompt": "2+2?",
+                "domain": "reviewed",
+                "task_type": "math",
+                "benchmark_id": "reviewed",
+                "model_id": "premium",
+                "model_output": "4",
+                "quality_score": 0.95,
+                "reviewed_pass": True,
+                "cost": 0.2,
+            },
+        ]
+    )
+    specs_df = pd.DataFrame(
+        [
+            {
+                "prompt_id": "reviewed_1",
+                "prompt": "2+2?",
+                "task_type": "math",
+                "difficulty": "trivial",
+                "risk_level": "low",
+                "expected_min_model": "cheap",
+                "evaluation_type": "exact_match",
+                "reference_answer": "4",
+                "test_spec": "",
+            }
+        ]
+    )
+
+    labels = build_training_labels(train_df, specs_df)
+
+    cheap = labels[labels["model_id"] == "cheap"].iloc[0]
+    assert bool(cheap["success"]) is True
+    assert cheap["success_reason"] == "reviewed_outcome_matrix"
+    assert labels.iloc[0]["expected_min_model"] == "cheap"
+
+
 def test_optional_rubric_judge_can_assess_unstructured_rubric():
     evaluator = OutputEvaluator(rubric_judge=HeuristicRubricJudge())
     spec = {
@@ -238,6 +303,22 @@ def test_short_high_stakes_prompt_is_not_cheap_direct():
     assert decision.evidence["pre_route_lane"] in {"missing_context", "hard_task", "ambiguous"}
     assert decision.evidence["cheap_direct_lane"] == 0.0
     assert decision.evidence["high_stakes_domain"] == 1.0
+
+
+def test_rubric_check_explanation_is_not_cheap_direct_just_because_short():
+    router = make_router()
+
+    decision = router.route(
+        "Python과 Java 차이를 설명해줘",
+        budget_tier="fast",
+        task_type="explanation",
+        difficulty="easy",
+        risk_level="low",
+        evaluation_type="rubric_check",
+    )
+
+    assert decision.evidence["pre_route_lane"] != "cheap_direct"
+    assert decision.selection_reason != "simple_prompt_prior"
 
 
 def test_task_classifier_predicts_independent_heads():

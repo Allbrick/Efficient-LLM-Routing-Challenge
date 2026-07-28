@@ -492,8 +492,13 @@ def build_training_labels(
 
     rows = []
     for row in train_df.itertuples(index=False):
-        spec = specs.get(row.prompt_id)
-        result = evaluator.evaluate(row.model_output, spec, row.quality_score)
+        reviewed_pass = getattr(row, "reviewed_pass", None)
+        if reviewed_pass is not None and not pd.isna(reviewed_pass) and str(reviewed_pass).strip() != "":
+            success = _as_bool_static(reviewed_pass)
+            result = EvaluationResult(success, float(row.quality_score), "reviewed_outcome_matrix")
+        else:
+            spec = specs.get(row.prompt_id)
+            result = evaluator.evaluate(row.model_output, spec, row.quality_score)
         rows.append(
             {
                 "prompt_id": row.prompt_id,
@@ -527,5 +532,11 @@ def _as_list_static(value: Any) -> list[Any]:
     if isinstance(value, list):
         return value
     return [value]
+
+
+def _as_bool_static(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "pass", "passed"}
 
 

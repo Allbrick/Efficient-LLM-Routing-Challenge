@@ -1,2 +1,2 @@
 tier,count,budget_limit,total_budget,total_cost,mean_quality,mean_cost,mean_expected_quality,mean_quality_gain_per_cost,mean_under_route_risk,mean_excess_cost,cost_over_limit,under_route,under_route_lower_bound,over_route,should_abstain,ok,selection_counts
-fast,73,0.03,2.19,2.18,0.8795890410958905,0.029863013698630144,0.7710903187123286,3.7665183151766386,0.4352914520547945,0.011643835616438362,35,20,16,0,0,53,"{'mid': 34, 'cheap': 28, 'abstain': 10, 'premium': 1}"
+fast,270,0.03,8.1,8.1,0.8844074074074075,0.030000000000000006,0.8358576650296295,4.302250656666667,0.2921825962962963,0.010962962962962966,148,28,9,46,0,196,"{'mid': 148, 'cheap': 70, 'abstain': 52}"

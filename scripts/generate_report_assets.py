@@ -15,6 +15,7 @@ from router_impls.geometric.budget_allocator import allocate_public_budget
 from router_impls.geometric.router import GeometricRouter
 from router_impls.geometric.simulator import simulate_public_set
 from router_impls.geometric.tuning import score_tier_summary, tune_router_policy
+from routing_stack.training.outcome_matrix import merge_outcome_training
 
 
 TIER_ORDER = ("fast", "balanced", "premium")
@@ -57,6 +58,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate report-ready CSV/JSON assets for geometric routing.")
     parser.add_argument("--train_path", default="data/public/example_train.csv")
     parser.add_argument("--specs_path", default="data/public/example_eval_specs.csv")
+    parser.add_argument("--outcome_matrix_path", default="")
     parser.add_argument("--output_dir", default="docs/report_assets")
     parser.add_argument("--semantic_features", action="store_true")
     parser.add_argument("--no_synthetic", action="store_true")
@@ -64,6 +66,8 @@ def main() -> None:
 
     train_df = pd.read_csv(args.train_path)
     specs_df = pd.read_csv(args.specs_path)
+    if args.outcome_matrix_path:
+        train_df, specs_df, _summary = merge_outcome_training(train_df, specs_df, args.outcome_matrix_path)
     assets = generate_report_assets(
         train_df=train_df,
         specs_df=specs_df,

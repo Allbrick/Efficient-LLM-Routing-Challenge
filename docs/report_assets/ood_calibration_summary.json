@@ -1,0 +1,15 @@
+{
+  "files": [
+    "ood_calibration.csv",
+    "ood_calibration_summary.json"
+  ],
+  "summary": {
+    "count": 270,
+    "ood_high_threshold": 0.9,
+    "ood_high_count": 0,
+    "cheap_direct_success_rate": 0.9375,
+    "ood_high_cheap_failure_rate": null,
+    "ood_low_cheap_success_rate": 0.47035573122529645,
+    "ood_high_premium_overuse_rate": null
+  }
+}

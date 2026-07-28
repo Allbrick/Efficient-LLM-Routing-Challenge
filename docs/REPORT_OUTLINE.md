@@ -45,6 +45,9 @@ Prompt / Budget Tier / History / Model Metadata
 - `scripts/generate_geometric_explanations.py`: prompt별 geometric decision 근거 생성
 - `scripts/generate_router_comparison.py`: always cheap/mid/premium baseline 비교
 - `scripts/generate_policy_preset_comparison.py`: 운영 preset별 비용-품질 비교
+- `scripts/generate_outcome_matrix.py`: 모델별 output/score/pass/gain matrix 생성
+- `scripts/generate_sufficiency_calibration.py`: sufficiency probability calibration 리포트 생성
+- `scripts/generate_ood_calibration.py`: geometric OOD calibration 리포트 생성
 
 ## 4. 핵심 기술
 
@@ -108,9 +111,12 @@ python scripts\run_submission_checks.py --full --output docs\report_assets\submi
 ```powershell
 python router_impls\geometric\scripts\train_geometric_router.py --policy_report artifacts\geometric_policy_report.json
 python scripts\generate_report_assets.py --output_dir docs\report_assets
+python scripts\generate_outcome_matrix.py --output data\router_outcomes\public_outcome_matrix.csv
 python scripts\generate_geometric_explanations.py --output_dir docs\report_assets
 python scripts\generate_router_comparison.py --output_dir docs\report_assets
 python scripts\generate_policy_preset_comparison.py --output_dir docs\report_assets
+python scripts\generate_sufficiency_calibration.py --output_dir docs\report_assets
+python scripts\generate_ood_calibration.py --output_dir docs\report_assets
 python scripts\measure_router_latency.py --output_dir docs\report_assets --repeat 3
 python -m pytest routing_stack\app\tests routing_stack\adapters\tests routing_stack\input\tests routing_stack\training\tests router_impls\geometric\tests -q
 ```

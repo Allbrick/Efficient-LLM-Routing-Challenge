@@ -1,0 +1,33 @@
+{
+  "files": [
+    "sufficiency_calibration.csv",
+    "sufficiency_calibration_summary.csv",
+    "sufficiency_calibration_summary.json"
+  ],
+  "summary": [
+    {
+      "model_id": "cheap",
+      "count": 270,
+      "brier_score": 0.22606063147814076,
+      "ece": 0.08169567407407409,
+      "mean_predicted_probability": 0.44996972592592593,
+      "actual_success_rate": 0.44074074074074077
+    },
+    {
+      "model_id": "mid",
+      "count": 270,
+      "brier_score": 0.10862614617866666,
+      "ece": 0.13544206666666664,
+      "mean_predicted_probability": 0.7665633111111112,
+      "actual_success_rate": 0.8814814814814815
+    },
+    {
+      "model_id": "premium",
+      "count": 270,
+      "brier_score": 0.07903416664607407,
+      "ece": 0.08506428148148154,
+      "mean_predicted_probability": 0.8408616444444444,
+      "actual_success_rate": 0.9259259259259259
+    }
+  ]
+}

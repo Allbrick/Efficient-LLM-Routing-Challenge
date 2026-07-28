@@ -58,13 +58,26 @@ def build_check_commands(full: bool = False, strict_readiness: bool = False) -> 
                 sys.executable,
                 "router_impls/geometric/scripts/train_geometric_router.py",
                 "--include_feedback",
+                "--outcome_matrix_path",
+                "data/router_outcomes/reviewed_outcome_matrix.csv",
                 "--policy_report",
                 "artifacts/geometric_policy_report.json",
             ],
         ),
         CheckCommand(
             "generate_report_assets",
-            [sys.executable, "scripts/generate_report_assets.py", "--output_dir", "docs/report_assets"],
+            [
+                sys.executable,
+                "scripts/generate_report_assets.py",
+                "--outcome_matrix_path",
+                "data/router_outcomes/reviewed_outcome_matrix.csv",
+                "--output_dir",
+                "docs/report_assets",
+            ],
+        ),
+        CheckCommand(
+            "generate_outcome_matrix",
+            [sys.executable, "scripts/generate_outcome_matrix.py", "--output", "data/router_outcomes/public_outcome_matrix.csv"],
         ),
         CheckCommand(
             "measure_router_latency",
@@ -81,6 +94,28 @@ def build_check_commands(full: bool = False, strict_readiness: bool = False) -> 
         CheckCommand(
             "generate_policy_preset_comparison",
             [sys.executable, "scripts/generate_policy_preset_comparison.py", "--output_dir", "docs/report_assets"],
+        ),
+        CheckCommand(
+            "generate_sufficiency_calibration",
+            [
+                sys.executable,
+                "scripts/generate_sufficiency_calibration.py",
+                "--outcome_matrix_path",
+                "data/router_outcomes/reviewed_outcome_matrix.csv",
+                "--output_dir",
+                "docs/report_assets",
+            ],
+        ),
+        CheckCommand(
+            "generate_ood_calibration",
+            [
+                sys.executable,
+                "scripts/generate_ood_calibration.py",
+                "--outcome_matrix_path",
+                "data/router_outcomes/reviewed_outcome_matrix.csv",
+                "--output_dir",
+                "docs/report_assets",
+            ],
         ),
         CheckCommand("verify_submission_readiness", readiness_command),
     ]

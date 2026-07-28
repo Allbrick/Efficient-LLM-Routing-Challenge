@@ -17,6 +17,9 @@ REQUIRED_FILES = (
     "docs/AI_MODEL_USAGE.md",
     "docs/DEMO_SCRIPT.md",
     "data/external/dataset_sources.json",
+    "data/router_outcomes/README.md",
+    "data/router_outcomes/public_outcome_matrix.csv",
+    "data/router_outcomes/reviewed_outcome_matrix.csv",
     "router_impls/geometric/submission.py",
     "router_impls/geometric/router.py",
 )
@@ -34,6 +37,11 @@ REQUIRED_REPORT_ASSETS = (
     "latency_report.json",
     "policy_preset_comparison.csv",
     "policy_preset_comparison_summary.json",
+    "sufficiency_calibration.csv",
+    "sufficiency_calibration_summary.csv",
+    "sufficiency_calibration_summary.json",
+    "ood_calibration.csv",
+    "ood_calibration_summary.json",
 )
 
 PLACEHOLDER_PATTERNS = {
