@@ -39,9 +39,12 @@ python scripts\run_submission_checks.py --full --output docs\report_assets\submi
 ```powershell
 python router_impls\geometric\scripts\train_geometric_router.py --policy_report artifacts\geometric_policy_report.json
 python scripts\generate_report_assets.py --output_dir docs\report_assets
+python scripts\generate_outcome_matrix.py --output data\router_outcomes\public_outcome_matrix.csv
 python scripts\generate_geometric_explanations.py --output_dir docs\report_assets
 python scripts\generate_router_comparison.py --output_dir docs\report_assets
 python scripts\generate_policy_preset_comparison.py --output_dir docs\report_assets
+python scripts\generate_sufficiency_calibration.py --output_dir docs\report_assets
+python scripts\generate_ood_calibration.py --output_dir docs\report_assets
 python scripts\measure_router_latency.py --output_dir docs\report_assets --repeat 3
 python scripts\verify_submission_readiness.py --output docs\report_assets\submission_readiness.json
 ```
@@ -70,6 +73,8 @@ python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4
 - geometric decision 설명: `scripts/generate_geometric_explanations.py`
 - baseline 비교: `scripts/generate_router_comparison.py`
 - policy preset 비교: `scripts/generate_policy_preset_comparison.py`
+- outcome matrix 생성: `scripts/generate_outcome_matrix.py`
+- sufficiency/OOD calibration: `scripts/generate_sufficiency_calibration.py`, `scripts/generate_ood_calibration.py`
 - latency report: `scripts/measure_router_latency.py`
 - readiness check: `scripts/verify_submission_readiness.py`
 - reproducibility runner: `scripts/run_submission_checks.py`
@@ -110,6 +115,9 @@ decision = router.route(
 - `docs/report_assets/geometric_explanations.csv`에서 prompt별 후보 모델 cost, distance, pass probability, abstain probability, OOD/lane 근거를 확인한다.
 - `docs/report_assets/router_comparison.csv`에서 always cheap/mid/premium baseline과 geometric router를 비교한다.
 - `docs/report_assets/policy_preset_comparison.csv`에서 Fast/Balanced/Premium preset별 비용-품질 tradeoff를 확인한다.
+- `data/router_outcomes/public_outcome_matrix.csv`에서 모델별 output/score/pass/gain matrix를 확인한다.
+- `docs/report_assets/sufficiency_calibration_summary.json`에서 모델별 Brier/ECE를 확인한다.
+- `docs/report_assets/ood_calibration_summary.json`에서 OOD high/low 구간의 cheap failure, premium overuse 지표를 확인한다.
 - 반복 prompt 케이스는 `repetition_ratio`와 `compressed_length_norm`으로 cheap 유지 근거를 확인한다.
 
 ## 최종 확인
