@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass
 
@@ -56,6 +57,11 @@ TASK_HINTS = {
 MISSING_CONTEXT_TERMS = ("다음", "이 ", "해당", "위 ", "아래", "첨부", "코드", "계약", "문서", "파일", "조항")
 CLARIFICATION_TASK_TERMS = ("고쳐", "수정", "판단", "분석", "검토", "유효", "무효")
 
+# Log1p normalization denominators for token/cost features
+_LOG1P_120 = math.log1p(120)
+_LOG1P_800 = math.log1p(800)
+_LOG1P_1200 = math.log1p(1200)
+
 
 @dataclass(frozen=True)
 class PromptEvidence:
@@ -75,6 +81,10 @@ class PromptEvidence:
     cost_estimate_norm: float
     code_token_pressure: float
     json_or_table_pressure: float
+    # Phase 2: Interaction features
+    difficulty_risk_interaction: float = 0.0
+    code_complexity_interaction: float = 0.0
+    cost_pressure_interaction: float = 0.0
 
     def as_vector(self) -> np.ndarray:
         base = np.array(
@@ -103,7 +113,15 @@ class PromptEvidence:
             ],
             dtype=np.float64,
         )
-        return np.concatenate([base, text_shape, token_cost])
+        interaction = np.array(
+            [
+                self.difficulty_risk_interaction,
+                self.code_complexity_interaction,
+                self.cost_pressure_interaction,
+            ],
+            dtype=np.float64,
+        )
+        return np.concatenate([base, text_shape, token_cost, interaction])
 
 
 class EvidenceExtractor:
@@ -134,10 +152,25 @@ class EvidenceExtractor:
         difficulty_score = DIFFICULTY_SCORE.get(str(difficulty).lower(), inferred_difficulty)
         risk_score = RISK_SCORE.get(str(risk_level).lower(), inferred_risk)
 
+        condition_count_val = float(self._condition_count(semantic_text, lowered))
+
+        # Log1p transform for token/cost features (Phase 2)
+        token_count_norm = float(min(math.log1p(whitespace_tokens) / _LOG1P_120, 1.0))
+        estimated_input_tokens_norm = float(
+            min(math.log1p(token_estimate.estimated_input_tokens) / _LOG1P_800, 1.0)
+        )
+        estimated_output_tokens_norm = float(
+            min(math.log1p(token_estimate.estimated_output_tokens) / _LOG1P_1200, 1.0)
+        )
+        raw_cost_estimate = (
+            token_estimate.estimated_input_tokens + 0.35 * token_estimate.estimated_output_tokens
+        )
+        cost_estimate_norm = float(min(math.log1p(raw_cost_estimate) / _LOG1P_1200, 1.0))
+
         return PromptEvidence(
             difficulty_score=float(difficulty_score),
             risk_score=float(risk_score),
-            condition_count=float(self._condition_count(semantic_text, lowered)),
+            condition_count=condition_count_val,
             missing_context=float(self._missing_context(semantic_text)),
             exact_answer=float(exact_answer),
             code_like=float(code_like),
@@ -147,21 +180,15 @@ class EvidenceExtractor:
             char_ngram_vector=tuple(
                 float(value) for value in hashed_char_ngrams(semantic_text, n_features=CHAR_NGRAM_FEATURES)
             ),
-            token_count_norm=float(min(whitespace_tokens / 120.0, 1.0)),
-            estimated_input_tokens_norm=float(min(token_estimate.estimated_input_tokens / 800.0, 1.0)),
-            estimated_output_tokens_norm=float(min(token_estimate.estimated_output_tokens / 1200.0, 1.0)),
-            cost_estimate_norm=float(
-                min(
-                    (
-                        token_estimate.estimated_input_tokens
-                        + 0.35 * token_estimate.estimated_output_tokens
-                    )
-                    / 1200.0,
-                    1.0,
-                )
-            ),
+            token_count_norm=token_count_norm,
+            estimated_input_tokens_norm=estimated_input_tokens_norm,
+            estimated_output_tokens_norm=estimated_output_tokens_norm,
+            cost_estimate_norm=cost_estimate_norm,
             code_token_pressure=float(token_estimate.code_token_pressure),
             json_or_table_pressure=float(token_estimate.json_or_table_pressure),
+            difficulty_risk_interaction=float(difficulty_score * risk_score),
+            code_complexity_interaction=float(code_like * condition_count_val),
+            cost_pressure_interaction=float(token_count_norm * cost_estimate_norm),
         )
 
     def explain(
@@ -192,6 +219,9 @@ class EvidenceExtractor:
             "cost_estimate_norm": evidence.cost_estimate_norm,
             "code_token_pressure": evidence.code_token_pressure,
             "json_or_table_pressure": evidence.json_or_table_pressure,
+            "difficulty_risk_interaction": evidence.difficulty_risk_interaction,
+            "code_complexity_interaction": evidence.code_complexity_interaction,
+            "cost_pressure_interaction": evidence.cost_pressure_interaction,
             "repetition_ratio": text_features.repetition_ratio,
             "unique_char_ratio": text_features.unique_char_ratio,
             "compressed_length_norm": text_features.compressed_length_norm,

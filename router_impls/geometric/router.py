@@ -14,7 +14,7 @@ from router_impls.geometric.features import MODEL_ORDER, TASK_HINTS, EvidenceExt
 from router_impls.geometric.pass_model import PassProbabilityModel, fit_pass_model
 from router_impls.geometric.pareto import best_under_budget, build_pareto_frontier
 from router_impls.geometric.risk_model import SufficiencyRiskModel, fit_risk_model
-from router_impls.geometric.synthetic_data import build_numeric_count_data
+from router_impls.geometric.synthetic_data import build_numeric_count_data, smote_augment_features
 from router_impls.geometric.task_classifier import TaskClassifier
 from routing_stack.input.semantic_features import HashPromptEncoder, SemanticFeatureIndex
 from routing_stack.input.text_features import analyze_text_prompt
@@ -115,6 +115,7 @@ class GeometricRouter:
         fallback_threshold: float = 0.85,
         radius_quantile: float = 0.90,
         include_synthetic: bool = True,
+        include_smote: bool = True,
         use_semantic_features: bool = False,
         semantic_index: SemanticFeatureIndex | None = None,
     ) -> "GeometricRouter":
@@ -187,13 +188,21 @@ class GeometricRouter:
         else:
             ood_reference = {"score_high_threshold": 0.90}
 
+        # SMOTE augmentation for pass_model and risk_model (Phase 2)
+        if include_smote:
+            smote_features, smote_labels, smote_texts = smote_augment_features(
+                prompt_features, labels, prompt_texts
+            )
+        else:
+            smote_features, smote_labels, smote_texts = prompt_features, labels, prompt_texts
+
         model_costs = (
             train_df.groupby("model_id")["cost"].mean().astype(float).to_dict()
         )
         frontier = build_pareto_frontier(train_df)
         task_classifier = TaskClassifier.fit(specs_df) if specs_df is not None and not specs_df.empty else None
-        pass_model = fit_pass_model(prompt_features, labels)
-        risk_model = fit_risk_model(prompt_features, labels, prompt_texts)
+        pass_model = fit_pass_model(smote_features, smote_labels)
+        risk_model = fit_risk_model(smote_features, smote_labels, smote_texts)
         metadata = {
             "fallback_threshold": fallback_threshold,
             "radius_quantile": radius_quantile,

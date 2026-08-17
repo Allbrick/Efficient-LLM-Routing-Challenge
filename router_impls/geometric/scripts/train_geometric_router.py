@@ -45,6 +45,7 @@ def main() -> None:
     parser.add_argument("--radius_quantile", type=float, default=0.90)
     parser.add_argument("--no_synthetic", action="store_true")
     parser.add_argument("--no_tune", action="store_true")
+    parser.add_argument("--no_smote", action="store_true", help="Disable SMOTE minority class augmentation")
     parser.add_argument("--semantic_features", action="store_true")
     parser.add_argument("--quality-check", action="store_true", help="Run data quality validation before training")
     parser.add_argument("--cross-validate", action="store_true", help="Run K-fold cross-validation after training")
@@ -85,6 +86,7 @@ def main() -> None:
         fallback_threshold=args.fallback_threshold,
         radius_quantile=args.radius_quantile,
         include_synthetic=not args.no_synthetic,
+        include_smote=not args.no_smote,
         use_semantic_features=args.semantic_features,
     )
     tuning = None
