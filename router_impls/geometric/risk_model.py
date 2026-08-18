@@ -85,7 +85,7 @@ class SufficiencyRiskModel:
         )
 
 
-def fit_risk_model(prompt_features: dict[str, np.ndarray], labels, prompt_texts: dict[str, str]) -> SufficiencyRiskModel:
+def fit_risk_model(prompt_features: dict[str, np.ndarray], labels, prompt_texts: dict[str, str], bandwidth: float = 1.15) -> SufficiencyRiskModel:
     prompt_labels = labels.drop_duplicates("prompt_id")
     exemplars = []
     for row in prompt_labels.itertuples(index=False):
@@ -97,7 +97,7 @@ def fit_risk_model(prompt_features: dict[str, np.ndarray], labels, prompt_texts:
                 expected_min_model=str(row.expected_min_model),
             )
         )
-    return SufficiencyRiskModel(exemplars=exemplars)
+    return SufficiencyRiskModel(exemplars=exemplars, bandwidth=bandwidth)
 
 
 def _risk_vector(evidence_vector: np.ndarray, prompt: str) -> np.ndarray:

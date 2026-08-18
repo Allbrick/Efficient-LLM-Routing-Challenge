@@ -13,6 +13,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 os.chdir(PROJECT_ROOT)
 
+from router_impls.geometric.bayesian_tuning import (
+    BayesianTuningConfig,
+    bayesian_tune_router_policy,
+)
 from router_impls.geometric.classification_metrics import (
     compute_classification_report,
     compute_roc_auc,
@@ -20,8 +24,15 @@ from router_impls.geometric.classification_metrics import (
 )
 from router_impls.geometric.cross_validation import cross_validate_router
 from router_impls.geometric.evaluator import build_training_labels
-from router_impls.geometric.router import GeometricRouter
+from router_impls.geometric.hyperopt import grid_search_hyperparams
+from router_impls.geometric.router import (
+    DEFAULT_FALLBACK_COST_WEIGHT,
+    DEFAULT_PASS_THRESHOLDS,
+    DEFAULT_RADIUS_MULTIPLIERS,
+    GeometricRouter,
+)
 from router_impls.geometric.simulator import simulate_public_set
+from router_impls.geometric.statistical_tests import paired_t_test_policies
 from router_impls.geometric.tuning import tune_router_policy
 from routing_stack.training.data_quality import validate_training_data
 from routing_stack.training.external_training import load_training_with_external
@@ -50,6 +61,11 @@ def main() -> None:
     parser.add_argument("--quality-check", action="store_true", help="Run data quality validation before training")
     parser.add_argument("--cross-validate", action="store_true", help="Run K-fold cross-validation after training")
     parser.add_argument("--cv-folds", type=int, default=5, help="Number of folds for cross-validation (default: 5)")
+    parser.add_argument("--bayesian-tune", action="store_true", help="Use Bayesian optimization instead of Grid Search for policy tuning")
+    parser.add_argument("--optimize-hyperparams", action="store_true", help="Optimize bandwidth/epsilon via CV before training")
+    parser.add_argument("--bayesian-initial", type=int, default=10, help="Initial random points for Bayesian optimization (default: 10)")
+    parser.add_argument("--bayesian-iterations", type=int, default=30, help="GP-guided iterations for Bayesian optimization (default: 30)")
+    parser.add_argument("--stat-tests", action="store_true", help="Run statistical tests comparing tuned vs default policy")
     args = parser.parse_args()
 
     train_df, specs_df, data_summary = load_training_with_external(
@@ -80,6 +96,38 @@ def main() -> None:
             print(f"  [ERROR] {e}")
         print(f"  Data quality report saved to {dq_path}")
 
+    # --- Hyperparameter optimization ---
+    opt_pass_bandwidth = 1.25
+    opt_risk_bandwidth = 1.15
+    opt_envelope_epsilon = 1e-3
+    hyperopt_result = None
+    if getattr(args, "optimize_hyperparams", False):
+        print("Optimizing hyperparameters via CV grid search...")
+        from router_impls.geometric.hyperopt import grid_search_hyperparams
+        ho_result = grid_search_hyperparams(
+            train_df, specs_df,
+            n_folds=min(3, args.cv_folds),
+            fallback_threshold=args.fallback_threshold,
+            radius_quantile=args.radius_quantile,
+            include_synthetic=not args.no_synthetic,
+            include_smote=not args.no_smote,
+            max_evaluations=50,
+        )
+        opt_pass_bandwidth = ho_result.best.pass_bandwidth
+        opt_risk_bandwidth = ho_result.best.risk_bandwidth
+        opt_envelope_epsilon = ho_result.best.envelope_epsilon
+        hyperopt_result = {
+            "best_pass_bandwidth": opt_pass_bandwidth,
+            "best_risk_bandwidth": opt_risk_bandwidth,
+            "best_envelope_epsilon": opt_envelope_epsilon,
+            "cv_mean_score": ho_result.best.cv_mean_score,
+            "cv_std_score": ho_result.best.cv_std_score,
+            "search_method": ho_result.search_method,
+            "n_evaluated": len(ho_result.all_results),
+        }
+        print(f"  Best: pass_bw={opt_pass_bandwidth:.3f}, risk_bw={opt_risk_bandwidth:.3f}, eps={opt_envelope_epsilon:.1e}")
+        print(f"  CV score: {ho_result.best.cv_mean_score:.4f} +/- {ho_result.best.cv_std_score:.4f}")
+
     router = GeometricRouter.fit(
         train_df,
         specs_df,
@@ -88,10 +136,65 @@ def main() -> None:
         include_synthetic=not args.no_synthetic,
         include_smote=not args.no_smote,
         use_semantic_features=args.semantic_features,
+        pass_bandwidth=opt_pass_bandwidth,
+        risk_bandwidth=opt_risk_bandwidth,
+        envelope_epsilon=opt_envelope_epsilon,
     )
+    if hyperopt_result is not None:
+        router.metadata["hyperopt"] = hyperopt_result
+
     tuning = None
     if not args.no_tune:
-        tuning = tune_router_policy(router, train_df, specs_df)
+        if getattr(args, "bayesian_tune", False):
+            print("Running Bayesian policy optimization...")
+            config = BayesianTuningConfig(
+                n_initial=args.bayesian_initial,
+                n_iterations=args.bayesian_iterations,
+            )
+            tuning = bayesian_tune_router_policy(router, train_df, specs_df, config=config)
+            print("  Bayesian tuning complete.")
+        else:
+            tuning = tune_router_policy(router, train_df, specs_df)
+
+    # --- Statistical tests ---
+    if getattr(args, "stat_tests", False) and tuning is not None:
+        print("Running statistical tests (tuned vs default)...")
+        from copy import deepcopy
+        default_policy = {
+            "radius_multipliers": deepcopy(DEFAULT_RADIUS_MULTIPLIERS),
+            "fallback_cost_weight": DEFAULT_FALLBACK_COST_WEIGHT.copy(),
+            "pass_thresholds": DEFAULT_PASS_THRESHOLDS.copy(),
+        }
+        tuned_policy = {
+            "radius_multipliers": deepcopy(router.radius_multipliers),
+            "fallback_cost_weight": router.fallback_cost_weight.copy(),
+            "pass_thresholds": router.pass_thresholds.copy(),
+        }
+        test_result = paired_t_test_policies(
+            router, train_df, specs_df,
+            policy_a=tuned_policy,
+            policy_b=default_policy,
+        )
+        router.metadata["stat_test_tuned_vs_default"] = {
+            "test_name": test_result.test_name,
+            "statistic": test_result.statistic,
+            "p_value": test_result.p_value,
+            "significant": test_result.significant,
+            "effect_size": test_result.effect_size,
+            "mean_tuned": test_result.mean_a,
+            "mean_default": test_result.mean_b,
+            "n_samples": test_result.n_samples,
+        }
+        # Restore tuned policy after stat tests
+        router.set_policy(
+            tuned_policy["radius_multipliers"],
+            tuned_policy["fallback_cost_weight"],
+            tuned_policy["pass_thresholds"],
+        )
+        sig_str = "SIGNIFICANT" if test_result.significant else "not significant"
+        print(f"  Paired t-test: t={test_result.statistic:.4f}, p={test_result.p_value:.4f} ({sig_str})")
+        print(f"  Effect size (Cohen's d): {test_result.effect_size:.4f}")
+
     router.save(args.output)
 
     labels = build_training_labels(train_df, specs_df, fallback_threshold=args.fallback_threshold)

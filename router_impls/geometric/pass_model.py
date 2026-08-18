@@ -72,7 +72,7 @@ class PassProbabilityModel:
         )
 
 
-def fit_pass_model(prompt_features: dict[str, np.ndarray], labels) -> PassProbabilityModel:
+def fit_pass_model(prompt_features: dict[str, np.ndarray], labels, bandwidth: float = 1.25) -> PassProbabilityModel:
     exemplars = []
     for row in labels.itertuples(index=False):
         feature = prompt_features[str(row.prompt_id)]
@@ -84,6 +84,6 @@ def fit_pass_model(prompt_features: dict[str, np.ndarray], labels) -> PassProbab
                 success=bool(row.success),
             )
         )
-    return PassProbabilityModel(exemplars=exemplars)
+    return PassProbabilityModel(exemplars=exemplars, bandwidth=bandwidth)
 
 

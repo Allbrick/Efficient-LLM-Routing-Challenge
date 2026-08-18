@@ -57,7 +57,11 @@ def cross_validate_router(
     fallback_threshold: float = 0.85,
     radius_quantile: float = 0.90,
     include_synthetic: bool = True,
+    include_smote: bool = True,
     tiers: tuple[str, ...] = ("fast", "balanced", "premium"),
+    pass_bandwidth: float = 1.25,
+    risk_bandwidth: float = 1.15,
+    envelope_epsilon: float = 1e-3,
 ) -> CrossValidationResult:
     total_start = time.time()
 
@@ -108,6 +112,10 @@ def cross_validate_router(
             fallback_threshold=fallback_threshold,
             radius_quantile=radius_quantile,
             include_synthetic=include_synthetic,
+            include_smote=include_smote,
+            pass_bandwidth=pass_bandwidth,
+            risk_bandwidth=risk_bandwidth,
+            envelope_epsilon=envelope_epsilon,
         )
         fit_time = time.time() - fit_start
 

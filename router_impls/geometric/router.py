@@ -118,6 +118,9 @@ class GeometricRouter:
         include_smote: bool = True,
         use_semantic_features: bool = False,
         semantic_index: SemanticFeatureIndex | None = None,
+        pass_bandwidth: float = 1.25,
+        risk_bandwidth: float = 1.15,
+        envelope_epsilon: float = 1e-3,
     ) -> "GeometricRouter":
         if include_synthetic:
             synthetic_train, synthetic_specs = build_numeric_count_data()
@@ -167,7 +170,7 @@ class GeometricRouter:
             features = np.array([prompt_features[pid] for pid in successful_prompt_ids], dtype=np.float64)
             if len(features) == 0:
                 features = all_features
-            envelopes[model_id] = fit_envelope(model_id, features, quantile=radius_quantile)
+            envelopes[model_id] = fit_envelope(model_id, features, quantile=radius_quantile, epsilon=envelope_epsilon)
 
         training_min_distances = []
         for feature_vector in prompt_features.values():
@@ -201,8 +204,8 @@ class GeometricRouter:
         )
         frontier = build_pareto_frontier(train_df)
         task_classifier = TaskClassifier.fit(specs_df) if specs_df is not None and not specs_df.empty else None
-        pass_model = fit_pass_model(smote_features, smote_labels)
-        risk_model = fit_risk_model(smote_features, smote_labels, smote_texts)
+        pass_model = fit_pass_model(smote_features, smote_labels, bandwidth=pass_bandwidth)
+        risk_model = fit_risk_model(smote_features, smote_labels, smote_texts, bandwidth=risk_bandwidth)
         metadata = {
             "fallback_threshold": fallback_threshold,
             "radius_quantile": radius_quantile,
@@ -211,6 +214,9 @@ class GeometricRouter:
             "n_prompts": int(train_df["prompt_id"].nunique()),
             "n_rows": int(len(train_df)),
             "ood_reference": ood_reference,
+            "pass_bandwidth": pass_bandwidth,
+            "risk_bandwidth": risk_bandwidth,
+            "envelope_epsilon": envelope_epsilon,
         }
         return cls(
             envelopes=envelopes,
