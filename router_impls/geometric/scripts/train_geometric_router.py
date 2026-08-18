@@ -66,6 +66,11 @@ def main() -> None:
     parser.add_argument("--bayesian-initial", type=int, default=10, help="Initial random points for Bayesian optimization (default: 10)")
     parser.add_argument("--bayesian-iterations", type=int, default=30, help="GP-guided iterations for Bayesian optimization (default: 30)")
     parser.add_argument("--stat-tests", action="store_true", help="Run statistical tests comparing tuned vs default policy")
+    parser.add_argument("--use-logistic", action="store_true", help="Train logistic regression auxiliary pass model")
+    parser.add_argument("--logistic-C", type=float, default=1.0, help="Logistic regression regularization strength (default: 1.0)")
+    parser.add_argument("--blend-alpha", type=float, default=1.0, help="Blend weight: 1.0=pure KNN, 0.0=pure logistic (default: 1.0)")
+    parser.add_argument("--use-risk-pca", action="store_true", help="Apply PCA dimension reduction to risk model")
+    parser.add_argument("--risk-pca-variance", type=float, default=0.90, help="PCA explained variance threshold (default: 0.90)")
     args = parser.parse_args()
 
     train_df, specs_df, data_summary = load_training_with_external(
@@ -139,6 +144,11 @@ def main() -> None:
         pass_bandwidth=opt_pass_bandwidth,
         risk_bandwidth=opt_risk_bandwidth,
         envelope_epsilon=opt_envelope_epsilon,
+        use_logistic=getattr(args, "use_logistic", False),
+        logistic_C=getattr(args, "logistic_C", 1.0),
+        blend_alpha=getattr(args, "blend_alpha", 1.0),
+        use_risk_pca=getattr(args, "use_risk_pca", False),
+        risk_pca_variance=getattr(args, "risk_pca_variance", 0.90),
     )
     if hyperopt_result is not None:
         router.metadata["hyperopt"] = hyperopt_result
@@ -261,6 +271,11 @@ def main() -> None:
             "pass_thresholds": router.pass_thresholds,
             "abstain_thresholds": router.abstain_thresholds,
             "tuning": tuning,
+        },
+        "phase4": {
+            "logistic_pass_model": router.logistic_pass_model is not None,
+            "blend_alpha": router.blend_alpha,
+            "risk_pca": router.risk_model.pca_transform is not None if router.risk_model else False,
         },
     }
     if dq_report_dict is not None:

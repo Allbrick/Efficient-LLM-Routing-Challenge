@@ -11,11 +11,13 @@ import pandas as pd
 from router_impls.geometric.envelope import Envelope, fit_envelope
 from router_impls.geometric.evaluator import build_training_labels
 from router_impls.geometric.features import MODEL_ORDER, TASK_HINTS, EvidenceExtractor
+from router_impls.geometric.logistic_pass_model import LogisticPassModel, fit_logistic_pass_model
 from router_impls.geometric.pass_model import PassProbabilityModel, fit_pass_model
 from router_impls.geometric.pareto import best_under_budget, build_pareto_frontier
 from router_impls.geometric.risk_model import SufficiencyRiskModel, fit_risk_model
 from router_impls.geometric.synthetic_data import build_numeric_count_data, smote_augment_features
 from router_impls.geometric.task_classifier import TaskClassifier
+from router_impls.geometric.xai import EVIDENCE_FEATURE_NAMES, contributions_to_evidence, decompose_all_models
 from routing_stack.input.semantic_features import HashPromptEncoder, SemanticFeatureIndex
 from routing_stack.input.text_features import analyze_text_prompt
 
@@ -90,6 +92,8 @@ class GeometricRouter:
         abstain_thresholds: dict[str, float] | None = None,
         semantic_index: SemanticFeatureIndex | None = None,
         metadata: dict | None = None,
+        logistic_pass_model: LogisticPassModel | None = None,
+        blend_alpha: float = 1.0,
     ):
         self.envelopes = envelopes
         self.model_costs = model_costs
@@ -105,6 +109,8 @@ class GeometricRouter:
         self.abstain_thresholds = abstain_thresholds or DEFAULT_ABSTAIN_THRESHOLDS.copy()
         self.semantic_index = semantic_index
         self.metadata = metadata or {}
+        self.logistic_pass_model = logistic_pass_model
+        self.blend_alpha = blend_alpha
         self.extractor = EvidenceExtractor()
 
     @classmethod
@@ -121,6 +127,11 @@ class GeometricRouter:
         pass_bandwidth: float = 1.25,
         risk_bandwidth: float = 1.15,
         envelope_epsilon: float = 1e-3,
+        use_logistic: bool = False,
+        logistic_C: float = 1.0,
+        blend_alpha: float = 1.0,
+        use_risk_pca: bool = False,
+        risk_pca_variance: float = 0.90,
     ) -> "GeometricRouter":
         if include_synthetic:
             synthetic_train, synthetic_specs = build_numeric_count_data()
@@ -205,7 +216,15 @@ class GeometricRouter:
         frontier = build_pareto_frontier(train_df)
         task_classifier = TaskClassifier.fit(specs_df) if specs_df is not None and not specs_df.empty else None
         pass_model = fit_pass_model(smote_features, smote_labels, bandwidth=pass_bandwidth)
-        risk_model = fit_risk_model(smote_features, smote_labels, smote_texts, bandwidth=risk_bandwidth)
+        risk_model = fit_risk_model(
+            smote_features, smote_labels, smote_texts, bandwidth=risk_bandwidth,
+            use_pca=use_risk_pca, pca_variance=risk_pca_variance,
+        )
+        logistic_pass_model = None
+        if use_logistic:
+            logistic_pass_model = fit_logistic_pass_model(
+                smote_features, smote_labels, C=logistic_C,
+            )
         metadata = {
             "fallback_threshold": fallback_threshold,
             "radius_quantile": radius_quantile,
@@ -217,6 +236,10 @@ class GeometricRouter:
             "pass_bandwidth": pass_bandwidth,
             "risk_bandwidth": risk_bandwidth,
             "envelope_epsilon": envelope_epsilon,
+            "use_logistic": use_logistic,
+            "blend_alpha": blend_alpha,
+            "use_risk_pca": use_risk_pca,
+            "risk_pca_variance": risk_pca_variance,
         }
         return cls(
             envelopes=envelopes,
@@ -227,6 +250,8 @@ class GeometricRouter:
             risk_model=risk_model,
             semantic_index=semantic_index,
             metadata=metadata,
+            logistic_pass_model=logistic_pass_model,
+            blend_alpha=blend_alpha,
         )
 
     def set_policy(
@@ -278,6 +303,13 @@ class GeometricRouter:
         tier_radius = self.radius_multipliers.get(tier, DEFAULT_RADIUS_MULTIPLIERS[tier])
         active_model_costs = {**self.model_costs, **request_model_costs}
         pass_probabilities = self.pass_model.predict_all(x) if self.pass_model is not None else {}
+        if self.logistic_pass_model is not None and pass_probabilities:
+            logistic_probs = self.logistic_pass_model.predict_all(x)
+            alpha = self.blend_alpha
+            pass_probabilities = {
+                mid: alpha * pass_probabilities.get(mid, 0.0) + (1.0 - alpha) * logistic_probs.get(mid, 0.0)
+                for mid in MODEL_ORDER
+            }
         sufficiency_probabilities = self.risk_model.predict_all(x, prompt) if self.risk_model is not None else {}
         candidates = []
         simple_prompt_prior = self._has_simple_prompt_prior(semantic_prompt, evidence_obj, evaluation_type) or (
@@ -428,6 +460,17 @@ class GeometricRouter:
         evidence["explicit_task_context"] = 1.0 if explicit_task_context else 0.0
         if self.semantic_index is not None:
             evidence.update(self.semantic_index.explain(prompt))
+        xai_contributions = decompose_all_models(x, self.envelopes, EVIDENCE_FEATURE_NAMES)
+        evidence["feature_contributions"] = {
+            mid: {
+                "total_distance": fc.total_distance,
+                "total_distance_squared": fc.total_distance_squared,
+                "top_pushing_away": fc.top_pushing_away,
+                "top_pulling_toward": fc.top_pulling_toward,
+            }
+            for mid, fc in xai_contributions.items()
+        }
+        evidence.update(contributions_to_evidence(xai_contributions))
         return RouteDecision(
             prompt=prompt,
             budget_tier=tier,
@@ -654,6 +697,8 @@ class GeometricRouter:
             "abstain_thresholds": self.abstain_thresholds,
             "semantic_index": self.semantic_index.to_dict() if self.semantic_index is not None else None,
             "metadata": self.metadata,
+            "logistic_pass_model": self.logistic_pass_model.to_dict() if self.logistic_pass_model is not None else None,
+            "blend_alpha": self.blend_alpha,
         }
         output = Path(path)
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -687,6 +732,10 @@ class GeometricRouter:
             if payload.get("semantic_index") is not None
             else None,
             metadata=payload.get("metadata", {}),
+            logistic_pass_model=LogisticPassModel.from_dict(payload["logistic_pass_model"])
+            if payload.get("logistic_pass_model") is not None
+            else None,
+            blend_alpha=float(payload.get("blend_alpha", 1.0)),
         )
 
     def _classify_pre_route_lane(
