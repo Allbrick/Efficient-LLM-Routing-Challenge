@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 from pathlib import Path
 
 
@@ -15,7 +14,7 @@ REQUIRED_FILES = (
     "docs/SUBMISSION.md",
     "docs/SBOM.md",
     "docs/AI_MODEL_USAGE.md",
-    "docs/DEMO_SCRIPT.md",
+    "docs/DEMO.md",
     "data/external/dataset_sources.json",
     "data/router_outcomes/README.md",
     "data/router_outcomes/public_outcome_matrix.csv",

@@ -13,7 +13,6 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from router_impls.geometric.evaluator import build_training_labels
-from router_impls.geometric.features import MODEL_RANK
 from router_impls.geometric.router import BUDGET_LIMITS, GeometricRouter
 from router_impls.geometric.simulator import classify_route
 
