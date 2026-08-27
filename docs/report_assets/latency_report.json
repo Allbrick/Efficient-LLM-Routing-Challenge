@@ -6,26 +6,26 @@
     {
       "budget_tier": "fast",
       "count": 37,
-      "latency_ms_mean": 9.571695496823203,
-      "latency_ms_p50": 8.245133329182863,
-      "latency_ms_p95": 16.797659996276096,
-      "latency_ms_max": 19.3981333480527
+      "latency_ms_mean": 23.722800900236713,
+      "latency_ms_p50": 21.755899996302713,
+      "latency_ms_p95": 31.9372533316103,
+      "latency_ms_max": 35.18859999409566
     },
     {
       "budget_tier": "balanced",
       "count": 37,
-      "latency_ms_mean": 9.866784685417205,
-      "latency_ms_p50": 8.079033306178948,
-      "latency_ms_p95": 18.592386669479303,
-      "latency_ms_max": 28.083700065811474
+      "latency_ms_mean": 24.25685855845799,
+      "latency_ms_p50": 21.880633333542693,
+      "latency_ms_p95": 41.17919333123912,
+      "latency_ms_max": 44.64743333907487
     },
     {
       "budget_tier": "premium",
       "count": 37,
-      "latency_ms_mean": 9.243692791609615,
-      "latency_ms_p50": 7.500299989866714,
-      "latency_ms_p95": 17.8472999871398,
-      "latency_ms_max": 20.288366669168074
+      "latency_ms_mean": 23.335345045386536,
+      "latency_ms_p50": 22.910833334511455,
+      "latency_ms_p95": 31.71719333040528,
+      "latency_ms_max": 33.25903333219079
     }
   ],
   "files": [

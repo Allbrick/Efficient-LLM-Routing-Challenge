@@ -1,16 +1,19 @@
 demo_case,tier,selected_model_id,selection_reason,pre_route_lane,pre_route_reason,ood_score,uncertainty_score,ood_high,cheap_distance,mid_distance,premium_distance,cheap_pass_probability,mid_pass_probability,premium_pass_probability
-trivial cheap,fast,cheap,simple_prompt_prior,cheap_direct,obvious_low_risk_prompt,0.02739,0.462359,0.0,1.126417,2.372384,7.295955,0.503509,0.911345,0.903614
-trivial cheap,balanced,cheap,simple_prompt_prior,cheap_direct,obvious_low_risk_prompt,0.02739,0.462359,0.0,1.126417,1.42343,1.459191,0.503509,0.911345,0.903614
-trivial cheap,premium,cheap,simple_prompt_prior,cheap_direct,obvious_low_risk_prompt,0.040949,0.469816,0.0,1.188995,1.334466,1.563419,0.503509,0.911345,0.903614
-simple numeric,fast,cheap,exact_answer_prior,cheap_direct,obvious_low_risk_prompt,0.125302,0.507483,0.0,1.578318,3.756437,16.631237,0.509573,0.911803,0.879137
-simple numeric,balanced,cheap,exact_answer_prior,cheap_direct,obvious_low_risk_prompt,0.125302,0.507483,0.0,1.578318,2.253862,3.326247,0.509573,0.911803,0.879137
-simple numeric,premium,cheap,exact_answer_prior,cheap_direct,obvious_low_risk_prompt,0.1443,0.517932,0.0,1.666002,2.112996,3.563836,0.509573,0.911803,0.879137
-medium code,fast,mid,nearest_budget_fallback,hard_task,hard_or_high_risk_signal,0.047771,0.472388,0.0,1.220481,2.235184,6.486496,0.470403,0.897076,0.90818
-medium code,balanced,mid,nearest_budget_fallback,hard_task,hard_or_high_risk_signal,0.047771,0.472388,0.0,1.220481,1.341111,1.297299,0.470403,0.897076,0.90818
-medium code,premium,premium,cheapest_passing_probability,hard_task,hard_or_high_risk_signal,0.055746,0.476774,0.0,1.288286,1.257291,1.389963,0.470403,0.897076,0.90818
-hard architecture,fast,mid,nearest_envelope_fallback,hard_task,hard_or_high_risk_signal,0.060175,0.470137,0.0,1.277733,1.896635,5.254403,0.414441,0.883172,0.920198
-hard architecture,balanced,premium,nearest_envelope_fallback,hard_task,hard_or_high_risk_signal,0.011024,0.443104,0.0,1.277733,1.137981,1.050881,0.414441,0.883172,0.920198
-hard architecture,premium,premium,cheapest_passing_probability,hard_task,hard_or_high_risk_signal,0.014486,0.445008,0.0,1.348718,1.066857,1.125944,0.414441,0.883172,0.920198
-missing context abstain,fast,abstain,missing_context_prior,missing_context,missing_required_context,0.386564,0.646243,0.0,2.784143,2.996049,8.102582,0.405712,0.87721,0.923973
-missing context abstain,balanced,abstain,missing_context_prior,missing_context,missing_required_context,0.134445,0.507578,0.0,2.784143,1.797629,1.620516,0.405712,0.87721,0.923973
-missing context abstain,premium,abstain,missing_context_prior,missing_context,missing_required_context,0.148477,0.515295,0.0,2.938817,1.685278,1.736268,0.405712,0.87721,0.923973
+trivial cheap,fast,cheap,simple_prompt_prior,cheap_direct,obvious_low_risk_prompt,0.024324,0.412773,0.0,1.112266,2.295472,7.124298,0.353896,0.678504,0.823092
+trivial cheap,balanced,cheap,simple_prompt_prior,cheap_direct,obvious_low_risk_prompt,0.024324,0.412773,0.0,1.112266,1.377283,3.05327,0.353896,0.678504,0.823092
+trivial cheap,premium,cheap,simple_prompt_prior,cheap_direct,obvious_low_risk_prompt,0.0,0.299394,0.0,1.174059,0.983774,1.526635,0.353896,0.678504,0.823092
+simple numeric,fast,cheap,exact_answer_prior,cheap_direct,obvious_low_risk_prompt,0.116905,0.471637,0.0,1.539563,3.627355,15.988247,0.360743,0.686289,0.808177
+simple numeric,balanced,cheap,exact_answer_prior,cheap_direct,obvious_low_risk_prompt,0.116905,0.471637,0.0,1.539563,2.176413,6.852106,0.360743,0.686289,0.808177
+simple numeric,premium,cheap,exact_answer_prior,cheap_direct,obvious_low_risk_prompt,0.120159,0.473427,0.0,1.625094,1.554581,3.426053,0.360743,0.686289,0.808177
+medium code,fast,cheap,nearest_budget_fallback,hard_task,hard_or_high_risk_signal,0.088204,0.435156,0.0,1.407096,2.440621,7.252764,0.31459,0.637468,0.818485
+medium code,balanced,mid,nearest_budget_fallback,hard_task,hard_or_high_risk_signal,0.088204,0.435156,0.0,1.407096,1.464373,3.108327,0.31459,0.637468,0.818485
+medium code,premium,premium,nearest_budget_fallback,hard_task,hard_or_high_risk_signal,0.009963,0.392123,0.0,1.485269,1.045981,1.554164,0.31459,0.637468,0.818485
+hard architecture,fast,cheap,nearest_budget_fallback,hard_task,hard_or_high_risk_signal,0.092988,0.4259,0.0,1.429177,1.961282,5.498919,0.247022,0.596574,0.811557
+hard architecture,balanced,mid,nearest_budget_fallback,hard_task,hard_or_high_risk_signal,0.0383,0.395821,0.0,1.429177,1.176769,2.35668,0.247022,0.596574,0.811557
+hard architecture,premium,premium,nearest_budget_fallback,hard_task,hard_or_high_risk_signal,0.0,0.274756,0.0,1.508575,0.840549,1.17834,0.247022,0.596574,0.811557
+missing context abstain,fast,abstain,missing_context_prior,missing_context,missing_required_context,0.406309,0.604639,0.0,2.875272,2.90064,7.941534,0.239522,0.589807,0.786466
+missing context abstain,balanced,abstain,missing_context_prior,missing_context,missing_required_context,0.160417,0.469398,0.0,2.875272,1.740384,3.403514,0.239522,0.589807,0.786466
+missing context abstain,premium,abstain,missing_context_prior,missing_context,missing_required_context,0.052678,0.410142,0.0,3.035009,1.243131,1.701757,0.239522,0.589807,0.786466
+tier-dependent selection,fast,cheap,nearest_budget_fallback,ambiguous,requires_budgeted_model_choice,2e-06,0.391994,0.0,1.000007,2.282098,7.741056,0.340412,0.655264,0.820999
+tier-dependent selection,balanced,mid,nearest_budget_fallback,ambiguous,requires_budgeted_model_choice,2e-06,0.391994,0.0,1.000007,1.369259,3.317595,0.340412,0.655264,0.820999
+tier-dependent selection,premium,mid,cheapest_sufficient_envelope,ambiguous,requires_budgeted_model_choice,0.0,0.291993,0.0,1.055563,0.978042,1.658798,0.340412,0.655264,0.820999

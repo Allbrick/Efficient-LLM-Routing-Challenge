@@ -5,47 +5,51 @@
     {
       "name": "train_geometric_router",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "router_impls/geometric/scripts/train_geometric_router.py",
         "--include_feedback",
+        "--outcome_matrix_path",
+        "data/router_outcomes/reviewed_outcome_matrix.csv",
         "--policy_report",
         "artifacts/geometric_policy_report.json"
       ],
       "returncode": 0,
-      "elapsed_seconds": 92.386,
-      "stdout_tail": "          \"budget_limit\": 0.2,\n          \"mean_quality\": 0.952054794520548,\n          \"mean_cost\": 0.09602739726027397,\n          \"mean_excess_cost\": 0.0,\n          \"cost_over_limit\": 0,\n          \"under_route\": 1,\n          \"over_route\": 13,\n          \"should_abstain\": 0,\n          \"ok\": 59,\n          \"selection_counts\": {\n            \"premium\": 33,\n            \"cheap\": 26,\n            \"abstain\": 11,\n            \"mid\": 3\n          }\n        }\n      }\n    }\n  }\n}",
+      "elapsed_seconds": 852.638,
+      "stdout_tail": "          \"under_route\": 10,\n          \"over_route\": 129,\n          \"should_abstain\": 0,\n          \"ok\": 131,\n          \"selection_counts\": {\n            \"mid\": 96,\n            \"premium\": 87,\n            \"abstain\": 54,\n            \"cheap\": 33\n          }\n        }\n      }\n    }\n  },\n  \"phase4\": {\n    \"logistic_pass_model\": false,\n    \"blend_alpha\": 1.0,\n    \"risk_pca\": false\n  }\n}",
       "stderr_tail": ""
     },
     {
       "name": "generate_report_assets",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/generate_report_assets.py",
+        "--outcome_matrix_path",
+        "data/router_outcomes/reviewed_outcome_matrix.csv",
         "--output_dir",
         "docs/report_assets"
       ],
       "returncode": 0,
-      "elapsed_seconds": 111.039,
-      "stdout_tail": "        \"ok\": 59,\n        \"selection_counts\": {\n          \"premium\": 33,\n          \"cheap\": 26,\n          \"abstain\": 11,\n          \"mid\": 3\n        }\n      }\n    }\n  },\n  \"files\": [\n    \"tier_summary.csv\",\n    \"selection_distribution.csv\",\n    \"error_summary.csv\",\n    \"before_after.csv\",\n    \"demo_prompts.csv\",\n    \"fast_allocation_summary.csv\",\n    \"report_assets_summary.json\"\n  ]\n}",
+      "elapsed_seconds": 717.089,
+      "stdout_tail": "        \"ok\": 131,\n        \"selection_counts\": {\n          \"mid\": 96,\n          \"premium\": 87,\n          \"abstain\": 54,\n          \"cheap\": 33\n        }\n      }\n    }\n  },\n  \"files\": [\n    \"tier_summary.csv\",\n    \"selection_distribution.csv\",\n    \"error_summary.csv\",\n    \"before_after.csv\",\n    \"demo_prompts.csv\",\n    \"fast_allocation_summary.csv\",\n    \"report_assets_summary.json\"\n  ]\n}",
       "stderr_tail": ""
     },
     {
       "name": "generate_outcome_matrix",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/generate_outcome_matrix.py",
         "--output",
         "data/router_outcomes/public_outcome_matrix.csv"
       ],
       "returncode": 0,
-      "elapsed_seconds": 1.267,
+      "elapsed_seconds": 0.786,
       "stdout_tail": "    \"difficulty\",\n    \"risk_level\",\n    \"evaluation_type\",\n    \"cheap_output\",\n    \"cheap_score\",\n    \"cheap_pass\",\n    \"mid_output\",\n    \"mid_score\",\n    \"mid_pass\",\n    \"premium_output\",\n    \"premium_score\",\n    \"premium_pass\",\n    \"min_sufficient_model\",\n    \"best_model\",\n    \"premium_gain_over_mid\",\n    \"mid_gain_over_cheap\",\n    \"abstain_is_correct\",\n    \"failure_reason\"\n  ]\n}",
       "stderr_tail": ""
     },
     {
       "name": "measure_router_latency",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/measure_router_latency.py",
         "--output_dir",
         "docs/report_assets",
@@ -53,86 +57,108 @@
         "3"
       ],
       "returncode": 0,
-      "elapsed_seconds": 4.27,
-      "stdout_tail": "      \"count\": 37,\n      \"latency_ms_mean\": 9.866784685417205,\n      \"latency_ms_p50\": 8.079033306178948,\n      \"latency_ms_p95\": 18.592386669479303,\n      \"latency_ms_max\": 28.083700065811474\n    },\n    {\n      \"budget_tier\": \"premium\",\n      \"count\": 37,\n      \"latency_ms_mean\": 9.243692791609615,\n      \"latency_ms_p50\": 7.500299989866714,\n      \"latency_ms_p95\": 17.8472999871398,\n      \"latency_ms_max\": 20.288366669168074\n    }\n  ],\n  \"files\": [\n    \"latency_summary.csv\",\n    \"latency_detail.csv\"\n  ]\n}",
+      "elapsed_seconds": 8.835,
+      "stdout_tail": "      \"count\": 37,\n      \"latency_ms_mean\": 24.25685855845799,\n      \"latency_ms_p50\": 21.880633333542693,\n      \"latency_ms_p95\": 41.17919333123912,\n      \"latency_ms_max\": 44.64743333907487\n    },\n    {\n      \"budget_tier\": \"premium\",\n      \"count\": 37,\n      \"latency_ms_mean\": 23.335345045386536,\n      \"latency_ms_p50\": 22.910833334511455,\n      \"latency_ms_p95\": 31.71719333040528,\n      \"latency_ms_max\": 33.25903333219079\n    }\n  ],\n  \"files\": [\n    \"latency_summary.csv\",\n    \"latency_detail.csv\"\n  ]\n}",
       "stderr_tail": ""
     },
     {
       "name": "generate_geometric_explanations",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/generate_geometric_explanations.py",
         "--output_dir",
         "docs/report_assets"
       ],
       "returncode": 0,
-      "elapsed_seconds": 1.138,
-      "stdout_tail": "    },\n    {\n      \"demo_case\": \"tier-dependent selection\",\n      \"tier\": \"premium\",\n      \"selected_model_id\": \"mid\",\n      \"selection_reason\": \"cheapest_feasible_envelope\",\n      \"pre_route_lane\": \"hard_task\",\n      \"pre_route_reason\": \"hard_or_high_risk_signal\",\n      \"ood_score\": 0.0,\n      \"uncertainty_score\": 0.347835,\n      \"ood_high\": 0.0,\n      \"cheap_distance\": 2.637811,\n      \"mid_distance\": 0.964739,\n      \"premium_distance\": 1.371997,\n      \"cheap_pass_probability\": 0.440705,\n      \"mid_pass_probability\": 0.657231,\n      \"premium_pass_probability\": 0.663416\n    }\n  ]\n}",
+      "elapsed_seconds": 1.162,
+      "stdout_tail": "    },\n    {\n      \"demo_case\": \"tier-dependent selection\",\n      \"tier\": \"premium\",\n      \"selected_model_id\": \"mid\",\n      \"selection_reason\": \"cheapest_sufficient_envelope\",\n      \"pre_route_lane\": \"ambiguous\",\n      \"pre_route_reason\": \"requires_budgeted_model_choice\",\n      \"ood_score\": 0.0,\n      \"uncertainty_score\": 0.291993,\n      \"ood_high\": 0.0,\n      \"cheap_distance\": 1.055563,\n      \"mid_distance\": 0.978042,\n      \"premium_distance\": 1.658798,\n      \"cheap_pass_probability\": 0.340412,\n      \"mid_pass_probability\": 0.655264,\n      \"premium_pass_probability\": 0.820999\n    }\n  ]\n}",
       "stderr_tail": ""
     },
     {
       "name": "generate_router_comparison",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/generate_router_comparison.py",
         "--output_dir",
         "docs/report_assets"
       ],
       "returncode": 0,
-      "elapsed_seconds": 12.516,
-      "stdout_tail": "      \"latency_ms_mean\": 40.78059863420331,\n      \"selection_counts\": \"{\\\"cheap\\\": 24, \\\"premium\\\": 23, \\\"mid\\\": 15, \\\"abstain\\\": 11}\"\n    },\n    {\n      \"router\": \"geometric_external_weak\",\n      \"tier\": \"premium\",\n      \"count\": 73,\n      \"mean_quality\": 0.9342465753424656,\n      \"mean_cost\": 0.093013698630137,\n      \"mean_excess_cost\": 0.0,\n      \"cost_over_limit\": 0,\n      \"under_route\": 2,\n      \"over_route\": 12,\n      \"should_abstain\": 0,\n      \"ok\": 59,\n      \"latency_ms_mean\": 40.22309178014426,\n      \"selection_counts\": \"{\\\"premium\\\": 31, \\\"cheap\\\": 24, \\\"abstain\\\": 11, \\\"mid\\\": 7}\"\n    }\n  ]\n}",
+      "elapsed_seconds": 6.6,
+      "stdout_tail": "      \"latency_ms_mean\": 25.893468492902013,\n      \"selection_counts\": \"{\\\"mid\\\": 39, \\\"cheap\\\": 23, \\\"abstain\\\": 11}\"\n    },\n    {\n      \"router\": \"geometric_tuned\",\n      \"tier\": \"premium\",\n      \"count\": 73,\n      \"mean_quality\": 0.9310958904109589,\n      \"mean_cost\": 0.10589041095890411,\n      \"mean_excess_cost\": 0.0,\n      \"cost_over_limit\": 0,\n      \"under_route\": 3,\n      \"over_route\": 18,\n      \"should_abstain\": 0,\n      \"ok\": 52,\n      \"latency_ms_mean\": 26.17644657514836,\n      \"selection_counts\": \"{\\\"premium\\\": 37, \\\"cheap\\\": 23, \\\"abstain\\\": 11, \\\"mid\\\": 2}\"\n    }\n  ]\n}",
       "stderr_tail": ""
     },
     {
       "name": "generate_policy_preset_comparison",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/generate_policy_preset_comparison.py",
         "--output_dir",
         "docs/report_assets"
       ],
       "returncode": 0,
-      "elapsed_seconds": 10.596,
-      "stdout_tail": "      \"tier\": \"premium\",\n      \"count\": 73,\n      \"budget_limit\": 0.2,\n      \"mean_quality\": 0.9383561643835616,\n      \"mean_cost\": 0.10123287671232878,\n      \"mean_excess_cost\": 0.0,\n      \"cost_over_limit\": 0,\n      \"under_route\": 1,\n      \"over_route\": 16,\n      \"should_abstain\": 0,\n      \"ok\": 56,\n      \"selection_counts\": {\n        \"premium\": 35,\n        \"cheap\": 24,\n        \"abstain\": 11,\n        \"mid\": 3\n      }\n    }\n  ]\n}",
+      "elapsed_seconds": 19.068,
+      "stdout_tail": "      \"tier\": \"premium\",\n      \"count\": 73,\n      \"budget_limit\": 0.2,\n      \"mean_quality\": 0.9173972602739726,\n      \"mean_cost\": 0.10794520547945206,\n      \"mean_excess_cost\": 0.0,\n      \"cost_over_limit\": 0,\n      \"under_route\": 3,\n      \"over_route\": 18,\n      \"should_abstain\": 0,\n      \"ok\": 52,\n      \"selection_counts\": {\n        \"premium\": 38,\n        \"cheap\": 23,\n        \"abstain\": 11,\n        \"mid\": 1\n      }\n    }\n  ]\n}",
       "stderr_tail": ""
     },
     {
       "name": "generate_sufficiency_calibration",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/generate_sufficiency_calibration.py",
+        "--outcome_matrix_path",
+        "data/router_outcomes/reviewed_outcome_matrix.csv",
         "--output_dir",
         "docs/report_assets"
       ],
       "returncode": 0,
-      "elapsed_seconds": 2.187,
-      "stdout_tail": "      \"actual_success_rate\": 0.3698630136986301\n    },\n    {\n      \"model_id\": \"mid\",\n      \"count\": 73,\n      \"brier_score\": 0.20470036931510957,\n      \"ece\": 0.15810080821917813,\n      \"mean_predicted_probability\": 0.5999122328767124,\n      \"actual_success_rate\": 0.589041095890411\n    },\n    {\n      \"model_id\": \"premium\",\n      \"count\": 73,\n      \"brier_score\": 0.24550533324790413,\n      \"ece\": 0.1715185068493151,\n      \"mean_predicted_probability\": 0.8730697945205479,\n      \"actual_success_rate\": 0.726027397260274\n    }\n  ]\n}",
+      "elapsed_seconds": 6.834,
+      "stdout_tail": "      \"actual_success_rate\": 0.44074074074074077\n    },\n    {\n      \"model_id\": \"mid\",\n      \"count\": 270,\n      \"brier_score\": 0.19678608100476297,\n      \"ece\": 0.3422287333333333,\n      \"mean_predicted_probability\": 0.5505030740740741,\n      \"actual_success_rate\": 0.8814814814814815\n    },\n    {\n      \"model_id\": \"premium\",\n      \"count\": 270,\n      \"brier_score\": 0.10054127308288888,\n      \"ece\": 0.24248608888888887,\n      \"mean_predicted_probability\": 0.7671553407407407,\n      \"actual_success_rate\": 0.9259259259259259\n    }\n  ]\n}",
       "stderr_tail": ""
     },
     {
       "name": "generate_ood_calibration",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/generate_ood_calibration.py",
+        "--outcome_matrix_path",
+        "data/router_outcomes/reviewed_outcome_matrix.csv",
         "--output_dir",
         "docs/report_assets"
       ],
       "returncode": 0,
-      "elapsed_seconds": 1.829,
-      "stdout_tail": "{\n  \"files\": [\n    \"ood_calibration.csv\",\n    \"ood_calibration_summary.json\"\n  ],\n  \"summary\": {\n    \"count\": 73,\n    \"ood_high_threshold\": 0.9,\n    \"ood_high_count\": 0,\n    \"cheap_direct_success_rate\": 1.0,\n    \"ood_high_cheap_failure_rate\": null,\n    \"ood_low_cheap_success_rate\": 0.7894736842105263,\n    \"ood_high_premium_overuse_rate\": null\n  }\n}",
+      "elapsed_seconds": 6.873,
+      "stdout_tail": "{\n  \"files\": [\n    \"ood_calibration.csv\",\n    \"ood_calibration_summary.json\"\n  ],\n  \"summary\": {\n    \"count\": 270,\n    \"ood_high_threshold\": 0.9,\n    \"ood_high_count\": 0,\n    \"cheap_direct_success_rate\": 0.9375,\n    \"ood_high_cheap_failure_rate\": null,\n    \"ood_low_cheap_success_rate\": 0.468503937007874,\n    \"ood_high_premium_overuse_rate\": null\n  }\n}",
       "stderr_tail": ""
     },
     {
       "name": "verify_submission_readiness",
       "command": [
-        "C:\\Users\\junhere\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
         "scripts/verify_submission_readiness.py",
         "--output",
         "docs/report_assets/submission_readiness.json"
       ],
       "returncode": 0,
-      "elapsed_seconds": 0.257,
-      "stdout_tail": "  \"warning_count\": 0,\n  \"blockers\": [\n    {\n      \"type\": \"placeholder\",\n      \"path\": \"docs/REPORT_OUTLINE.md\",\n      \"message\": \"github_url placeholder remains\"\n    },\n    {\n      \"type\": \"placeholder\",\n      \"path\": \"docs/REPORT_OUTLINE.md\",\n      \"message\": \"youtube_url placeholder remains\"\n    },\n    {\n      \"type\": \"placeholder\",\n      \"path\": \"docs/SUBMISSION.md\",\n      \"message\": \"github_url placeholder remains\"\n    }\n  ],\n  \"warnings\": []\n}",
+      "elapsed_seconds": 0.162,
+      "stdout_tail": "{\n  \"status\": \"blocked\",\n  \"blocker_count\": 2,\n  \"warning_count\": 0,\n  \"blockers\": [\n    {\n      \"type\": \"placeholder\",\n      \"path\": \"docs/REPORT_OUTLINE.md\",\n      \"message\": \"youtube_url placeholder remains\"\n    },\n    {\n      \"type\": \"placeholder\",\n      \"path\": \"docs/SUBMISSION.md\",\n      \"message\": \"youtube_url placeholder remains\"\n    }\n  ],\n  \"warnings\": []\n}",
+      "stderr_tail": ""
+    },
+    {
+      "name": "pytest_related",
+      "command": [
+        "C:\\Users\\junhere\\anaconda3\\python.exe",
+        "-m",
+        "pytest",
+        "routing_stack/app/tests",
+        "routing_stack/adapters/tests",
+        "routing_stack/input/tests",
+        "routing_stack/training/tests",
+        "router_impls/geometric/tests",
+        "-q"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 167.975,
+      "stdout_tail": "router_impls/geometric/tests/test_phase3.py::test_bayesian_tune_compatible_with_grid_format\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_compatible_with_grid_format\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_produces_positive_score\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_produces_positive_score\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_search_hyperparams_returns_result\n  C:\\Users\\junhere\\anaconda3\\Lib\\site-packages\\sklearn\\gaussian_process\\kernels.py:452: ConvergenceWarning: The optimal value found for dimension 0 of parameter k1__length_scale is close to the specified upper bound 100000.0. Increasing the bound and calling fit again may find a better value.\n    warnings.warn(\n\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_tier_returns_valid_result\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_tier_returns_valid_result\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_compatible_with_grid_format\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_compatible_with_grid_format\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_produces_positive_score\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_tune_produces_positive_score\nrouter_impls/geometric/tests/test_phase3.py::test_bayesian_search_hyperparams_returns_result\n  C:\\Users\\junhere\\anaconda3\\Lib\\site-packages\\sklearn\\gaussian_process\\kernels.py:442: ConvergenceWarning: The optimal value found for dimension 0 of parameter k2__noise_level is close to the specified lower bound 1e-05. Decreasing the bound and calling fit again may find a better value.\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n171 passed, 14 warnings in 167.08s (0:02:47)",
       "stderr_tail": ""
     }
   ]

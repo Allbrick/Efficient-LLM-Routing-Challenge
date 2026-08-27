@@ -8,25 +8,25 @@
     {
       "model_id": "cheap",
       "count": 270,
-      "brier_score": 0.22606063147814076,
-      "ece": 0.08169567407407409,
-      "mean_predicted_probability": 0.44996972592592593,
+      "brier_score": 0.24443933202221851,
+      "ece": 0.2075354703703704,
+      "mean_predicted_probability": 0.2954196777777778,
       "actual_success_rate": 0.44074074074074077
     },
     {
       "model_id": "mid",
       "count": 270,
-      "brier_score": 0.10862614617866666,
-      "ece": 0.13544206666666664,
-      "mean_predicted_probability": 0.7665633111111112,
+      "brier_score": 0.19678608100476297,
+      "ece": 0.3422287333333333,
+      "mean_predicted_probability": 0.5505030740740741,
       "actual_success_rate": 0.8814814814814815
     },
     {
       "model_id": "premium",
       "count": 270,
-      "brier_score": 0.07903416664607407,
-      "ece": 0.08506428148148154,
-      "mean_predicted_probability": 0.8408616444444444,
+      "brier_score": 0.10054127308288888,
+      "ece": 0.24248608888888887,
+      "mean_predicted_probability": 0.7671553407407407,
       "actual_success_rate": 0.9259259259259259
     }
   ]

@@ -1,22 +1,32 @@
 {
   "status": "blocked",
-  "blocker_count": 3,
+  "blocker_count": 5,
   "warning_count": 0,
   "blockers": [
     {
-      "type": "placeholder",
+      "type": "missing_file",
       "path": "docs/REPORT_OUTLINE.md",
-      "message": "github_url placeholder remains"
+      "message": "required submission file is missing"
     },
     {
-      "type": "placeholder",
-      "path": "docs/REPORT_OUTLINE.md",
-      "message": "youtube_url placeholder remains"
-    },
-    {
-      "type": "placeholder",
+      "type": "missing_file",
       "path": "docs/SUBMISSION.md",
-      "message": "github_url placeholder remains"
+      "message": "required submission file is missing"
+    },
+    {
+      "type": "missing_file",
+      "path": "docs/SBOM.md",
+      "message": "required submission file is missing"
+    },
+    {
+      "type": "missing_file",
+      "path": "docs/AI_MODEL_USAGE.md",
+      "message": "required submission file is missing"
+    },
+    {
+      "type": "missing_file",
+      "path": "docs/DEMO.md",
+      "message": "required submission file is missing"
     }
   ],
   "warnings": []

@@ -1,6 +1,7 @@
 demo_case,prompt_id,prompt,task_type,difficulty,risk_level,expected_min_model,evaluation_type,selected_model_id,selection_reason
 trivial cheap,r031,오늘 날짜는?,chat,trivial,low,cheap,exact_match,cheap,simple_prompt_prior
 simple numeric,r005,2+2는?,math,trivial,low,cheap,numeric_check,cheap,exact_answer_prior
-medium code,e101,"정수 n을 입력받아 0 이상이면 n번째 피보나치 수를 반복문으로 반환하고, 음수면 ValueError를 발생시키는 파이썬 함수 fibonacci(n)를 작성해줘.",code_constraints,medium,low,mid,unit_test,mid,nearest_budget_fallback
-hard architecture,r162,갑자기 가슴이 아픈데 어떻게 해야 해?,medical,hard,high,premium,rubric_check,mid,nearest_envelope_fallback
+medium code,e101,"정수 n을 입력받아 0 이상이면 n번째 피보나치 수를 반복문으로 반환하고, 음수면 ValueError를 발생시키는 파이썬 함수 fibonacci(n)를 작성해줘.",code_constraints,medium,low,mid,unit_test,cheap,nearest_budget_fallback
+hard architecture,r162,갑자기 가슴이 아픈데 어떻게 해야 해?,medical,hard,high,premium,rubric_check,cheap,nearest_budget_fallback
 missing context abstain,r015,계약서를 검토해줘,legal_analysis,hard,high,abstain,required_clarification,abstain,missing_context_prior
+tier-dependent selection,e004,"다음 중 짝수를 고르세요: 3, 7, 10, 15",classification,trivial,low,cheap,exact_match,cheap,nearest_budget_fallback

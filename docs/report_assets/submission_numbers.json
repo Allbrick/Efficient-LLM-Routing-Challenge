@@ -1,0 +1,49 @@
+{
+  "artifact": "artifacts/geometric_router.json",
+  "train_path": "data/public/example_train.csv",
+  "overall_weighted_score": 0.25133835616438366,
+  "tiers": [
+    {
+      "tier": "fast",
+      "count": 73,
+      "budget_limit": 0.03,
+      "mean_quality": 0.6884931506849316,
+      "mean_cost": 0.008493150684931509,
+      "cost_over_limit": 0,
+      "under_route": 36,
+      "over_route": 0,
+      "weighted_score": -0.006479452054794443,
+      "tier_weight": 0.5,
+      "latency_ms_mean": 23.722800900236717,
+      "latency_ms_p95": 31.9372533316103
+    },
+    {
+      "tier": "balanced",
+      "count": 73,
+      "budget_limit": 0.08,
+      "mean_quality": 0.8572602739726027,
+      "mean_cost": 0.02986301369863014,
+      "cost_over_limit": 0,
+      "under_route": 23,
+      "over_route": 6,
+      "weighted_score": 0.09342328767123288,
+      "tier_weight": 0.3,
+      "latency_ms_mean": 24.25685855845799,
+      "latency_ms_p95": 41.17919333123912
+    },
+    {
+      "tier": "premium",
+      "count": 73,
+      "budget_limit": 0.2,
+      "mean_quality": 0.9310958904109589,
+      "mean_cost": 0.10589041095890411,
+      "cost_over_limit": 0,
+      "under_route": 3,
+      "over_route": 18,
+      "weighted_score": 0.1643945205479452,
+      "tier_weight": 0.2,
+      "latency_ms_mean": 23.335345045386536,
+      "latency_ms_p95": 31.71719333040528
+    }
+  ]
+}
