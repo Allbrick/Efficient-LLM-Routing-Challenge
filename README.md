@@ -1,378 +1,221 @@
-﻿# Efficient LLM Routing Challenge
+# Efficient LLM Routing Challenge
 
-이 저장소는 LLM 라우팅을 실험하는 프로젝트입니다. 실행 구조는 다음 3단계로 고정합니다.
+프롬프트의 난이도를 로컬에서 판단해 **예산을 넘지 않는 가장 저렴하고 충분한 모델**을 고르는 LLM 라우터입니다.
 
-```text
-viewer -> router -> ai
-```
+라우터는 답변을 생성하지 않습니다. 주어진 프롬프트와 예산 tier에 대해 `cheap` / `mid` / `premium` 호출, 기존 출력 재사용(`select_output`), 거절(`abstain`) 중 하나의 **결정만** 반환합니다.
 
-`routing_stack/viewer`와 `routing_stack/ai`는 항상 동일하게 유지하고, 중간의 adapter만 교체합니다.
+- **GPU · API 키 · 네트워크 불필요** — CPU 단독으로 동작합니다
+- 학습 artifact(`artifacts/geometric_router.json`)가 저장소에 포함되어 clean clone 직후 바로 실행됩니다
+- 요구사항은 **Python 3.12 이상**뿐입니다
 
-## 구조
+---
 
-- `routing_stack/`: 공통 `viewer -> router -> ai` 실행 스택
-- `routing_stack/app/`: 공통 서버와 앱 조립 계층
-- `routing_stack/viewer/`: 공통 UI와 HTTP API 서버
-- `routing_stack/input/`: 입력 정규화와 router feature 추출 계층
-- `routing_stack/context/`: 최근 대화, 세션 상태, 참조 대상을 task feature로 해석하는 계층
-- `routing_stack/adapters/`: 교체 가능한 router adapter와 공통 router 계약
-- `routing_stack/ai/`: `cheap`, `mid`, `premium`을 실행하는 공통 로컬 AI 계층
-- `routing_stack/planning/`: 여러 라우터 결과를 종합하는 uncertainty/orchestrator 계층
-- `routing_stack/experiments/`: 라우터 비교와 public set 근사 평가 도구
-- `router_impls/geometric/`: geometric router 구현체
-- `router_impls/quality_utility/`: quality-utility baseline router 구현체
-- `data/public/`: 공개 예제 데이터
-- `artifacts/`: geometric router 학습 산출물
-- `docs/ROUTING_STACK_RULES.md`: 공통 스택 규칙
-
-## 입력 정규화
-
-라우터는 원본 파일이나 이미지를 직접 보지 않고, 정규화된 입력과 feature만 받습니다. 현재 구조는 단일 프롬프트뿐 아니라 최근 대화와 세션 상태를 함께 해석하는 Task Router 구조를 지원합니다.
-
-```text
-Text input
-File input
-Image input
-PDF input
-        ↓
-Input Normalizer
-        ↓
-Context Resolver
-        ↓
-Router Feature Vector
-        ↓
-Router
-```
-
-현재 구현된 입력은 `text`입니다. 이후 파일, 이미지, PDF를 추가할 때도 router adapter 계약은 유지하고 `routing_stack/input/` 안에서 정규화 계층만 확장합니다.
-
-## Task Router Context
-
-`routing_stack/context/`는 현재 프롬프트가 이전 대화나 artifact를 참조하는지 판단합니다.
-
-예를 들어 `다음 코드를 분석해줘`는 문장만 보면 정보가 부족하지만, 이전 대화에 코드가 있으면 `missing_context=false`로 라우팅을 계속합니다. 반대로 참조 대상이 없으면 `missing_context=true`로 보고 premium 호출 대신 `abstain` 쪽으로 보냅니다.
+## Quick Start
 
 ```powershell
-python -m routing_stack.experiments.router_compare "다음 코드를 분석해줘" --context_json examples/context/code_context.json --include_orchestrator --tiers fast
-python -m routing_stack.experiments.router_compare "다음 코드를 분석해줘" --context_json examples/context/unresolved_reference.json --include_orchestrator --tiers premium
-```
-
-context payload의 핵심 필드는 다음과 같습니다.
-
-- `conversation`: 최근 대화입니다. viewer는 최근 10개 메시지만 보냅니다.
-- `session_state`: 현재 작업 대상, 요약, artifact, 이전 호출 이력입니다.
-- `call_history`: 모델 호출 실패나 재시도 이력입니다.
-
-## 빠른 시작
-
-의존성을 설치합니다.
-
-```powershell
+git clone https://github.com/Allbrick/Efficient-LLM-Routing-Challenge
+cd Efficient-LLM-Routing-Challenge
 pip install -r requirements.txt
+python scripts\demo.py
 ```
 
-라우터 서버를 먼저 실행합니다. 라우터 서버는 등록된 라우터를 모두 로드하고 AI 호출까지 담당합니다.
+`demo.py`는 환경 점검 → 테스트 → public set 시뮬레이션 → 시연 시나리오를 순서대로 실행합니다.
+테스트를 건너뛰려면 `--skip-test`를 붙입니다.
+
+### 하위 명령
+
+| 명령 | 용도 |
+| --- | --- |
+| `python scripts\demo.py doctor` | 환경 / 의존성 / artifact / 진입점 점검 |
+| `python scripts\demo.py route "<프롬프트>" --tier fast` | 프롬프트 하나를 라우팅하고 근거 출력 |
+| `python scripts\demo.py showcase` | 핵심 강점 시나리오 6종 시연 |
+| `python scripts\demo.py sim` | public set 시뮬레이션 + tier별 요약 |
+| `python scripts\demo.py viewer` | 브라우저 시연 (서버 2개 자동 기동) |
+| `python scripts\demo.py full` | 학습부터 제출 검증까지 전체 재현 |
+
+---
+
+## 단일 프롬프트 라우팅
 
 ```powershell
-python routing_stack\app\router_server.py --ai mock --port 4100
+python scripts\demo.py route "2 + 3은 얼마야?" --tier fast
 ```
-
-다른 터미널에서 뷰어 서버를 실행합니다.
-
-```powershell
-python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4100 --port 4010
-```
-
-브라우저에서 `http://127.0.0.1:4010/`에 접속합니다.
-
-## 로컬 무료 AI 연결
-
-Ollama를 설치하고 로컬 모델을 받은 뒤 같은 viewer를 Ollama와 함께 실행합니다.
-
-```powershell
-ollama pull qwen3:4b-instruct
-ollama pull qwen3:8b
-ollama pull qwen3:14b
-python routing_stack\app\router_server.py --ai ollama --port 4100
-```
-
-로컬 모델이 느려서 `timeout`이 발생하면 timeout을 늘릴 수 있습니다.
-
-```powershell
-python routing_stack\app\router_server.py --ai ollama --ai_timeout 240 --port 4100
-```
-
-AI 계층의 기본 모델 매핑은 다음과 같습니다.
 
 ```text
-cheap   -> qwen3:4b-instruct
-mid     -> qwen3:8b
-premium -> qwen3:14b
+  프롬프트   : 2 + 3은 얼마야?
+  예산 tier  : fast
+  결정       : call_model -> cheap
+  선택 근거  : simple_prompt_prior
+  pre-route  : cheap_direct (obvious_low_risk_prompt)
+
+    model        cost  dist/rad    pass    suff  feasible
+    abstain     0.000      0.00   0.247   0.247  no
+    cheap       0.010      1.85   0.296   0.294  no
+    mid         0.050      2.13   0.645   0.556  no
+    premium     0.200     18.94   0.802   0.753  no
 ```
 
-## 라우터 선택
+| 항목 | 의미 |
+| --- | --- |
+| `dist/rad` | 학습된 success envelope 중심으로부터의 정규화 거리 (작을수록 그 모델이 성공해 온 영역) |
+| `pass` / `suff` | 모델별 통과 확률과 충분성 확률 |
+| `feasible` | 현재 tier의 예산 feasible region 안에 드는지 |
 
-라우터 서버는 기본적으로 `geometric`, `quality_utility`, `orchestrator`, `learned_label`을 모두 로드합니다. 뷰어에서 라우터를 선택해 같은 입력을 다른 라우터로 실행할 수 있습니다.
-
-`orchestrator`는 답변을 생성하는 AI가 아니라, 내부적으로 base router 결과를 비교해 최종 모델을 고르는 planning 라우터입니다.
+같은 프롬프트라도 tier에 따라 결정이 달라집니다.
 
 ```powershell
-python routing_stack\app\router_server.py --routers geometric,quality_utility,orchestrator --ai ollama --port 4100
-python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4100 --port 4010
+python scripts\demo.py route "마이크로서비스 전환 전략을 설계해줘" --tier fast     # 예산 제약으로 제한
+python scripts\demo.py route "마이크로서비스 전환 전략을 설계해줘" --tier premium  # 다른 feasible region
 ```
 
-orchestrator만 서버에 노출하고 싶다면 다음처럼 실행할 수 있습니다.
+---
 
-```powershell
-python routing_stack\app\router_server.py --routers orchestrator --default_router orchestrator --ai mock --port 4100
+## 채점 시뮬레이터 연동
+
+진입점은 한 곳입니다.
+
+```python
+from router_impls.geometric.submission import create_router
+
+router = create_router()          # artifacts/geometric_router.json 자동 탐색
+decision = router.route(
+    prompt=prompt,
+    budget_tier=budget_tier,      # "fast" | "balanced" | "premium"
+    history=history,
+    model_metadata=model_metadata,
+)
 ```
 
-## Prompt/routing_score 기반 라우터 학습
+`decision["action"]`은 다음 중 하나입니다.
 
-`data/router_labels/prompt_labels.csv`에 `prompt,routing_score` 형식으로 예시를 추가하면 로컬 회귀 라우터를 다시 학습할 수 있습니다. `routing_score`는 0-100 범위의 모델 필요도 점수입니다.
-
-- `0-40`: cheap
-- `41-70`: mid
-- `71-100`: premium
-
-```csv
-prompt,routing_score
-안녕,8
-FooDB와 BarQueue를 언제 각각 선택하는 것이 좋은가?,55
-XAlgo를 구현하고 시간복잡도를 증명해줘,86
+```python
+{"type": "call_model",    "model_id": "cheap|mid|premium"}
+{"type": "select_output", "model_id": "cheap|mid|premium", "history_index": 0}
+{"type": "abstain",       "model_id": None}
 ```
 
-학습 명령:
+호출자의 작업 디렉터리와 무관하게 artifact를 자동 탐색하며, 내부 오류가 나도 예외를 던지지 않고 `cheap` 호출로 degrade합니다.
 
-```powershell
-python -m routing_stack.training.train_prompt_label_router --csv data\router_labels\prompt_labels.csv --output artifacts\prompt_label_router.joblib
-```
+---
 
-실행:
-
-```powershell
-python routing_stack\app\router_server.py --routers learned_label,orchestrator --default_router learned_label --ai mock --port 4100
-```
-
-이 라우터는 word/char TF-IDF와 공통 text feature를 함께 사용해 유사한 작업 유형으로 일반화합니다. 추가로 학습 feature 공간에서 `cheap`, `mid`, `premium` score 구간별 중심점 거리와 최근접 학습 예시를 계산하는 geometric memory를 사용합니다. 따라서 완전히 같은 학습 프롬프트는 사용자가 준 score를 우선하고, 새로운 프롬프트는 회귀 예측값과 geometric similarity를 함께 반영합니다.
-
-viewer 오른쪽의 `CSV/TXT 평가·학습` 패널에서도 같은 구조의 CSV 또는 TXT를 업로드할 수 있습니다.
-
-- `정답 비교`: 현재 선택한 라우터와 tier로 업로드 파일의 `routing_score`를 평가합니다. bucket accuracy와 MAE를 함께 표시합니다.
-- `학습`: 업로드한 CSV/TXT로 `artifacts/prompt_label_router.joblib`를 다시 만들고 `learned_label` 라우터를 갱신합니다.
-
-TXT 파일도 아래처럼 CSV와 같은 쉼표 구분 구조라면 그대로 사용할 수 있습니다.
+## 동작 원리
 
 ```text
-prompt,routing_score
-안녕,8
-React Context와 Zustand를 언제 각각 사용하는 것이 좋은가?,55
+Prompt / Budget Tier / History / Model Metadata
+    -> Input Normalizer / Context Resolver
+    -> Geometric Router
+    -> call_model / select_output / abstain
 ```
 
-## Optional semantic features
+1. **Geometric Success Envelope** — cheap / mid / premium이 실제로 성공했던 프롬프트 분포를 중심과 반경을 가진 envelope으로 학습하고, 새 프롬프트까지의 정규화 거리로 판정합니다.
+2. **Budget Feasible Region** — 요청별 예산이 hard constraint입니다. 한도를 넘는 모델은 어떤 경우에도 호출하지 않습니다.
+3. **4-Lane Pre-Route** — `missing_context`(참조 대상 부재) / `cheap_direct` / `hard_task` / `ambiguous`로 먼저 분기합니다. `hard_task`는 tier별 모델 하한을 적용하되, 비싼 모델이 충분성에서 뚜렷하게 앞서지 못하면 하한을 내립니다.
+4. **Repetition-Invariant Geometry** — 반복 입력은 표면 길이가 아니라 압축된 의미 길이로 판정합니다.
 
-geometric router는 기본적으로 구조적 feature와 deterministic hash text feature만 사용합니다. 공개 임베딩 모델을 활용하고 싶을 때는 semantic feature index를 별도 생성해 cheap/mid/premium centroid 거리와 uncertainty feature를 추가할 수 있습니다.
+---
 
-외부 모델 없이 재현 가능한 기본 index 생성:
+## 성능
+
+public evaluation set 73건 기준입니다. 전체 weighted score는 `0.251`입니다.
+
+| Tier | 예산 | 평균 품질 | 평균 비용 | 예산 초과 | 평균 지연 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Fast | 0.03 | 0.688 | 0.008 | **0/73** | 23.72ms |
+| Balanced | 0.08 | 0.857 | 0.030 | **0/73** | 24.26ms |
+| Premium | 0.20 | 0.931 | 0.106 | **0/73** | 23.34ms |
+
+baseline 대비:
+
+| 정책 | Fast 품질 | Fast 예산초과 | Balanced 품질 | Premium 품질 |
+| --- | ---: | ---: | ---: | ---: |
+| always_cheap | 0.565 | 0/73 | 0.565 | 0.565 |
+| always_mid | 0.805 | **73/73** | 0.805 | 0.805 |
+| always_premium | 0.808 | **73/73** | 0.808 | 0.808 |
+| **geometric (제출)** | 0.688 | **0/73** | **0.857** | **0.931** |
+
+`always_mid`와 `always_premium`은 Fast tier에서 73건 전부 예산을 초과하므로 유효한 정책이 아닙니다. geometric router는 **예산을 한 번도 넘지 않으면서** 예산이 열리는 tier에서 always_premium을 넘어섭니다.
+
+수치는 전부 `docs/report_assets/`에 스크립트로 생성됩니다.
+
+| 확인 항목 | 파일 |
+| --- | --- |
+| 프롬프트별 라우팅 근거 | `docs/report_assets/geometric_explanations.csv` |
+| baseline 대비 비교 | `docs/report_assets/router_comparison.csv` |
+| 충분성 확률 보정 (Brier / ECE) | `docs/report_assets/sufficiency_calibration_summary.json` |
+| tier별 요약 | `docs/report_assets/tier_summary.csv` |
+| 전체 재현 검증 결과 | `docs/report_assets/submission_check_run.json` |
+
+---
+
+## 브라우저 시연
 
 ```powershell
-python scripts\build_semantic_feature_index.py --input data\public\example_eval_specs.csv --output artifacts\semantic_feature_index.json
+python scripts\demo.py viewer
 ```
 
-geometric router 학습에 semantic feature 포함:
+`router_server`와 `viewer_server`를 자동 기동합니다. 기본값이 `--ai mock`이라 **Ollama 없이도 라우팅 결정 전체를 시연**할 수 있습니다. `Ctrl+C`로 두 서버 모두 정리됩니다.
+
+선택된 모델의 실제 응답까지 보려면 로컬 Ollama를 연결합니다.
 
 ```powershell
-python router_impls\geometric\scripts\train_geometric_router.py --semantic_features
+ollama pull qwen3:4b-instruct   # cheap
+ollama pull qwen3:8b            # mid
+ollama pull qwen3:14b           # premium
+python scripts\demo.py viewer --ai ollama
 ```
 
-`sentence-transformers`가 설치된 환경에서는 `intfloat/multilingual-e5-small` 같은 공개 임베딩 모델을 그대로 사용할 수 있습니다.
+옵션: `--router-port`(기본 4100), `--viewer-port`(기본 4010), `--no-browser`
+
+---
+
+## 전체 재현
 
 ```powershell
-python scripts\build_semantic_feature_index.py --input data\public\example_eval_specs.csv --output artifacts\semantic_feature_index.json --encoder sentence-transformers --model intfloat/multilingual-e5-small
+python scripts\demo.py full
 ```
 
-## Free public dataset training path
+라우터 학습 → report asset 생성 → baseline/preset 비교 → calibration 리포트 → latency 측정 → pytest → 제출 검증을 순차 실행합니다.
 
-기본 제출용 geometric artifact는 `data/public/example_train.csv`와 synthetic data로 재현성을 유지합니다. 무료 공개 데이터셋까지 포함한 약지도 학습 artifact를 만들려면 Hugging Face dataset viewer API에서 작은 샘플을 내려받아 라우팅 schema로 변환합니다.
-
-현재 지원하는 공개 소스:
-
-- `CarrotAI/ko-instruction-dataset`: 한국어 instruction prompt 샘플
-- `lmsys/mt_bench_human_judgments`: MT-Bench human preference prompt 샘플
-
-다운로드와 필터링:
+개별 실행:
 
 ```powershell
-python scripts\download_public_dataset_samples.py --ko_limit 320 --mt_bench_limit 180
+python router_impls\geometric\scripts\train_geometric_router.py
+python scripts\run_submission_checks.py --full
+python -m pytest -q
 ```
 
-평가 명세 변환:
+---
 
-```powershell
-python scripts\build_external_routing_dataset.py --input data\external\routing_prompts.csv --output data\external\external_eval_specs.csv --summary data\external\external_dataset_summary.json
-```
+## 저장소 구조
 
-외부 데이터 포함 학습:
+| 경로 | 내용 |
+| --- | --- |
+| `router_impls/geometric/` | 제출 라우터 구현체 (`submission.py`가 진입점) |
+| `router_impls/quality_utility/` | 비교용 baseline 라우터 |
+| `routing_stack/` | 공통 `viewer -> router -> ai` 실행 스택 |
+| `routing_stack/adapters/` | 교체 가능한 router adapter와 공통 계약 |
+| `routing_stack/input/`, `context/` | 입력 정규화와 컨텍스트 해석 계층 |
+| `scripts/` | 학습 · 리포트 생성 · 검증 스크립트 |
+| `data/public/` | 공개 예제 데이터 |
+| `artifacts/` | 학습 산출물 (제출 artifact 포함) |
+| `docs/report_assets/` | 스크립트로 생성한 성능 근거 |
 
-```powershell
-python router_impls\geometric\scripts\train_geometric_router.py --include_external --external_specs_path data\external\external_eval_specs.csv --no_tune --output artifacts\geometric_router_external.json --labels_output artifacts\geometric_labels_external.csv --policy_report artifacts\geometric_policy_report_external.json
-```
+---
 
-이 경로는 외부 데이터셋의 prompt와 weak expected_min_model label을 학습 feature로 쓰며, 원본 대용량 데이터셋 전체를 저장소에 재배포하지 않습니다. 기본 tuned artifact와 분리해 `artifacts/geometric_router_external.json`으로 저장합니다.
+## 문제 해결
 
-## Geometric policy tuning report
+| 증상 | 조치 |
+| --- | --- |
+| `학습 artifact 없음` | `python scripts\demo.py full`로 재생성 |
+| 패키지 미설치 경고 | `pip install -r requirements.txt` |
+| viewer 포트 충돌 | `--router-port` / `--viewer-port`로 변경 |
+| `--ai ollama`에서 응답 없음 | Ollama 실행 여부와 모델 3개 다운로드 확인, 또는 `--ai mock` 사용 |
+| 한글이 깨져 보임 | `chcp 65001` 실행 후 재시도 |
 
-geometric router 학습 스크립트는 튜닝된 정책과 평가 지표를 `artifacts/geometric_policy_report.json`에 저장합니다.
+---
 
-```powershell
-python router_impls\geometric\scripts\train_geometric_router.py --policy_report artifacts\geometric_policy_report.json
-```
+## 라이선스
 
-리포트에는 tier별 `mean_quality`, `mean_cost`, `under_route`, `over_route`, `cost_over_limit`와 함께 다음 weighted objective가 포함됩니다.
+Apache License 2.0 — 자세한 내용은 `LICENSE`를 참고하세요.
 
-```text
-score_tier = quality - cost penalty - overflow penalty - under-route penalty - over-route penalty - abstain penalty
-overall_score = 0.5 * fast + 0.3 * balanced + 0.2 * premium
-```
-
-## Report assets
-
-결과보고서와 시연 영상에 넣을 표는 아래 명령으로 재생성합니다.
-
-```powershell
-python scripts\generate_report_assets.py --output_dir docs\report_assets
-python scripts\generate_outcome_matrix.py --output data\router_outcomes\public_outcome_matrix.csv
-```
-
-geometric routing이 왜 선택됐는지 보여주는 prompt별 설명표, baseline 비교표, calibration 리포트는 아래 명령으로 재생성합니다.
-
-```powershell
-python scripts\generate_geometric_explanations.py --output_dir docs\report_assets
-python scripts\generate_router_comparison.py --output_dir docs\report_assets
-python scripts\generate_policy_preset_comparison.py --output_dir docs\report_assets
-python scripts\generate_sufficiency_calibration.py --output_dir docs\report_assets
-python scripts\generate_ood_calibration.py --output_dir docs\report_assets
-```
-
-라우터 decision latency 리포트는 아래 명령으로 재생성합니다.
-
-```powershell
-python scripts\measure_router_latency.py --output_dir docs\report_assets --repeat 3
-```
-
-제출 전 필수 파일과 placeholder 상태는 아래 명령으로 확인합니다.
-
-```powershell
-python scripts\verify_submission_readiness.py --output docs\report_assets\submission_readiness.json
-```
-
-학습, 보고서 자산 생성, geometric 설명표, baseline 비교표, latency 측정, readiness 확인을 한 번에 실행하려면 다음 명령을 사용합니다.
-
-```powershell
-python scripts\run_submission_checks.py --full --output docs\report_assets\submission_check_run.json
-```
-
-주요 산출물:
-
-- `docs/report_assets/tier_summary.csv`: tier별 품질, 비용, 오류, weighted score
-- `docs/report_assets/before_after.csv`: 튜닝 전후 비용/품질 비교
-- `docs/report_assets/selection_distribution.csv`: tier별 cheap/mid/premium/abstain 선택 분포
-- `docs/report_assets/error_summary.csv`: under-route, over-route, should_abstain 분포
-- `docs/report_assets/demo_prompts.csv`: 시연 영상용 대표 프롬프트
-- `docs/report_assets/report_assets_summary.json`: 위 내용을 묶은 보고서용 JSON
-- `docs/report_assets/geometric_explanations.csv`: prompt별 geometric distance, pass probability, repetition feature 설명표
-- `docs/report_assets/geometric_explanations_summary.json`: 설명표 요약 JSON
-- `docs/report_assets/router_comparison.csv`: always cheap/mid/premium baseline과 geometric router 비교표
-- `docs/report_assets/router_comparison_summary.json`: baseline 비교 요약 JSON
-- `docs/report_assets/policy_preset_comparison.csv`: Fast/Balanced/Premium 운영 preset별 비용-품질 비교표
-- `docs/report_assets/policy_preset_comparison_summary.json`: policy preset 비교 요약 JSON
-- `docs/report_assets/sufficiency_calibration.csv`: 모델별 sufficiency probability calibration bin 리포트
-- `docs/report_assets/sufficiency_calibration_summary.json`: 모델별 Brier/ECE 요약
-- `docs/report_assets/ood_calibration.csv`: OOD score bin별 cheap success, under-route, premium 선택률
-- `docs/report_assets/ood_calibration_summary.json`: OOD high/low 핵심 지표 요약
-- `docs/report_assets/latency_summary.csv`: tier별 로컬 라우팅 decision latency 요약
-- `docs/report_assets/latency_report.json`: latency 측정 JSON 리포트
-- `docs/report_assets/submission_readiness.json`: 제출 전 필수 파일과 URL placeholder 점검 결과
-- `docs/report_assets/submission_check_run.json`: 제출 전 재현 명령 실행 결과
-
-현재 public evaluation 기준 핵심 수치는 다음과 같습니다.
-
-```text
-Overall weighted score: 0.532
-Fast: mean_quality 0.885, mean_cost 0.046, under_route 12/73, weighted_score 0.136
-Balanced: mean_quality 0.926, mean_cost 0.097, under_route 0/73, weighted_score 0.217
-Premium: mean_quality 0.926, mean_cost 0.099, under_route 0/73, weighted_score 0.179
-Local decision latency: Fast 7.94ms, Balanced 7.90ms, Premium 7.95ms
-```
-
-## 라우터 품질 예측 비교
-
-난이도 하나를 예측하는 대신 `quality(prompt, model)`을 모델별로 비교합니다.
-다음 명령은 같은 프롬프트를 여러 라우터와 tier에 넣고, `cheap`, `mid`, `premium`별 품질 예측과 선택 결과를 JSON으로 출력합니다.
-
-```powershell
-python -m routing_stack.experiments.router_compare "이모티콘좀 그만 써라" --include_orchestrator
-```
-
-출력의 핵심 필드는 다음과 같습니다.
-
-- `model_quality`: 라우터가 보는 모델별 품질 예측입니다.
-- `model_utility`: 비용 패널티까지 반영한 선택 점수입니다.
-- `selected_model_id`: 실제 선택된 모델입니다.
-- `selection_reason`: 선택 이유입니다.
-- `planning`: orchestrator가 사용한 uncertainty와 geometric signal입니다.
-- `routing_context`: Task Router가 해석한 참조, context confidence, missing context 판단입니다.
-
-## 라우팅 피드백 기록
-
-수동 테스트 중 잘못된 라우팅을 발견하면 feedback CSV에 저장할 수 있습니다.
-
-```powershell
-python scripts\append_router_feedback.py --prompt "이 라우팅은 틀렸어" --budget_tier fast --selected cheap --expected mid --selection_reason simple_prompt_prior --note "cheap 답변이 너무 얕음"
-```
-
-기본 출력은 `data/router_feedback/online_feedback.csv`입니다. 이 파일은 이후 재학습 데이터로 병합할 수 있는 online feedback source로 사용합니다.
-
-feedback을 geometric router 학습에 반영하려면 다음 옵션을 사용합니다.
-
-```powershell
-python router_impls\geometric\scripts\train_geometric_router.py --include_feedback --feedback_path data\router_feedback\online_feedback.csv --policy_report artifacts\geometric_policy_report.json
-```
-
-## 학습용 reviewed outcome viewer
-
-기존 라우터 실행 viewer와 별도로, `reviewed_outcome_matrix.csv`를 사람이 직접 채우기 위한 학습 데이터 viewer를 실행할 수 있습니다. 이 도구는 제출용 라우터가 아니라, 로컬 Ollama로 cheap/mid/premium 3개 모델을 모두 실행하고 사람이 가장 좋은 답변을 고르면 `data/router_outcomes/reviewed_outcome_matrix.csv`에 한 줄을 append하는 데이터 구축 도구입니다.
-
-```powershell
-python routing_stack\app\training_labeler_server.py --ai ollama --port 4120
-```
-
-브라우저에서 `http://127.0.0.1:4120/`에 접속한 뒤 프롬프트를 입력하고 `Run 3 Models`를 누릅니다. 세 결과를 비교한 뒤 가장 좋은 카드의 `Best & Save`를 누르면 자동 저장됩니다.
-
-Ollama 없이 동작만 확인하려면 mock provider를 사용할 수 있습니다.
-
-```powershell
-python routing_stack\app\training_labeler_server.py --ai mock --port 4120
-```
-
-## public set 근사 평가
-
-private simulator를 대체하는 정식 평가는 아니지만, 공개 train 샘플에서 선택 모델의 공개 quality/cost를 lookup해 라우터별 경향을 볼 수 있습니다.
-
-```powershell
-python -m routing_stack.experiments.orchestrator_eval --tiers fast
-```
-
-context fixture를 주입해 task router 경향을 볼 수도 있습니다.
-
-```powershell
-python -m routing_stack.experiments.orchestrator_eval --tiers fast --context_fixture examples/context/design_context.json
-```
-
-## 테스트
-
-```powershell
-python -m pytest routing_stack\app\tests routing_stack\input\tests routing_stack\context\tests routing_stack\planning\tests routing_stack\adapters\tests routing_stack\training\tests routing_stack\experiments\tests router_impls\geometric\tests -q
-```
-
-
+의존성은 pandas, numpy, scikit-learn, lightgbm, scipy, joblib, pytest 7개이며 전부 MIT/BSD 계열입니다. 제출 라우터의 실행 경로에서는 외부 API를 호출하지 않습니다.
