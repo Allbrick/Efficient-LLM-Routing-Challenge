@@ -6,7 +6,50 @@ from typing import Any
 
 from router_impls.geometric.evaluator import OutputEvaluator
 from router_impls.geometric.features import MODEL_ORDER, MODEL_RANK
-from router_impls.geometric.router import GeometricRouter
+from router_impls.geometric.router import BUDGET_LIMITS, GeometricRouter, within_budget
+
+DEFAULT_ARTIFACT_PATH = "artifacts/geometric_router.json"
+DEFAULT_BUDGET_TIER = "balanced"
+FALLBACK_MODEL_ID = "cheap"
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+_TIER_ALIASES = {
+    "fast": "fast",
+    "cheap": "fast",
+    "low": "fast",
+    "economy": "fast",
+    "balanced": "balanced",
+    "standard": "balanced",
+    "medium": "balanced",
+    "mid": "balanced",
+    "premium": "premium",
+    "high": "premium",
+    "quality": "premium",
+}
+
+
+def resolve_artifact_path(artifact_path: str | Path = DEFAULT_ARTIFACT_PATH) -> Path:
+    """Resolve the router artifact regardless of the caller's working directory.
+
+    The private simulator may import this module from any CWD, so a relative
+    path is also looked up against the repository root.
+    """
+    candidate = Path(artifact_path)
+    if candidate.is_file():
+        return candidate
+    if not candidate.is_absolute():
+        repo_candidate = _REPO_ROOT / candidate
+        if repo_candidate.is_file():
+            return repo_candidate
+    return candidate
+
+
+def normalize_budget_tier(budget_tier: Any) -> str:
+    """Map an arbitrary tier label onto a known tier without raising."""
+    tier = str(budget_tier or "").strip().lower()
+    if tier in BUDGET_LIMITS:
+        return tier
+    return _TIER_ALIASES.get(tier, DEFAULT_BUDGET_TIER)
 
 
 class RouterSubmission:
@@ -17,11 +60,54 @@ class RouterSubmission:
     only returns a local routing action.
     """
 
-    def __init__(self, artifact_path: str | Path = "artifacts/geometric_router.json"):
-        self.router = GeometricRouter.load(artifact_path)
+    def __init__(self, artifact_path: str | Path = DEFAULT_ARTIFACT_PATH):
+        self.artifact_path = resolve_artifact_path(artifact_path)
+        self.router = GeometricRouter.load(self.artifact_path)
         self.evaluator = OutputEvaluator()
 
     def route(
+        self,
+        prompt: str,
+        budget_tier: str = DEFAULT_BUDGET_TIER,
+        history: list[dict[str, Any]] | None = None,
+        model_metadata: list[dict[str, Any]] | None = None,
+        task_type: str = "",
+        difficulty: str = "",
+        risk_level: str = "",
+        evaluation_type: str = "",
+        reference_answer: str = "",
+        test_spec: str = "",
+    ) -> dict[str, Any]:
+        """Return a routing action, never raising to the simulator.
+
+        Any unexpected input or internal failure degrades to the cheapest model
+        call instead of aborting the whole evaluation run.
+        """
+        try:
+            return self._route_impl(
+                prompt=prompt,
+                budget_tier=budget_tier,
+                history=history,
+                model_metadata=model_metadata,
+                task_type=task_type,
+                difficulty=difficulty,
+                risk_level=risk_level,
+                evaluation_type=evaluation_type,
+                reference_answer=reference_answer,
+                test_spec=test_spec,
+            )
+        except Exception as exc:  # pragma: no cover - defensive guard
+            return self._fallback_response(exc)
+
+    def _fallback_response(self, exc: Exception) -> dict[str, Any]:
+        return {
+            "action": {"type": "call_model", "model_id": FALLBACK_MODEL_ID},
+            "selected_model_id": FALLBACK_MODEL_ID,
+            "selection_reason": f"fallback_on_error:{type(exc).__name__}",
+            "diagnostics": {"error": f"{type(exc).__name__}: {exc}"},
+        }
+
+    def _route_impl(
         self,
         prompt: str,
         budget_tier: str,
@@ -34,16 +120,18 @@ class RouterSubmission:
         reference_answer: str = "",
         test_spec: str = "",
     ) -> dict[str, Any]:
+        prompt = "" if prompt is None else str(prompt)
+        tier = normalize_budget_tier(budget_tier)
+        history = _normalize_history(history)
         decision = self.router.route(
             prompt=prompt,
-            budget_tier=budget_tier,
+            budget_tier=tier,
             task_type=task_type,
             difficulty=difficulty,
             risk_level=risk_level,
             evaluation_type=evaluation_type,
             model_metadata=model_metadata,
         )
-        history = history or []
         spec = {
             "evaluation_type": evaluation_type,
             "reference_answer": reference_answer,
@@ -61,10 +149,31 @@ class RouterSubmission:
                 escalation_model = self._next_escalation_model(
                     decision.selected_model_id,
                     history,
-                    budget_tier,
+                    tier,
                     spec,
                 )
-                action = {"type": "call_model", "model_id": escalation_model}
+                model_costs = self._request_model_costs(model_metadata)
+                affordable = self._affordable_model(
+                    escalation_model,
+                    history,
+                    tier,
+                    model_costs,
+                    spec,
+                )
+                if affordable is None:
+                    # The remaining per-request budget cannot pay for any call.
+                    # Reuse the best output already paid for, else abstain.
+                    best = self._best_history_output(history, spec)
+                    if best is None:
+                        action = {"type": "abstain", "model_id": None}
+                    else:
+                        action = {
+                            "type": "select_output",
+                            "model_id": best["model_id"],
+                            "history_index": best["history_index"],
+                        }
+                else:
+                    action = {"type": "call_model", "model_id": affordable}
             else:
                 action = {
                     "type": "select_output",
@@ -77,6 +186,74 @@ class RouterSubmission:
             "selection_reason": decision.selection_reason,
             "diagnostics": asdict(decision),
         }
+
+    def _request_model_costs(self, model_metadata: Any) -> dict[str, float]:
+        costs = dict(self.router.model_costs)
+        costs.update(self.router._model_costs_from_metadata(model_metadata))
+        return costs
+
+    def _spent_cost(self, history: list[dict[str, Any]], model_costs: dict[str, float]) -> float:
+        """Cost already charged to this request by earlier model calls."""
+        spent = 0.0
+        for item in history:
+            raw_cost = item.get("cost")
+            if isinstance(raw_cost, (int, float)):
+                spent += float(raw_cost)
+                continue
+            model_id = _history_model_id(item)
+            if model_id in model_costs:
+                spent += float(model_costs[model_id])
+        return spent
+
+    def _affordable_model(
+        self,
+        model_id: str,
+        history: list[dict[str, Any]],
+        tier: str,
+        model_costs: dict[str, float],
+        spec: dict[str, Any] | None = None,
+    ) -> str | None:
+        """Downgrade a planned call until it fits the remaining request budget.
+
+        The budget is enforced per request, so previously spent cost counts
+        against the tier limit before a new call is allowed. A model that
+        already failed for this request is skipped: paying twice for the same
+        output only burns budget.
+        """
+        limit = BUDGET_LIMITS[tier]
+        remaining = limit - self._spent_cost(history, model_costs)
+        if model_id not in MODEL_RANK:
+            return model_id
+        for candidate in reversed(MODEL_ORDER[: MODEL_RANK[model_id] + 1]):
+            if not within_budget(float(model_costs.get(candidate, 0.0)), remaining):
+                continue
+            if self._model_has_failed(candidate, history, spec) or _explicitly_failed(candidate, history):
+                continue
+            return candidate
+        return None
+
+    def _best_history_output(
+        self,
+        history: list[dict[str, Any]],
+        spec: dict[str, Any] | None = None,
+    ) -> dict[str, Any] | None:
+        """Best already-paid output, used when no further call is affordable."""
+        best = None
+        for index, item in enumerate(history):
+            model_id = _history_model_id(item)
+            if model_id not in MODEL_RANK:
+                continue
+            output = _history_output(item)
+            if output in {None, ""}:
+                continue
+            candidate = {
+                "model_id": model_id,
+                "history_index": int(item.get("history_index", index)),
+                "rank": MODEL_RANK[model_id],
+            }
+            if best is None or candidate["rank"] > best["rank"]:
+                best = candidate
+        return best
 
     def _select_reusable_history(
         self,
@@ -222,7 +399,56 @@ class RouterSubmission:
         return False
 
 
-def create_router(artifact_path: str | Path = "artifacts/geometric_router.json") -> RouterSubmission:
+def _explicitly_failed(model_id: str, history: list[dict[str, Any]]) -> bool:
+    """True when history marks this model's attempt as unsuccessful."""
+    for item in history:
+        if _history_model_id(item) != model_id:
+            continue
+        if item.get("success") is False or item.get("sufficient") is False:
+            return True
+    return False
+
+
+def _history_model_id(item: dict[str, Any]) -> str:
+    return str(
+        item.get("model_id")
+        or item.get("selected_model_id")
+        or item.get("model_slot")
+        or ""
+    )
+
+
+def _history_output(item: dict[str, Any]) -> Any:
+    output = item.get("output")
+    if output is None and "response" in item:
+        output = item.get("response")
+    if output is None and "model_output" in item:
+        output = item.get("model_output")
+    return output
+
+
+def _normalize_history(history: Any) -> list[dict[str, Any]]:
+    """Keep only dict-shaped history entries, tolerating any input shape.
+
+    Dropping non-dict entries would shift positions, so each kept entry carries
+    an explicit ``history_index`` pointing at its slot in the original list.
+    """
+    if not isinstance(history, (list, tuple)):
+        return []
+    normalized = []
+    for index, item in enumerate(history):
+        if not isinstance(item, dict):
+            continue
+        if "history_index" in item:
+            normalized.append(item)
+            continue
+        entry = dict(item)
+        entry["history_index"] = index
+        normalized.append(entry)
+    return normalized
+
+
+def create_router(artifact_path: str | Path = DEFAULT_ARTIFACT_PATH) -> RouterSubmission:
     return RouterSubmission(artifact_path)
 
 

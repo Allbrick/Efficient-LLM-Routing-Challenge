@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import pandas as pd
 
 from scripts.generate_report_assets import (
     build_before_after_summary,

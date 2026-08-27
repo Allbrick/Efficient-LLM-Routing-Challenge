@@ -1,20 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 import pandas as pd
 
 from router_impls.geometric.evaluator import build_training_labels
 from router_impls.geometric.features import MODEL_ORDER, MODEL_RANK
 from router_impls.geometric.router import GeometricRouter
-
-
-@dataclass(frozen=True)
-class CalibrationSummary:
-    model_id: str
-    count: int
-    brier_score: float
-    ece: float
 
 
 def build_sufficiency_calibration(
@@ -119,6 +109,20 @@ def build_ood_calibration(
     return binned, summary
 
 
+def _fill_numeric(df: pd.DataFrame) -> pd.DataFrame:
+    """Fill NaN in numeric columns only.
+
+    ``pd.cut`` produces a Categorical bin column, and calling ``fillna`` on a
+    frame that still holds it raises ``TypeError`` on pandas 2.x. Restricting
+    the fill to numeric columns keeps the behaviour identical on pandas 2 and 3.
+    """
+    numeric_columns = df.select_dtypes(include="number").columns
+    if len(numeric_columns) == 0:
+        return df
+    df[numeric_columns] = df[numeric_columns].fillna(0.0)
+    return df
+
+
 def _bin_calibration(detail_df: pd.DataFrame, bins: int) -> pd.DataFrame:
     if detail_df.empty:
         return pd.DataFrame()
@@ -142,7 +146,7 @@ def _bin_calibration(detail_df: pd.DataFrame, bins: int) -> pd.DataFrame:
     grouped["calibration_gap"] = (
         grouped["mean_predicted_probability"] - grouped["actual_success_rate"]
     ).abs()
-    return grouped.fillna(0.0)
+    return _fill_numeric(grouped)
 
 
 def _summarize_calibration(detail_df: pd.DataFrame) -> pd.DataFrame:
@@ -183,7 +187,7 @@ def _bin_ood(detail_df: pd.DataFrame, bins: int) -> pd.DataFrame:
             under_route_rate=("under_route", "mean"),
         )
         .reset_index()
-        .fillna(0.0)
+        .pipe(_fill_numeric)
     )
 
 

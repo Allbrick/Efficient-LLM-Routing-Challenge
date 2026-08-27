@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from copy import deepcopy
 
-import numpy as np
 
 from router_impls.geometric.bayesian_tuning import (
     TIER_BOUNDS,

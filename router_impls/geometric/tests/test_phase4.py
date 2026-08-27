@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import json
-from copy import deepcopy
 
 import numpy as np
 
-from router_impls.geometric.envelope import Envelope, fit_envelope
 from router_impls.geometric.features import MODEL_ORDER, EvidenceExtractor
 from router_impls.geometric.logistic_pass_model import (
     LogisticPassModel,

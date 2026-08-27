@@ -50,6 +50,6 @@ http://127.0.0.1:4003/
 객관적 evaluator, pass/fail 근거, 명시적인 budget-aware risk handling 쪽으로
 판단 기준을 옮겨야 합니다.
 
-이 베이스라인의 상세 평가와 다음 라우터에서 해결해야 할 설계 문제는
-`../docs/03-review/implementation-review.md`를 참고합니다.
+이 베이스라인은 `router_impls/geometric/`과의 비교 대상으로만 유지합니다.
+비교 결과는 `docs/report_assets/router_comparison*.csv`에 있습니다.
 

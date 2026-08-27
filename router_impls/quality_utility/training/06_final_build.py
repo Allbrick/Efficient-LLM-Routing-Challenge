@@ -18,7 +18,6 @@ import pandas as pd
 from importlib import import_module
 
 from src.feature_extractor import FeatureExtractor
-from src.candidate_expander import CandidateExpander
 from src.quality_predictor import QualityPredictor
 from src.calibrator import Calibrator
 from src.data_models import CostConfig, LambdaParams

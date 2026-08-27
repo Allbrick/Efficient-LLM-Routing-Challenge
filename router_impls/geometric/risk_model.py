@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from router_impls.geometric.features import MODEL_ORDER, MODEL_RANK, ROUTE_ACTIONS
+from router_impls.geometric.features import MODEL_RANK, ROUTE_ACTIONS
 from router_impls.geometric.task_classifier import hashed_char_ngrams
 
 

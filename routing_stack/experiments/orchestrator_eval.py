@@ -5,7 +5,7 @@ import csv
 import json
 import os
 import sys
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 os.chdir(PROJECT_ROOT)
 
-from routing_stack.adapters.contract import RouteRequest, RouterAdapter
+from routing_stack.adapters.contract import RouteRequest
 from routing_stack.adapters.registry import available_routers, create_router
 from routing_stack.context import resolve_context
 from routing_stack.input import normalize_input

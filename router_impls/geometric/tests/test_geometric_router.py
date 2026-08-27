@@ -7,7 +7,7 @@ import pandas as pd
 
 from router_impls.geometric.evaluator import HeuristicRubricJudge, OutputEvaluator, build_training_labels
 from router_impls.geometric.budget_allocator import allocate_public_budget
-from router_impls.geometric.router import GeometricRouter
+from router_impls.geometric.router import BUDGET_LIMITS, GeometricRouter
 from router_impls.geometric.simulator import simulate_public_set
 from router_impls.geometric.submission import RouterSubmission
 from router_impls.geometric.task_classifier import TaskClassifier
@@ -38,6 +38,14 @@ def cached_semantic_router():
 
 def make_router():
     return deepcopy(cached_router())
+
+
+def _selected_cost(decision) -> float:
+    """선택된 후보의 비용. abstain은 0.0으로 본다."""
+    for candidate in decision.candidates:
+        if candidate["model_id"] == decision.selected_model_id:
+            return float(candidate.get("cost", 0.0))
+    return 0.0
 
 
 def make_semantic_router():
@@ -412,19 +420,18 @@ def test_long_non_repetitive_architecture_prompt_still_escalates():
         "보안 통제, 데이터 격리, 장애 복구, 월말 정산, 권한 관리, 모니터링까지 포함해줘."
     )
 
-    decision = router.route(prompt, budget_tier="fast")
+    decision = router.route(prompt, budget_tier="balanced")
 
     assert decision.selected_model_id in {"mid", "premium"}
     assert decision.evidence["repetition_ratio"] < 0.2
 
 
 def test_geometric_router_escalates_hard_architecture_prompt():
-    train_df, specs_df = load_data()
     router = make_router()
 
     decision = router.route(
         "멀티테넌트 결제 시스템을 설계하고 웹훅 멱등성, 감사 로그, 장애 재처리, 보안 통제를 포함해줘.",
-        budget_tier="fast",
+        budget_tier="balanced",
         task_type="architecture_constraints",
         difficulty="hard",
         risk_level="high",
@@ -434,8 +441,12 @@ def test_geometric_router_escalates_hard_architecture_prompt():
     assert decision.selected_model_id in {"mid", "premium"}
 
 
-def test_fast_budget_guard_limits_inferred_premium_to_mid():
-    train_df, specs_df = load_data()
+def test_fast_tier_never_exceeds_the_per_request_budget():
+    """`strict_request_budget`에서 Fast 한도(0.03)는 hard constraint다.
+
+    mid(0.05)와 premium(0.20)은 한도를 넘으므로, 난이도가 높다고 추론되어도
+    Fast tier에서는 선택될 수 없다.
+    """
     router = make_router()
 
     decision = router.route(
@@ -444,12 +455,13 @@ def test_fast_budget_guard_limits_inferred_premium_to_mid():
         task_type="complex_design",
     )
 
-    assert decision.selected_model_id == "mid"
+    assert decision.selected_model_id in {"cheap", "abstain"}
+    assert _selected_cost(decision) <= BUDGET_LIMITS["fast"]
     assert decision.evidence["explicit_task_context"] == 0.0
 
 
-def test_fast_budget_guard_allows_explicit_high_risk_premium():
-    train_df, specs_df = load_data()
+def test_fast_tier_keeps_budget_even_for_explicit_high_risk_context():
+    """명시적 high-risk task context도 Fast 예산 한도를 넘길 수 없다."""
     router = make_router()
 
     decision = router.route(
@@ -461,8 +473,20 @@ def test_fast_budget_guard_allows_explicit_high_risk_premium():
         evaluation_type="rubric_check",
     )
 
-    assert decision.selected_model_id in {"premium", "mid"}
+    assert decision.selected_model_id in {"cheap", "abstain"}
+    assert _selected_cost(decision) <= BUDGET_LIMITS["fast"]
     assert decision.evidence["explicit_task_context"] == 1.0
+
+    # 같은 프롬프트라도 예산이 허용되는 tier에서는 상위 모델로 올라간다.
+    premium_decision = router.route(
+        "멀티테넌트 결제 시스템을 설계하고 웹훅 멱등성, 감사 로그, 장애 재처리, 보안 통제를 포함해줘.",
+        budget_tier="premium",
+        task_type="architecture_constraints",
+        difficulty="hard",
+        risk_level="high",
+        evaluation_type="rubric_check",
+    )
+    assert premium_decision.selected_model_id in {"mid", "premium"}
 
 
 def test_geometric_router_uses_request_model_metadata_costs():
@@ -531,7 +555,26 @@ def test_submission_evaluates_history_before_selecting_output(tmp_path):
 
 
 def test_submission_calls_model_when_structured_history_fails(tmp_path):
-    train_df, specs_df = load_data()
+    artifact = tmp_path / "router.json"
+    make_router().save(artifact)
+    submission = RouterSubmission(artifact)
+
+    payload = submission.route(
+        prompt="2 + 3의 값만 숫자로 답해줘.",
+        budget_tier="balanced",
+        history=[{"model_id": "cheap", "output": "4"}],
+        task_type="math_exact",
+        difficulty="trivial",
+        risk_level="low",
+        evaluation_type="exact_match",
+        reference_answer="5",
+    )
+
+    assert payload["action"] == {"type": "call_model", "model_id": "mid"}
+
+
+def test_submission_reuses_history_when_escalation_is_unaffordable(tmp_path):
+    """Fast 예산이 상위 모델 호출을 감당하지 못하면 재호출 대신 재사용한다."""
     artifact = tmp_path / "router.json"
     make_router().save(artifact)
     submission = RouterSubmission(artifact)
@@ -547,7 +590,9 @@ def test_submission_calls_model_when_structured_history_fails(tmp_path):
         reference_answer="5",
     )
 
-    assert payload["action"] == {"type": "call_model", "model_id": "mid"}
+    assert payload["action"]["type"] in {"select_output", "abstain"}
+    if payload["action"]["type"] == "select_output":
+        assert payload["action"]["model_id"] == "cheap"
 
 
 def test_submission_selects_lower_rank_history_when_output_is_sufficient(tmp_path):
@@ -683,6 +728,7 @@ def test_budget_allocator_respects_total_fast_budget():
 
 
 def test_budget_allocator_reports_tradeoff_against_online_fast_policy():
+    """배치 할당은 예산을 pooling해 품질을 사고, 온라인 정책은 요청별 한도를 지킨다."""
     train_df, specs_df = sample_train_data()
     router = GeometricRouter.fit(train_df, specs_df)
     tune_router_policy(router, train_df, specs_df, tiers=("fast",))
@@ -690,9 +736,16 @@ def test_budget_allocator_reports_tradeoff_against_online_fast_policy():
     payload = allocate_public_budget(router, train_df, specs_df, "fast")
     summary = payload["summary"]
 
+    # 배치 할당은 전체 예산 안에 머문다.
     assert summary["total_cost"] <= summary["total_budget"]
-    assert summary["mean_cost"] <= independent["mean_cost"]
     assert summary["under_route"] >= summary["under_route_lower_bound"]
+
+    # 온라인 정책은 요청별 한도를 절대 넘지 않는다.
+    assert independent["cost_over_limit"] == 0
+    assert independent["mean_cost"] <= summary["budget_limit"]
+
+    # 그 대가로 배치 할당이 더 높은 품질을 얻는 trade-off를 보고한다.
+    assert summary["mean_quality"] >= independent["mean_quality"]
 
 
 

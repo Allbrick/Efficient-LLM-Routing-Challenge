@@ -4,17 +4,14 @@
 전체 파이프라인 테스트는 artifacts 생성 후 별도로 수행.
 """
 
-import json
 import os
 
 import numpy as np
 import pytest
 
-from src.calibrator import Calibrator
 from src.candidate_expander import CandidateExpander
 from src.data_models import CostConfig, LambdaParams
 from src.feature_extractor import FeatureExtractor
-from src.quality_predictor import QualityPredictor
 from src.utility_engine import CostNormalizer, UtilityEngine
 
 

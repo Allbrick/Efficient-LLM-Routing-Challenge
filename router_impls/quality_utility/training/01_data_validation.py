@@ -13,7 +13,6 @@ import argparse
 import sys
 
 import pandas as pd
-import numpy as np
 
 
 def validate(data: pd.DataFrame) -> dict:
