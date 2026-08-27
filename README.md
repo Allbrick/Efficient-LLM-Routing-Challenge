@@ -16,13 +16,52 @@
 git clone https://github.com/Allbrick/Efficient-LLM-Routing-Challenge
 cd Efficient-LLM-Routing-Challenge
 pip install -r requirements.txt
+```
+
+### 1. 브라우저에서 바로 보기
+
+실행 스택은 `viewer -> router -> ai` 세 계층입니다. **라우터 서버**가 등록된 라우터를 모두 로드하고 AI 호출까지 담당하며, **뷰어 서버**는 UI를 서빙하고 요청을 라우터 서버로 프록시합니다.
+
+라우터 서버를 먼저 실행합니다.
+
+```powershell
+python routing_stack\app\router_server.py --ai mock --port 4100
+```
+
+다른 터미널에서 뷰어 서버를 실행합니다.
+
+```powershell
+python routing_stack\app\viewer_server.py --router_server_url http://127.0.0.1:4100 --port 4010
+```
+
+브라우저에서 `http://127.0.0.1:4010/` 에 접속합니다. `--ai mock` 이므로 **Ollama 없이도 라우팅 결정 전체를 시연**할 수 있습니다.
+
+두 서버를 한 번에 띄우고 브라우저까지 열려면 아래 한 줄로 대체할 수 있습니다. 포트 응답을 확인한 뒤 열고, `Ctrl+C` 로 두 서버 모두 정리합니다.
+
+```powershell
+python scripts\demo.py viewer
+```
+
+### 2. 선택된 모델의 실제 응답까지 보기
+
+Ollama를 설치하고 로컬 모델을 받은 뒤, 라우터 서버만 `--ai ollama` 로 다시 실행합니다. 뷰어 서버는 그대로 둡니다.
+
+```powershell
+ollama pull qwen3:4b-instruct   # cheap
+ollama pull qwen3:8b            # mid
+ollama pull qwen3:14b           # premium
+python routing_stack\app\router_server.py --ai ollama --port 4100
+```
+
+응답이 느려 timeout이 나면 `--ai_timeout 240` 을 붙입니다.
+
+### 3. 터미널에서 확인하기
+
+```powershell
 python scripts\demo.py
 ```
 
-`demo.py`는 환경 점검 → 테스트 → public set 시뮬레이션 → 시연 시나리오를 순서대로 실행합니다.
-테스트를 건너뛰려면 `--skip-test`를 붙입니다.
-
-### 하위 명령
+환경 점검 → 테스트 → public set 시뮬레이션 → 시연 시나리오를 순서대로 실행합니다. 테스트를 건너뛰려면 `--skip-test` 를 붙입니다.
 
 | 명령 | 용도 |
 | --- | --- |
@@ -30,7 +69,6 @@ python scripts\demo.py
 | `python scripts\demo.py route "<프롬프트>" --tier fast` | 프롬프트 하나를 라우팅하고 근거 출력 |
 | `python scripts\demo.py showcase` | 핵심 강점 시나리오 6종 시연 |
 | `python scripts\demo.py sim` | public set 시뮬레이션 + tier별 요약 |
-| `python scripts\demo.py viewer` | 브라우저 시연 (서버 2개 자동 기동) |
 | `python scripts\demo.py full` | 학습부터 제출 검증까지 전체 재현 |
 
 ---
@@ -147,27 +185,6 @@ baseline 대비:
 
 ---
 
-## 브라우저 시연
-
-```powershell
-python scripts\demo.py viewer
-```
-
-`router_server`와 `viewer_server`를 자동 기동합니다. 기본값이 `--ai mock`이라 **Ollama 없이도 라우팅 결정 전체를 시연**할 수 있습니다. `Ctrl+C`로 두 서버 모두 정리됩니다.
-
-선택된 모델의 실제 응답까지 보려면 로컬 Ollama를 연결합니다.
-
-```powershell
-ollama pull qwen3:4b-instruct   # cheap
-ollama pull qwen3:8b            # mid
-ollama pull qwen3:14b           # premium
-python scripts\demo.py viewer --ai ollama
-```
-
-옵션: `--router-port`(기본 4100), `--viewer-port`(기본 4010), `--no-browser`
-
----
-
 ## 전체 재현
 
 ```powershell
@@ -208,7 +225,7 @@ python -m pytest -q
 | --- | --- |
 | `학습 artifact 없음` | `python scripts\demo.py full`로 재생성 |
 | 패키지 미설치 경고 | `pip install -r requirements.txt` |
-| viewer 포트 충돌 | `--router-port` / `--viewer-port`로 변경 |
+| 포트 충돌 | 서버를 직접 띄울 때는 각 서버의 `--port`(와 뷰어의 `--router_server_url`), `demo.py viewer` 는 `--router-port` / `--viewer-port` |
 | `--ai ollama`에서 응답 없음 | Ollama 실행 여부와 모델 3개 다운로드 확인, 또는 `--ai mock` 사용 |
 | 한글이 깨져 보임 | `chcp 65001` 실행 후 재시도 |
 
