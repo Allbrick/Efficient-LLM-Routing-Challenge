@@ -10,7 +10,7 @@ import pandas as pd
 
 from router_impls.geometric.envelope import Envelope, fit_envelope
 from router_impls.geometric.evaluator import build_training_labels
-from router_impls.geometric.features import MODEL_ORDER, TASK_HINTS, EvidenceExtractor
+from router_impls.geometric.features import MODEL_ORDER, MODEL_RANK, TASK_HINTS, EvidenceExtractor
 from router_impls.geometric.logistic_pass_model import LogisticPassModel, fit_logistic_pass_model
 from router_impls.geometric.pass_model import PassProbabilityModel, fit_pass_model
 from router_impls.geometric.pareto import best_under_budget, build_pareto_frontier
@@ -20,6 +20,15 @@ from router_impls.geometric.task_classifier import TaskClassifier
 from router_impls.geometric.xai import EVIDENCE_FEATURE_NAMES, contributions_to_evidence, decompose_all_models
 from routing_stack.input.semantic_features import HashPromptEncoder, SemanticFeatureIndex
 from routing_stack.input.text_features import analyze_text_prompt
+
+
+def within_budget(cost: float, limit: float) -> bool:
+    """Budget comparison tolerant of float noise.
+
+    Learned model costs are averaged, so an exactly-at-limit model can end up
+    at 0.20000000000000004 and would otherwise be rejected by its own tier.
+    """
+    return cost <= limit * (1.0 + 1e-9) + 1e-12
 
 
 BUDGET_LIMITS = {
@@ -51,6 +60,30 @@ DEFAULT_ABSTAIN_THRESHOLDS = {
     "balanced": 0.55,
     "premium": 0.55,
 }
+
+# Minimum model a hard_task prompt may be routed to, per tier. Fast keeps cheap
+# because its budget (0.03) cannot afford mid (0.05); raising the floor there
+# would only produce budget violations.
+DEFAULT_HARD_TASK_FLOOR = {
+    "fast": "cheap",
+    "balanced": "mid",
+    "premium": "premium",
+}
+
+# Envelope containment alone is not evidence that a model can answer: the cheap
+# envelope covers most of the feature space. A candidate selected on containment
+# must also clear this sufficiency probability.
+DEFAULT_SUFFICIENCY_FLOORS = {
+    "fast": 0.30,
+    "balanced": 0.45,
+    "premium": 0.55,
+}
+
+# The hard_task floor is paid for in cost, so it must buy something. A pricier
+# model only holds the floor when its sufficiency exceeds the next cheaper model
+# by at least this margin; otherwise the floor steps down one rank. Set to 0.0 to
+# always enforce the nominal floor.
+DEFAULT_HARD_TASK_FLOOR_MARGIN = 0.20
 
 
 @dataclass
@@ -94,6 +127,10 @@ class GeometricRouter:
         metadata: dict | None = None,
         logistic_pass_model: LogisticPassModel | None = None,
         blend_alpha: float = 1.0,
+        strict_request_budget: bool = True,
+        hard_task_floor: dict[str, str] | None = None,
+        sufficiency_floors: dict[str, float] | None = None,
+        hard_task_floor_margin: float = DEFAULT_HARD_TASK_FLOOR_MARGIN,
     ):
         self.envelopes = envelopes
         self.model_costs = model_costs
@@ -107,10 +144,17 @@ class GeometricRouter:
         self.fallback_cost_weight = fallback_cost_weight or DEFAULT_FALLBACK_COST_WEIGHT.copy()
         self.pass_thresholds = pass_thresholds or DEFAULT_PASS_THRESHOLDS.copy()
         self.abstain_thresholds = abstain_thresholds or DEFAULT_ABSTAIN_THRESHOLDS.copy()
+        self.hard_task_floor = hard_task_floor or DEFAULT_HARD_TASK_FLOOR.copy()
+        self.sufficiency_floors = sufficiency_floors or DEFAULT_SUFFICIENCY_FLOORS.copy()
+        self.hard_task_floor_margin = float(hard_task_floor_margin)
         self.semantic_index = semantic_index
         self.metadata = metadata or {}
         self.logistic_pass_model = logistic_pass_model
         self.blend_alpha = blend_alpha
+        # The challenge enforces the budget per request, so a model whose cost
+        # exceeds the tier limit can never be selected. Set to False only to
+        # reproduce the earlier soft-budget policy for ablation comparisons.
+        self.strict_request_budget = strict_request_budget
         self.extractor = EvidenceExtractor()
 
     @classmethod
@@ -260,6 +304,8 @@ class GeometricRouter:
         fallback_cost_weight: dict[str, float] | None = None,
         pass_thresholds: dict[str, float] | None = None,
         abstain_thresholds: dict[str, float] | None = None,
+        hard_task_floor: dict[str, str] | None = None,
+        sufficiency_floors: dict[str, float] | None = None,
     ) -> None:
         if radius_multipliers is not None:
             self.radius_multipliers = radius_multipliers
@@ -269,6 +315,10 @@ class GeometricRouter:
             self.pass_thresholds = pass_thresholds
         if abstain_thresholds is not None:
             self.abstain_thresholds = abstain_thresholds
+        if hard_task_floor is not None:
+            self.hard_task_floor = hard_task_floor
+        if sufficiency_floors is not None:
+            self.sufficiency_floors = sufficiency_floors
 
     def route(
         self,
@@ -385,9 +435,18 @@ class GeometricRouter:
         selected = None
         reason = ""
         abstain_candidate = candidates[0]
+        # A hard_task prompt must not be answered by a cheap-prior shortcut: the
+        # lane exists precisely because the prompt carries proof/design/high-risk
+        # signal. Enforce a per-tier model floor instead.
+        hard_task_lane = pre_route.lane == "hard_task"
+        floor_model = self._resolve_hard_task_floor(tier, candidates) if hard_task_lane else "cheap"
+        floor_rank = MODEL_RANK.get(floor_model, 0) if hard_task_lane else 0
         if pre_route.lane == "missing_context":
             selected = "abstain"
             reason = "missing_context_prior"
+        elif hard_task_lane:
+            # Skip every cheap prior and go straight to budgeted candidate search.
+            pass
         elif self._has_exact_answer_prior(evidence_obj, evaluation_type):
             selected = "cheap"
             reason = "exact_answer_prior"
@@ -405,18 +464,24 @@ class GeometricRouter:
             reason = "abstain_probability"
 
         pass_threshold = self.pass_thresholds.get(tier, DEFAULT_PASS_THRESHOLDS[tier])
+        sufficiency_floor = self.sufficiency_floors.get(tier, DEFAULT_SUFFICIENCY_FLOORS[tier])
         for candidate in candidates[1:]:
             if selected is not None:
                 break
+            if MODEL_RANK.get(candidate["model_id"], 0) < floor_rank:
+                continue
             if not self._budget_allowed(candidate, tier, evidence_obj, evaluation_type, explicit_task_context):
                 continue
             if candidate["pass_probability"] >= pass_threshold:
                 selected = candidate["model_id"]
                 reason = "cheapest_passing_probability"
                 break
-            if candidate["feasible"]:
+            # Containment is necessary but not sufficient. The cheap envelope
+            # spans most of the space, so accepting it on containment alone sent
+            # hard prompts to cheap regardless of how likely it was to succeed.
+            if candidate["feasible"] and candidate["sufficiency_probability"] >= sufficiency_floor:
                 selected = candidate["model_id"]
-                reason = "cheapest_feasible_envelope"
+                reason = "cheapest_sufficient_envelope"
                 break
 
         if selected is None:
@@ -425,10 +490,24 @@ class GeometricRouter:
             fallback_candidates = [
                 candidate
                 for candidate in candidates[1:]
-                if self._budget_allowed(candidate, tier, evidence_obj, evaluation_type, explicit_task_context)
+                if MODEL_RANK.get(candidate["model_id"], 0) >= floor_rank
+                and self._budget_allowed(candidate, tier, evidence_obj, evaluation_type, explicit_task_context)
             ]
+            if not fallback_candidates and floor_rank > 0:
+                # The floor left nothing affordable; drop it rather than violate
+                # the budget, and fall back to the ordinary candidate set.
+                fallback_candidates = [
+                    candidate
+                    for candidate in candidates[1:]
+                    if self._budget_allowed(candidate, tier, evidence_obj, evaluation_type, explicit_task_context)
+                ]
             if not fallback_candidates:
-                fallback_candidates = candidates[1:]
+                if self.strict_request_budget:
+                    # Nothing fits the limit: take the cheapest call so the
+                    # overrun is as small as possible.
+                    fallback_candidates = [min(candidates[1:], key=lambda item: item["cost"])]
+                else:
+                    fallback_candidates = candidates[1:]
             selected_candidate = max(
                 fallback_candidates,
                 key=lambda item: (
@@ -450,6 +529,8 @@ class GeometricRouter:
         evidence["cheap_direct_lane"] = 1.0 if pre_route.cheap_direct else 0.0
         evidence["missing_context_lane"] = 1.0 if pre_route.missing_context else 0.0
         evidence["hard_task_lane"] = 1.0 if pre_route.hard_task else 0.0
+        evidence["hard_task_floor"] = floor_model if hard_task_lane else ""
+        evidence["sufficiency_floor"] = round(float(sufficiency_floor), 6)
         evidence["ambiguous_lane"] = 1.0 if pre_route.ambiguous else 0.0
         evidence["high_stakes_domain"] = 1.0 if pre_route.high_stakes_domain else 0.0
         evidence["negative_easy_signal"] = 1.0 if pre_route.negative_easy_signal else 0.0
@@ -505,8 +586,12 @@ class GeometricRouter:
         explicit_task_context: bool,
     ) -> bool:
         cost = float(candidate.get("cost", 0.0))
-        if cost <= BUDGET_LIMITS[tier]:
+        if within_budget(cost, BUDGET_LIMITS[tier]):
             return True
+        if self.strict_request_budget:
+            # Per-request budget is a hard constraint: an over-limit call is a
+            # violation regardless of how difficult the prompt looks.
+            return False
         if tier == "premium":
             return True
 
@@ -695,10 +780,14 @@ class GeometricRouter:
             "fallback_cost_weight": self.fallback_cost_weight,
             "pass_thresholds": self.pass_thresholds,
             "abstain_thresholds": self.abstain_thresholds,
+            "hard_task_floor": self.hard_task_floor,
+            "sufficiency_floors": self.sufficiency_floors,
+            "hard_task_floor_margin": self.hard_task_floor_margin,
             "semantic_index": self.semantic_index.to_dict() if self.semantic_index is not None else None,
             "metadata": self.metadata,
             "logistic_pass_model": self.logistic_pass_model.to_dict() if self.logistic_pass_model is not None else None,
             "blend_alpha": self.blend_alpha,
+            "strict_request_budget": self.strict_request_budget,
         }
         output = Path(path)
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -728,6 +817,9 @@ class GeometricRouter:
             fallback_cost_weight=payload.get("fallback_cost_weight"),
             pass_thresholds=payload.get("pass_thresholds"),
             abstain_thresholds=payload.get("abstain_thresholds"),
+            hard_task_floor=payload.get("hard_task_floor"),
+            sufficiency_floors=payload.get("sufficiency_floors"),
+            hard_task_floor_margin=float(payload.get("hard_task_floor_margin", DEFAULT_HARD_TASK_FLOOR_MARGIN)),
             semantic_index=SemanticFeatureIndex.from_dict(payload["semantic_index"])
             if payload.get("semantic_index") is not None
             else None,
@@ -736,6 +828,7 @@ class GeometricRouter:
             if payload.get("logistic_pass_model") is not None
             else None,
             blend_alpha=float(payload.get("blend_alpha", 1.0)),
+            strict_request_budget=bool(payload.get("strict_request_budget", True)),
         )
 
     def _classify_pre_route_lane(
@@ -831,6 +924,30 @@ class GeometricRouter:
             high_stakes_domain=high_stakes,
             negative_easy_signal=negative_easy,
         )
+
+    def _resolve_hard_task_floor(self, tier: str, candidates: list[dict]) -> str:
+        """Step the hard_task floor down while the extra cost buys too little.
+
+        Forcing premium on every hard_task prompt doubled mean cost for prompts
+        where mid was nearly as likely to succeed. The floor now has to justify
+        itself with a sufficiency gap over the next cheaper model.
+        """
+        nominal = self.hard_task_floor.get(tier, "cheap")
+        index = MODEL_RANK.get(nominal, 0)
+        margin = self.hard_task_floor_margin
+        if margin <= 0.0 or index <= 0:
+            return nominal
+        sufficiency = {
+            str(item.get("model_id", "")): float(item.get("sufficiency_probability", 0.0))
+            for item in candidates
+        }
+        while index > 0:
+            here = MODEL_ORDER[index]
+            cheaper = MODEL_ORDER[index - 1]
+            if sufficiency.get(here, 0.0) - sufficiency.get(cheaper, 0.0) >= margin:
+                break
+            index -= 1
+        return MODEL_ORDER[index]
 
     def _ood_score(self, candidates: list[dict]) -> float:
         model_candidates = [item for item in candidates if item.get("model_id") in MODEL_ORDER]

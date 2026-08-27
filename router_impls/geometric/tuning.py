@@ -159,9 +159,16 @@ def _tier_grid(tier: str):
     return product(cheap_values, mid_values, premium_values, fallback_values, pass_values)
 
 
+# The budget is a per-request hard constraint, so a violated request cannot be
+# traded against quality. The penalty is >= 1.0 (the maximum attainable quality)
+# so no policy can profit from exceeding the limit.
+VIOLATION_PENALTY = 1.0
+
+
 def score_tier_summary(summary: dict, tier: str) -> dict:
     count = max(int(summary["count"]), 1)
     weights = TIER_OBJECTIVE_WEIGHTS[tier]
+    violation_rate = float(summary.get("cost_over_limit", 0)) / count
     under_rate = float(summary["under_route"]) / count
     over_rate = float(summary["over_route"]) / count
     should_abstain_rate = float(summary["should_abstain"]) / count
@@ -175,6 +182,7 @@ def score_tier_summary(summary: dict, tier: str) -> dict:
         - weights["under_gamma"] * under_rate
         - weights["over_delta"] * over_rate
         - weights["abstain_epsilon"] * should_abstain_rate
+        - VIOLATION_PENALTY * violation_rate
     )
     return {
         "tier": tier,
@@ -188,6 +196,7 @@ def score_tier_summary(summary: dict, tier: str) -> dict:
             "under_route_rate": under_rate,
             "over_route_rate": over_rate,
             "should_abstain_rate": should_abstain_rate,
+            "violation_rate": violation_rate,
         },
         "penalties": {
             "cost": weights["cost_alpha"] * mean_cost,
@@ -195,6 +204,7 @@ def score_tier_summary(summary: dict, tier: str) -> dict:
             "under_route": weights["under_gamma"] * under_rate,
             "over_route": weights["over_delta"] * over_rate,
             "should_abstain": weights["abstain_epsilon"] * should_abstain_rate,
+            "budget_violation": VIOLATION_PENALTY * violation_rate,
         },
     }
 

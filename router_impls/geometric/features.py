@@ -52,6 +52,30 @@ TASK_HINTS = {
     "data": ("json", "csv", "표", "배열", "필드"),
     "summary": ("요약", "불릿", "bullet", "정리"),
     "architecture": ("설계", "시스템", "파이프라인", "멀티테넌트", "분산", "장애"),
+    # Advanced reasoning demands premium regardless of prompt length. Without
+    # this group a short proof request ("P != NP임을 증명해줘.") falls through to
+    # the length rules and is scored as an easy prompt.
+    "reasoning": (
+        "증명",
+        "반례",
+        "귀류",
+        "복잡도",
+        "점근",
+        "최적해",
+        "수렴",
+        "np-hard",
+        "np-완전",
+        "np완전",
+        "p=np",
+        "p != np",
+        "p ≠ np",
+        "prove",
+        "proof",
+        "theorem",
+        "counterexample",
+        "np-complete",
+        "asymptotic",
+    ),
 }
 
 MISSING_CONTEXT_TERMS = ("다음", "이 ", "해당", "위 ", "아래", "첨부", "코드", "계약", "문서", "파일", "조항")
@@ -151,6 +175,12 @@ class EvidenceExtractor:
         inferred_risk = self._infer_risk(semantic_text, lowered, task_type)
         difficulty_score = DIFFICULTY_SCORE.get(str(difficulty).lower(), inferred_difficulty)
         risk_score = RISK_SCORE.get(str(risk_level).lower(), inferred_risk)
+        # A coarse label can undersell the prompt: the task classifier calls
+        # "P != NP임을 증명해줘." medium (0.55) because it is short. When the text
+        # carries an unambiguous architecture/proof signal, raise the floor so a
+        # label never routes premium-grade work to cheap.
+        if self._has_strong_difficulty_signal(lowered, eval_type):
+            difficulty_score = max(float(difficulty_score), 0.85)
 
         condition_count_val = float(self._condition_count(semantic_text, lowered))
 
@@ -234,6 +264,10 @@ class EvidenceExtractor:
             return 0.65
         if self._has_hint(lowered, TASK_HINTS["architecture"]):
             return 0.85
+        # Checked before the length rules so short proof/complexity requests are
+        # scored by meaning rather than by character count.
+        if self._has_hint(lowered, TASK_HINTS["reasoning"]):
+            return 0.85
         if self._has_hint(lowered, TASK_HINTS["code"]) and self._condition_count(text, lowered) >= 0.25:
             return 0.60
         if len(text) > 220 or self._condition_count(text, lowered) >= 0.50:
@@ -244,6 +278,15 @@ class EvidenceExtractor:
             if "medium" in task_type or "constraints" in task_type:
                 return 0.55
         return 0.30
+
+    def _has_strong_difficulty_signal(self, lowered: str, evaluation_type: str) -> bool:
+        """Lexical evidence strong enough to override a coarse difficulty label."""
+        if evaluation_type in {"exact_match", "numeric_check", "numeric_count"}:
+            return False
+        return bool(
+            self._has_hint(lowered, TASK_HINTS["architecture"])
+            or self._has_hint(lowered, TASK_HINTS["reasoning"])
+        )
 
     def _infer_risk(self, text: str, lowered: str, task_type: str) -> float:
         if self._missing_context(text) and self._has_hint(lowered, TASK_HINTS["legal"]):
