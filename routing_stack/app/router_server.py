@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import json
 import os
 import sys
+import tempfile
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
@@ -145,10 +146,12 @@ class RouterServerApp:
         csv_text = str(payload.get("csv_text", "") or "")
         rows = _read_label_rows(csv_text)
         output_path = str(payload.get("output_path", "artifacts/prompt_label_router.joblib") or "artifacts/prompt_label_router.joblib")
-        temp_path = Path("artifacts/_prompt_label_upload.csv")
-        temp_path.parent.mkdir(parents=True, exist_ok=True)
-        temp_path.write_text(csv_text, encoding="utf-8")
-        summary = train_from_csv(temp_path, output_path)
+        # Staged in the OS temp dir and removed afterwards: writing it into
+        # artifacts/ left a stray upload file behind on every training call.
+        with tempfile.TemporaryDirectory(prefix="prompt_label_upload_") as staging:
+            temp_path = Path(staging) / "prompt_label_upload.csv"
+            temp_path.write_text(csv_text, encoding="utf-8")
+            summary = train_from_csv(temp_path, output_path)
         self.routers["learned_label"] = create_router("learned_label", output_path)
         summary["loaded_router"] = "learned_label"
         summary["validated_rows"] = len(rows)
